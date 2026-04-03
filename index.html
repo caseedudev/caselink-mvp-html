@@ -316,23 +316,44 @@ body{display:flex;min-height:100vh;background:var(--g50);overflow:hidden}
   background:var(--g200);color:var(--g600);
   font-size:10px;font-weight:700;
   display:inline-flex;align-items:center;justify-content:center;
-  cursor:help;position:relative;flex-shrink:0;
+  cursor:pointer;flex-shrink:0;
 }
-.tooltip-icon:hover .tooltip-text{display:block}
-.tooltip-text{
-  display:none;position:absolute;bottom:calc(100% + 8px);left:50%;
-  transform:translateX(-50%);width:280px;
-  background:var(--g800);color:var(--white);
-  font-size:11px;font-weight:400;line-height:1.6;
-  padding:10px 12px;border-radius:8px;
-  box-shadow:0 4px 12px rgba(0,0,0,.2);
-  z-index:10;pointer-events:none;
+.tooltip-icon:hover{background:var(--blue);color:var(--white)}
+
+/* Tooltip Modal (full overlay, no clipping) */
+.tooltip-modal{
+  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,.4);z-index:300;
+  align-items:center;justify-content:center;
 }
-.tooltip-text::after{
-  content:'';position:absolute;top:100%;left:50%;
-  transform:translateX(-50%);
-  border:5px solid transparent;border-top-color:var(--g800);
+.tooltip-modal.open{display:flex}
+.tooltip-modal-body{
+  background:var(--white);border-radius:14px;
+  width:400px;max-width:90vw;max-height:70vh;overflow-y:auto;
+  box-shadow:0 16px 48px rgba(0,0,0,.2);
 }
+.tooltip-modal-header{
+  padding:16px 20px 12px;border-bottom:1px solid var(--g100);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.tooltip-modal-header h3{font-size:14px;font-weight:700;color:var(--g800);margin:0}
+.tooltip-modal-content{padding:16px 20px;font-size:13px;color:var(--g700);line-height:1.7}
+
+/* Help guide modal */
+.help-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:6px 10px;border:1px solid var(--g200);border-radius:6px;
+  background:var(--white);color:var(--g600);
+  font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;
+  transition:all .15s;margin-top:8px;
+}
+.help-btn:hover{border-color:var(--blue);color:var(--blue);background:rgba(30,111,217,.04)}
+.help-guide-section{margin-bottom:20px}
+.help-guide-section h4{font-size:13px;font-weight:700;color:var(--g800);margin:0 0 8px;display:flex;align-items:center;gap:6px}
+.help-guide-item{margin-bottom:12px;padding:10px 12px;background:var(--g50);border-radius:8px}
+.help-guide-item .hg-name{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:3px}
+.help-guide-item .hg-range{font-size:11px;color:var(--g500);margin-bottom:4px}
+.help-guide-item .hg-desc{font-size:12px;color:var(--g700);line-height:1.6}
 .range-wrap{display:flex;align-items:center;gap:10px}
 .range-wrap input[type=range]{flex:1;accent-color:var(--blue)}
 .range-val{
@@ -423,6 +444,28 @@ body{display:flex;min-height:100vh;background:var(--g50);overflow:hidden}
   </header>
   <div class="content" id="content">
     <!-- Welcome or iframe goes here -->
+  </div>
+</div>
+
+<!-- Tooltip Modal (single option explanation) -->
+<div class="tooltip-modal" id="tooltipModal" onclick="if(event.target===this)closeTooltip()">
+  <div class="tooltip-modal-body">
+    <div class="tooltip-modal-header">
+      <h3 id="tooltipTitle">옵션 설명</h3>
+      <button class="settings-close" onclick="closeTooltip()">✕</button>
+    </div>
+    <div class="tooltip-modal-content" id="tooltipContent"></div>
+  </div>
+</div>
+
+<!-- Help Guide Modal (all options explained) -->
+<div class="tooltip-modal" id="helpGuideModal" onclick="if(event.target===this)closeHelpGuide()">
+  <div class="tooltip-modal-body" style="width:520px">
+    <div class="tooltip-modal-header">
+      <h3>LLM 옵션 가이드</h3>
+      <button class="settings-close" onclick="closeHelpGuide()">✕</button>
+    </div>
+    <div class="tooltip-modal-content" id="helpGuideContent"></div>
   </div>
 </div>
 
@@ -763,14 +806,14 @@ function openSettings() {
     html += '</select></div>';
     // Render provider-specific options
     if (p.options && p.options.length) {
-      html += '<div class="option-divider">고급 옵션</div>';
+      html += '<div class="option-divider" style="display:flex;align-items:center;justify-content:space-between">고급 옵션 <button class="help-btn" onclick="event.stopPropagation();showHelpGuide(\'' + key + '\')">? 옵션 도움말</button></div>';
       var savedOpts = pcfg.options || {};
       p.options.forEach(function(opt) {
         var val = savedOpts[opt.key] !== undefined ? savedOpts[opt.key] : opt.default;
         var eid = 'cfg_opt_' + key + '_' + opt.key;
         html += '<div class="setting-row">';
         html += '<div class="setting-label-wrap"><label class="setting-label" style="margin-bottom:0">' + opt.label + '</label>';
-        html += '<span class="tooltip-icon">?<span class="tooltip-text">' + opt.tooltip + '</span></span></div>';
+        html += '<span class="tooltip-icon" onclick="event.stopPropagation();showTooltip(\'' + opt.label + '\',\'' + opt.key + '\',this)" data-tooltip="' + opt.tooltip.replace(/"/g,'&quot;') + '">?</span></div>';
         if (opt.type === 'range') {
           html += '<div class="range-wrap">';
           html += '<input type="range" id="' + eid + '" min="' + opt.min + '" max="' + opt.max + '" step="' + opt.step + '" value="' + val + '" oninput="document.getElementById(\'' + eid + '_v\').textContent=this.value">';
@@ -824,6 +867,54 @@ function saveSettings() {
   var toast = document.getElementById('saveToast');
   toast.classList.add('show');
   setTimeout(function() { toast.classList.remove('show'); }, 2000);
+}
+
+// ============================================================
+// Tooltip & Help Guide
+// ============================================================
+function showTooltip(label, key, el) {
+  document.getElementById('tooltipTitle').textContent = label;
+  document.getElementById('tooltipContent').textContent = el.getAttribute('data-tooltip');
+  document.getElementById('tooltipModal').classList.add('open');
+}
+function closeTooltip() {
+  document.getElementById('tooltipModal').classList.remove('open');
+}
+function showHelpGuide(providerKey) {
+  var p = LLM_PROVIDERS[providerKey];
+  if (!p || !p.options) return;
+  var html = '<div class="help-guide-section">';
+  html += '<h4>' + p.icon + ' ' + p.label + ' 옵션 가이드</h4>';
+  var useCases = {
+    temperature: { emoji: '🌡️', useCase: '• 보고서/분석 작업 → 0.2~0.5 (정확하고 일관된 답변)\n• 일반 대화/설명 → 0.7~1.0 (자연스러운 표현)\n• 브레인스토밍/창작 → 1.0~1.5 (다양하고 창의적)' },
+    max_tokens: { emoji: '📏', useCase: '• 짧은 답변/요약 → 500~1000\n• 일반 보고서 → 2000~4096\n• 상세 분석/긴 보고서 → 4096~8192' },
+    max_completion_tokens: { emoji: '📏', useCase: '• 짧은 답변/요약 → 500~1000\n• 일반 보고서 → 2000~4096\n• 상세 분석/긴 보고서 → 4096~16384' },
+    maxOutputTokens: { emoji: '📏', useCase: '• 짧은 답변/요약 → 500~1000\n• 일반 보고서 → 2000~4096\n• 상세 분석/긴 보고서 → 4096~8192' },
+    top_p: { emoji: '🎯', useCase: '• 정확한 답변 필요 → 0.3~0.5\n• 균형 잡힌 응답 → 0.7~0.9\n• 다양한 표현 → 0.95~1.0\n⚠️ Temperature와 동시에 변경하지 마세요' },
+    topP: { emoji: '🎯', useCase: '• 정확한 답변 필요 → 0.3~0.5\n• 균형 잡힌 응답 → 0.7~0.9\n• 다양한 표현 → 0.95~1.0' },
+    top_k: { emoji: '🔢', useCase: '• 매우 집중적인 응답 → 10~40\n• 일반적 사용 → 기본값(0=비활성화)\n• 다양한 어휘 사용 → 100+' },
+    topK: { emoji: '🔢', useCase: '• 매우 집중적인 응답 → 1~10\n• 일반적 사용 → 40 (기본)\n• 다양한 어휘 사용 → 60~100' },
+    frequency_penalty: { emoji: '🔄', useCase: '• 반복 허용 (기본) → 0\n• 반복 줄이기 → 0.3~0.7\n• 강력한 반복 억제 → 1.0~2.0\n• 보고서 작성 시 0.3~0.5 추천' },
+    presence_penalty: { emoji: '💡', useCase: '• 기존 주제 집중 → 0 또는 음수\n• 새 주제 약간 도입 → 0.3~0.6\n• 폭넓은 관점 → 0.8~1.5\n• 다각도 분석 시 0.3~0.6 추천' }
+  };
+  p.options.forEach(function(opt) {
+    var uc = useCases[opt.key] || { emoji: '⚙️', useCase: '' };
+    html += '<div class="help-guide-item">';
+    html += '<div class="hg-name">' + uc.emoji + ' ' + opt.label + '</div>';
+    var rangeStr = opt.type === 'range' ? '범위: ' + opt.min + ' ~ ' + opt.max + ' (기본: ' + opt.default + ')' : '범위: ' + opt.min + ' ~ ' + opt.max + ' (기본: ' + opt.default + ')';
+    html += '<div class="hg-range">' + rangeStr + '</div>';
+    html += '<div class="hg-desc">' + opt.tooltip + '</div>';
+    if (uc.useCase) {
+      html += '<div style="margin-top:6px;padding:8px 10px;background:#fff;border-radius:6px;font-size:11px;color:var(--g700);white-space:pre-line;line-height:1.6;border:1px solid var(--g200)">' + uc.useCase + '</div>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  document.getElementById('helpGuideContent').innerHTML = html;
+  document.getElementById('helpGuideModal').classList.add('open');
+}
+function closeHelpGuide() {
+  document.getElementById('helpGuideModal').classList.remove('open');
 }
 
 // ============================================================
