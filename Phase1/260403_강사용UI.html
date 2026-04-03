@@ -1,0 +1,2177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CaseLink — 강사 포털</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0B1E3D;--navy2:#142952;--navy3:#1C3A6E;
+  --blue:#1E6FD9;--blue-l:#EBF3FF;--blue-m:#C2D9F8;
+  --teal:#0A9268;--teal-l:#E3F6EF;
+  --amber:#C97008;--amber-l:#FEF3C7;
+  --red:#C8220E;--red-l:#FEE2E2;
+  --purple:#6B2FBA;--purple-l:#F0E9FF;
+  --kakao:#FEE500;--kakao-d:#3A2B00;
+  --g50:#F7F8FA;--g100:#EEF0F4;--g150:#E4E7ED;--g200:#D6DAE3;
+  --g300:#B8BFCC;--g400:#9AA3B4;--g500:#737D90;
+  --g600:#565E6D;--g700:#3D4452;--g800:#252B36;--g900:#141820;
+  --white:#FFFFFF;
+  --sidebar:240px;
+  --topbar:56px;
+  --r:8px;--r2:12px;--r3:16px;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --sh2:0 4px 12px rgba(0,0,0,.10),0 2px 4px rgba(0,0,0,.06);
+  font-family:'Noto Sans KR',-apple-system,sans-serif;
+  font-size:14px;
+  color:var(--g800);
+}
+
+/* ── LAYOUT ── */
+body{background:var(--g50);min-height:100vh;display:flex}
+.sidebar{
+  width:var(--sidebar);min-height:100vh;
+  background:var(--navy);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;
+  z-index:100;
+}
+.main{
+  margin-left:var(--sidebar);
+  flex:1;min-height:100vh;
+  display:flex;flex-direction:column;
+}
+.topbar{
+  height:var(--topbar);background:var(--white);
+  border-bottom:1px solid var(--g150);
+  display:flex;align-items:center;
+  padding:0 28px;gap:16px;
+  position:sticky;top:0;z-index:50;
+}
+.page-wrap{flex:1;padding:28px;overflow-y:auto}
+
+/* ── SIDEBAR ── */
+.sb-logo{
+  padding:0 20px;height:var(--topbar);
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.sb-logo-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--blue);display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:900;color:var(--white);letter-spacing:-.03em;
+}
+.sb-logo-text{font-size:15px;font-weight:800;color:var(--white);letter-spacing:-.02em}
+.sb-logo-text span{color:#7AB3F5}
+.sb-section{padding:18px 14px 8px;font-size:10px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:.1em}
+.sb-nav{padding:0 10px;flex:1}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:var(--r);
+  cursor:pointer;color:rgba(255,255,255,.6);
+  font-size:13px;font-weight:500;
+  margin-bottom:2px;transition:all .15s;
+  position:relative;
+}
+.nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
+.nav-item.active{background:rgba(255,255,255,.12);color:var(--white);font-weight:700}
+.nav-item.active::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;background:var(--blue);border-radius:0 2px 2px 0}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--red);margin-left:auto;flex-shrink:0}
+.sb-footer{
+  padding:14px 20px;border-top:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;gap:10px;
+}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--navy3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#7AB3F5;flex-shrink:0}
+.sb-user-name{font-size:13px;font-weight:600;color:rgba(255,255,255,.8)}
+.sb-user-role{font-size:11px;color:rgba(255,255,255,.4)}
+
+/* ── TOPBAR INNER ── */
+.topbar-breadcrumb{font-size:13px;color:var(--g500)}
+.topbar-breadcrumb span{color:var(--g800);font-weight:700}
+.topbar-date{margin-left:auto;font-size:13px;color:var(--g500)}
+.topbar-date strong{color:var(--g700)}
+
+/* ── PAGE HEADERS ── */
+.page-header{margin-bottom:24px}
+.page-title{font-size:20px;font-weight:800;color:var(--g900);letter-spacing:-.02em}
+.page-subtitle{font-size:13px;color:var(--g500);margin-top:4px}
+
+/* ── DASHBOARD BIG CARDS ── */
+.dash-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.dbc{
+  background:var(--white);border-radius:var(--r2);border:1px solid var(--g150);
+  box-shadow:var(--sh);overflow:hidden;cursor:pointer;
+  transition:box-shadow .18s,transform .18s;display:flex;flex-direction:column;
+}
+.dbc:hover{box-shadow:var(--sh2);transform:translateY(-2px)}
+.dbc-bar{height:4px}
+.dbc-bar.c-blue{background:linear-gradient(90deg,var(--blue),#5499F5)}
+.dbc-bar.c-red{background:linear-gradient(90deg,var(--red),#E85C4A)}
+.dbc-bar.c-teal{background:linear-gradient(90deg,var(--teal),#1DBFA0)}
+.dbc-bar.c-amber{background:linear-gradient(90deg,var(--amber),#F59F2C)}
+.dbc-body{padding:18px 20px;flex:1}
+.dbc-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:14px;flex-shrink:0}
+.dbc-icon.c-blue{background:var(--blue-l)}.dbc-icon.c-red{background:var(--red-l)}.dbc-icon.c-teal{background:var(--teal-l)}.dbc-icon.c-amber{background:var(--amber-l)}
+.dbc-label{font-size:11px;font-weight:700;color:var(--g400);letter-spacing:.06em;margin-bottom:6px}
+.dbc-num{font-size:34px;font-weight:900;letter-spacing:-.03em;line-height:1}
+.dbc-num.c-blue{color:var(--blue)}.dbc-num.c-red{color:var(--red)}.dbc-num.c-teal{color:var(--teal)}.dbc-num.c-amber{color:var(--amber)}
+.dbc-sub{font-size:12px;color:var(--g500);margin-top:9px;line-height:1.55}
+.dbc-sub strong{font-weight:700}
+.dbc-foot{padding:10px 20px;background:var(--g50);border-top:1px solid var(--g100);font-size:12px;color:var(--g500);display:flex;align-items:center;justify-content:space-between}
+.dbc-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.dbc-pill.red{background:var(--red-l);color:var(--red)}.dbc-pill.amber{background:var(--amber-l);color:var(--amber)}.dbc-pill.teal{background:var(--teal-l);color:var(--teal)}
+
+/* ── DETAIL SUB-PAGES ── */
+.sub-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.ssc{background:var(--white);border-radius:var(--r2);border:1px solid var(--g150);padding:15px 18px;box-shadow:var(--sh)}
+.ssc-val{font-size:26px;font-weight:900;letter-spacing:-.02em}
+.ssc-lbl{font-size:12px;color:var(--g500);margin-top:3px}
+.ssc-delta{font-size:11px;font-weight:700;margin-top:5px}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{padding:10px 16px;font-size:11px;font-weight:700;color:var(--g500);letter-spacing:.05em;border-bottom:1.5px solid var(--g150);text-align:left;white-space:nowrap;background:var(--g50)}
+.data-table td{padding:12px 16px;font-size:13px;color:var(--g800);border-bottom:1px solid var(--g100);vertical-align:middle}
+.data-table tbody tr:last-child td{border-bottom:none}
+.data-table tbody tr:hover td{background:var(--g50)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.tag-blue{background:var(--blue-l);color:var(--blue)}.tag-teal{background:var(--teal-l);color:var(--teal)}.tag-amber{background:var(--amber-l);color:var(--amber)}.tag-red{background:var(--red-l);color:var(--red)}.tag-gray{background:var(--g100);color:var(--g500)}.tag-purple{background:var(--purple-l);color:var(--purple)}
+.sc{display:flex;align-items:center;gap:9px}
+.score-high{font-weight:700;color:var(--teal)}.score-mid{font-weight:700;color:var(--blue)}.score-low{font-weight:700;color:var(--amber)}.score-danger{font-weight:700;color:var(--red)}
+.tr-up{color:var(--teal);font-weight:700;font-size:12px}.tr-dn{color:var(--red);font-weight:700;font-size:12px}.tr-fl{color:var(--g400);font-size:12px}
+.risk-row td{background:#FFFBEB!important}
+.funnel-row{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-bottom:22px}
+.funnel-step{text-align:center;padding:16px 10px;position:relative;background:var(--g50);border:1px solid var(--g150)}
+.funnel-step:not(:last-child)::after{content:'→';position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--g300);z-index:1;background:var(--white);padding:0 2px}
+.funnel-step:first-child{border-radius:var(--r2) 0 0 var(--r2)}.funnel-step:last-child{border-radius:0 var(--r2) var(--r2) 0}
+.fn{font-size:28px;font-weight:900;letter-spacing:-.02em}.fl2{font-size:11px;color:var(--g500);margin-top:4px}.fs{font-size:11px;font-weight:700;margin-top:5px}
+.task-item{padding:14px 18px;border-bottom:1px solid var(--g100);display:flex;align-items:flex-start;gap:12px}
+.task-item:last-child{border-bottom:none}
+.t-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.t-dot.high{background:var(--red)}.t-dot.mid{background:var(--amber)}.t-dot.low{background:var(--blue)}
+.t-title{font-size:13px;font-weight:700;color:var(--g900);margin-bottom:3px}
+.t-meta{font-size:12px;color:var(--g500)}
+.t-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.t-deadline{font-size:11px;font-weight:700;color:var(--red)}
+.t-done-btn{padding:5px 12px;font-size:12px;font-weight:600;border:1px solid var(--g200);border-radius:6px;background:var(--white);color:var(--g600);cursor:pointer;font-family:inherit;transition:all .15s}
+.t-done-btn:hover,.t-done-btn.done{background:var(--teal-l);border-color:var(--teal);color:var(--teal)}
+
+/* ── CLASS GRID ── */
+.class-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.cls-card{
+  background:var(--white);border-radius:var(--r2);border:1px solid var(--g150);
+  box-shadow:var(--sh);overflow:hidden;cursor:pointer;transition:box-shadow .15s,transform .15s;
+}
+.cls-card:hover{box-shadow:var(--sh2);transform:translateY(-1px)}
+.cls-top-bar{height:4px}
+.cls-top-bar.pending{background:var(--amber)}
+.cls-top-bar.done{background:var(--teal)}
+.cls-top-bar.upcoming{background:var(--g200)}
+.cls-card-body{padding:16px}
+.cls-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.cls-name{font-size:15px;font-weight:700;color:var(--g900)}
+.status-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+.sp-p{background:var(--amber-l);color:var(--amber)}
+.sp-d{background:var(--teal-l);color:var(--teal)}
+.sp-u{background:var(--g100);color:var(--g500)}
+.cls-meta{display:flex;flex-direction:column;gap:5px}
+.cls-meta-item{font-size:12px;color:var(--g500);display:flex;align-items:center;gap:5px}
+.cls-card-footer{padding:12px 16px;border-top:1px solid var(--g100);display:flex;gap:8px}
+.btn-sm-ghost{flex:1;padding:7px;font-size:12px;font-weight:600;border:1px solid var(--g200);border-radius:var(--r);background:var(--white);color:var(--g600);cursor:pointer;font-family:inherit;transition:background .12s}
+.btn-sm-ghost:hover{background:var(--g50)}
+.btn-sm-blue{flex:2;padding:7px;font-size:12px;font-weight:700;border:none;border-radius:var(--r);background:var(--blue);color:var(--white);cursor:pointer;font-family:inherit;transition:opacity .12s}
+.btn-sm-blue:hover{opacity:.9}
+
+/* ── ACTION ROW ── */
+.action-row{display:flex;gap:12px;margin-bottom:8px}
+.action-btn{
+  flex:1;padding:13px 20px;border-radius:var(--r2);
+  font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .15s;
+}
+.action-btn.kakao{background:var(--kakao);color:var(--kakao-d);border:none;box-shadow:0 2px 8px rgba(254,229,0,.35)}
+.action-btn.journal{background:var(--white);color:var(--g700);border:1px solid var(--g200)}
+.action-btn.consult{background:var(--purple);color:var(--white);border:none;box-shadow:0 2px 8px rgba(107,47,186,.2)}
+.action-btn.kakao:hover{opacity:.9}
+.action-btn.journal:hover{background:var(--g50)}
+.action-btn.consult:hover{opacity:.9}
+
+/* ── RECORD PAGE: 2-column ── */
+.record-layout{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start}
+.panel{background:var(--white);border-radius:var(--r2);border:1px solid var(--g150);box-shadow:var(--sh);overflow:hidden}
+.panel-header{padding:16px 20px;border-bottom:1px solid var(--g100);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:14px;font-weight:700;color:var(--g800)}
+.panel-body{padding:18px 20px}
+.panel-sub-header{padding:10px 20px;border-bottom:1px solid var(--g100);background:var(--g50);font-size:12px;font-weight:700;color:var(--g600);display:flex;align-items:center;justify-content:space-between}
+.req{font-size:10px;font-weight:700;color:var(--red);background:var(--red-l);padding:2px 6px;border-radius:8px}
+.auto-bdg{font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-l);padding:2px 7px;border-radius:8px}
+
+/* ── FORM FIELDS ── */
+.fg{margin-bottom:14px}.fg:last-child{margin-bottom:0}
+.fl{font-size:11px;font-weight:700;color:var(--g500);margin-bottom:5px;letter-spacing:.04em;display:flex;justify-content:space-between;align-items:center}
+.fi{width:100%;padding:9px 12px;font-size:13px;border:1px solid var(--g200);border-radius:var(--r);background:var(--white);color:var(--g800);font-family:inherit;outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,111,217,.1)}
+.fta{width:100%;padding:9px 12px;font-size:13px;border:1px solid var(--g200);border-radius:var(--r);background:var(--white);color:var(--g800);font-family:inherit;outline:none;resize:vertical;min-height:72px;transition:border-color .15s}
+.fta:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,111,217,.1)}
+.fsel{width:100%;padding:9px 12px;font-size:13px;border:1px solid var(--g200);border-radius:var(--r);background:var(--white);color:var(--g800);font-family:inherit;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%239AA3B4' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.test-toggle-row{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--g600)}
+.section-divider{height:1px;background:var(--g100);margin:16px 0}
+
+/* ── STUDENT TABLE IN RIGHT PANEL ── */
+.student-table-header{display:grid;grid-template-columns:140px 80px 120px 120px 80px 1fr 36px;gap:8px;padding:10px 20px;background:var(--g50);border-bottom:1px solid var(--g150);font-size:11px;font-weight:700;color:var(--g500);letter-spacing:.04em}
+.student-row-wrap{border-bottom:1px solid var(--g100)}
+.student-row-wrap:last-child{border-bottom:none}
+.student-row{display:grid;grid-template-columns:140px 80px 120px 120px 80px 1fr 36px;gap:8px;padding:11px 20px;align-items:center;cursor:pointer;transition:background .1s}
+.student-row:hover{background:var(--g50)}
+.student-name-cell{display:flex;align-items:center;gap:8px}
+.mini-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.av-b{background:var(--blue-l);color:var(--blue)}
+.av-t{background:var(--teal-l);color:var(--teal)}
+.av-a{background:var(--amber-l);color:var(--amber)}
+.av-r{background:var(--red-l);color:var(--red)}
+.st-nm{font-size:13px;font-weight:700;color:var(--g900)}
+.st-ct{font-size:11px;color:var(--g400)}
+.att-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;width:fit-content}
+.acp{background:var(--teal-l);color:var(--teal)}
+.acl{background:var(--amber-l);color:var(--amber)}
+.aca{background:var(--red-l);color:var(--red)}
+.cell-select{width:100%;padding:6px 8px;font-size:12px;border:1px solid var(--g200);border-radius:6px;background:var(--white);color:var(--g800);font-family:inherit;outline:none;appearance:none}
+.cell-select:focus{border-color:var(--blue)}
+.score-cell{display:flex;align-items:center;gap:6px}
+.score-input{width:64px;padding:6px 8px;font-size:12px;border:1px solid var(--g200);border-radius:6px;background:var(--white);color:var(--g800);font-family:inherit;outline:none;text-align:center}
+.score-input:focus{border-color:var(--blue)}
+.score-avg-tag{font-size:11px;color:var(--g500);white-space:nowrap}
+.note-input{width:100%;padding:6px 8px;font-size:12px;border:1px solid var(--g200);border-radius:6px;background:var(--white);color:var(--g800);font-family:inherit;outline:none}
+.note-input:focus{border-color:var(--blue)}
+.expand-btn{width:28px;height:28px;border:1px solid var(--g200);border-radius:6px;background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--g400);transition:all .15s;flex-shrink:0}
+.expand-btn:hover{background:var(--blue-l);border-color:var(--blue);color:var(--blue)}
+.student-consult-row{background:var(--g50);padding:12px 20px 12px 58px;border-bottom:1px solid var(--g100);display:none}
+.student-consult-row.open{display:block}
+.add-consult-inline{font-size:12px;font-weight:600;color:var(--purple);background:var(--purple-l);border:1.5px dashed var(--purple);border-radius:6px;padding:6px 14px;cursor:pointer;font-family:inherit;transition:all .15s}
+.add-consult-inline:hover{background:rgba(107,47,186,.1)}
+.record-panel-footer{padding:14px 20px;border-top:1px solid var(--g100);display:flex;align-items:center;justify-content:space-between;background:var(--g50)}
+.save-all-btn{padding:10px 24px;font-size:13px;font-weight:700;border:none;border-radius:var(--r);background:var(--navy);color:var(--white);cursor:pointer;font-family:inherit;transition:opacity .15s}
+.save-all-btn:hover{opacity:.88}
+.progress-info{font-size:12px;color:var(--g500);display:flex;align-items:center;gap:10px}
+.prog-mini{width:120px;height:4px;background:var(--g200);border-radius:2px;overflow:hidden}
+.prog-mini-fill{height:100%;background:var(--teal);border-radius:2px;transition:width .3s}
+.common-save-btn{width:100%;padding:11px;font-size:13px;font-weight:700;border:none;border-radius:var(--r);background:var(--blue);color:var(--white);cursor:pointer;font-family:inherit;margin-top:4px;transition:opacity .15s}
+.common-save-btn:hover{opacity:.9}
+
+/* ── ATT PICKER ── */
+.att-pick{display:flex;gap:4px}
+.att-btn{flex:1;padding:7px 0;font-size:12px;font-weight:700;border:1.5px solid var(--g200);border-radius:6px;background:var(--white);color:var(--g500);cursor:pointer;font-family:inherit;transition:all .12s;text-align:center}
+.att-btn.sp{border-color:var(--teal);background:var(--teal-l);color:var(--teal)}
+.att-btn.sl{border-color:var(--amber);background:var(--amber-l);color:var(--amber)}
+.att-btn.sa{border-color:var(--red);background:var(--red-l);color:var(--red)}
+
+/* ── CONSULTATION PAGE ── */
+.consult-layout{display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:start}
+.consult-log-list{}
+.consult-log-item{
+  background:var(--white);border-radius:var(--r2);border:1px solid var(--g150);
+  box-shadow:var(--sh);padding:16px 18px;margin-bottom:12px;
+}
+.ci-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ci-type{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+.ct-new{background:#EEF2FF;color:#3730A3}
+.ct-reg{background:var(--blue-l);color:var(--blue)}
+.ct-urg{background:var(--red-l);color:var(--red)}
+.ct-exp{background:var(--amber-l);color:var(--amber)}
+.ct-out{background:var(--g100);color:var(--g600)}
+.ci-date{font-size:12px;color:var(--g400);margin-left:auto}
+.ci-student{font-size:14px;font-weight:700;color:var(--g900);margin-bottom:4px}
+.ci-cls{font-size:12px;color:var(--g500);margin-bottom:8px}
+.ci-content{font-size:13px;color:var(--g700);line-height:1.6}
+.ci-resolve{margin-top:10px;padding:10px 12px;background:var(--g50);border-radius:var(--r);border-left:3px solid var(--teal)}
+.ci-resolve-lbl{font-size:10px;font-weight:700;color:var(--teal);margin-bottom:3px;letter-spacing:.05em}
+.ci-resolve-text{font-size:12px;color:var(--g700);line-height:1.5}
+.boss-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--red);margin-top:8px}
+
+/* CONSULT FORM PANEL */
+.consult-form-sticky{position:sticky;top:calc(var(--topbar) + 20px)}
+.ctype-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.ctype-btn{padding:10px 12px;border-radius:var(--r);border:1.5px solid var(--g200);background:var(--white);cursor:pointer;text-align:left;font-family:inherit;transition:all .15s}
+.ctype-btn:hover{border-color:var(--g300);background:var(--g50)}
+.ct-title{font-size:12px;font-weight:700;color:var(--g800)}
+.ct-sub{font-size:11px;color:var(--g500);margin-top:2px}
+.ctype-btn.sel-new{border-color:#3730A3;background:#EEF2FF}.ctype-btn.sel-new .ct-title{color:#3730A3}
+.ctype-btn.sel-reg{border-color:var(--blue);background:var(--blue-l)}.ctype-btn.sel-reg .ct-title{color:var(--blue)}
+.ctype-btn.sel-urg{border-color:var(--red);background:var(--red-l)}.ctype-btn.sel-urg .ct-title{color:var(--red)}
+.ctype-btn.sel-exp{border-color:var(--amber);background:var(--amber-l)}.ctype-btn.sel-exp .ct-title{color:var(--amber)}
+.ctype-btn.sel-out{border-color:var(--g700);background:var(--g100)}.ctype-btn.sel-out .ct-title{color:var(--g700)}
+.auto-data-block{background:var(--g50);border-radius:var(--r);border:1px solid var(--g200);overflow:hidden;margin-bottom:12px}
+.auto-data-hd{padding:9px 12px;background:var(--g100);border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700;color:var(--g600)}
+.auto-data-bd{padding:10px 12px}
+.data-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--g150);font-size:12px}
+.data-row:last-child{border-bottom:none}
+.dk{color:var(--g500)}.dv{font-weight:700;color:var(--g800)}
+.dv-warn{color:var(--amber)}.dv-danger{color:var(--red)}.dv-good{color:var(--teal)}
+.tips-block{background:var(--purple-l);border:1px solid rgba(107,47,186,.2);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
+.tips-hd{padding:9px 12px;border-bottom:1px solid rgba(107,47,186,.15);font-size:12px;font-weight:700;color:var(--purple)}
+.tips-bd{padding:10px 12px}
+.tip-item{display:flex;gap:7px;font-size:12px;color:var(--g700);line-height:1.55;padding:5px 0;border-bottom:1px solid rgba(107,47,186,.08)}
+.tip-item:last-child{border-bottom:none}
+.tip-n{width:18px;height:18px;border-radius:50%;background:var(--purple);color:var(--white);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.boss-alert-strip{background:var(--amber-l);border:1px solid var(--amber);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:12px;color:#92400E;font-weight:600}
+.consult-submit-btn{width:100%;padding:12px;font-size:13px;font-weight:800;border:none;border-radius:var(--r);background:var(--purple);color:var(--white);cursor:pointer;font-family:inherit;margin-top:4px;transition:opacity .15s}
+.consult-submit-btn:hover{opacity:.9}
+
+/* ── KAKAO PAGE ── */
+.kakao-layout{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start}
+.kakao-student-list .panel-body{padding:0}
+.kakao-st-item{padding:13px 18px;border-bottom:1px solid var(--g100);cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s}
+.kakao-st-item:hover{background:var(--g50)}
+.kakao-st-item.active{background:var(--blue-l)}
+.kakao-st-item-name{font-size:13px;font-weight:700;color:var(--g900)}
+.kakao-st-item-meta{font-size:11px;color:var(--g500);margin-top:2px}
+.sent-mark{font-size:10px;font-weight:700;color:var(--teal);background:var(--teal-l);padding:2px 7px;border-radius:20px;margin-left:auto}
+.msg-preview-area{background:var(--g50);border-radius:var(--r);border:1px solid var(--g200);padding:18px;font-size:13px;line-height:1.85;color:var(--g800);white-space:pre-wrap;font-family:'Noto Sans KR',monospace;min-height:260px;margin-bottom:14px}
+.send-actions{display:flex;gap:10px;margin-bottom:14px}
+.btn-send-one{flex:1;padding:10px;font-size:13px;font-weight:700;border:1px solid var(--g200);border-radius:var(--r);background:var(--white);color:var(--g700);cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-send-one:hover{background:var(--g50)}
+.btn-send-one.sent{background:var(--teal-l);color:var(--teal);border-color:var(--teal)}
+.bulk-section{background:var(--g50);border-radius:var(--r);border:1px solid var(--g200);padding:16px}
+.bulk-title{font-size:13px;font-weight:700;color:var(--g800);margin-bottom:4px}
+.bulk-sub{font-size:12px;color:var(--g500);margin-bottom:12px;line-height:1.5}
+.btn-send-all{width:100%;padding:12px;font-size:14px;font-weight:800;border:none;border-radius:var(--r);background:var(--kakao);color:var(--kakao-d);cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(254,229,0,.4);transition:opacity .15s}
+.btn-send-all:hover{opacity:.9}
+
+/* ── JOURNAL PAGE ── */
+.journal-layout{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+.auto-sum-card{background:var(--navy);border-radius:var(--r2);overflow:hidden;box-shadow:var(--sh2);margin-bottom:16px}
+.asm-header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between}
+.asm-title{font-size:13px;font-weight:700;color:rgba(255,255,255,.8)}
+.asm-badge{font-size:10px;font-weight:700;color:var(--teal);background:rgba(13,146,104,.2);padding:2px 8px;border-radius:10px}
+.asm-body{padding:14px 18px;font-size:12px;color:rgba(255,255,255,.7);line-height:1.85}
+.asm-body strong{color:rgba(255,255,255,.95);font-weight:700}
+.notice-card{background:var(--red-l);border:1px solid var(--red);border-radius:var(--r2);padding:14px 18px;margin-bottom:16px}
+.notice-title{font-size:12px;font-weight:700;color:var(--red);margin-bottom:6px}
+.notice-body{font-size:12px;color:#7F1D1D;line-height:1.6}
+.journal-form-sticky{position:sticky;top:calc(var(--topbar)+20px)}
+.submit-btn{width:100%;padding:12px;font-size:14px;font-weight:800;border:none;border-radius:var(--r);background:var(--navy);color:var(--white);cursor:pointer;font-family:inherit;margin-bottom:10px;transition:opacity .15s}
+.submit-btn:hover{opacity:.88}
+
+/* ── DETAIL MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal-box{background:var(--white);border-radius:var(--r3);width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden}
+.modal-hd{padding:18px 22px;border-bottom:1px solid var(--g150);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:15px;font-weight:700;color:var(--g900)}
+.modal-close{width:28px;height:28px;border:none;background:var(--g100);border-radius:6px;cursor:pointer;font-size:16px;color:var(--g500);display:flex;align-items:center;justify-content:center}
+.modal-body{padding:18px 22px}
+.modal-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--g100);font-size:13px}
+.modal-row:last-child{border-bottom:none}
+.mk{color:var(--g500)}.mv{font-weight:700;color:var(--g900)}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--g900);color:var(--white);font-size:13px;font-weight:600;padding:11px 20px;border-radius:var(--r2);z-index:400;opacity:0;transition:opacity .25s;pointer-events:none;box-shadow:var(--sh2)}
+.toast.show{opacity:1}
+
+/* ── Class Selector ── */
+.cls-si{padding:11px 16px;border-bottom:1px solid var(--g100);cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .12s}
+.cls-si:hover{background:var(--g50)}
+.cls-si.active{background:var(--navy)}
+.cls-si.active .cls-si-name{color:var(--white)}
+.cls-si.active .cls-si-meta{color:rgba(255,255,255,.45)}
+.cls-si.active .cls-si-dot{background:var(--blue)}
+.cls-si-dot{width:8px;height:8px;border-radius:50%;background:var(--g300);flex-shrink:0}
+.cls-si-name{font-size:13px;font-weight:700;color:var(--g900)}
+.cls-si-meta{font-size:11px;color:var(--g400);margin-top:1px}
+.cls-si-cnt{margin-left:auto;font-size:11px;font-weight:700;background:var(--g100);color:var(--g500);padding:2px 7px;border-radius:10px;flex-shrink:0;white-space:nowrap}
+.cls-si.active .cls-si-cnt{background:rgba(255,255,255,.15);color:rgba(255,255,255,.7)}
+
+/* ── Consultation Full View ── */
+.consult-full-item{background:var(--white);border-radius:var(--r2);border:1px solid var(--g150);padding:14px 16px;margin-bottom:10px;box-shadow:var(--sh)}
+.cfi-top{display:flex;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap}
+.cfi-num{width:20px;height:20px;border-radius:50%;background:var(--g100);color:var(--g500);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cfi-content{font-size:13px;color:var(--g700);line-height:1.65;margin-bottom:9px}
+.cfi-resolve{padding:9px 12px;background:var(--teal-l);border-radius:var(--r);border-left:3px solid var(--teal)}
+.cfi-resolve-lbl{font-size:10px;font-weight:700;color:var(--teal);letter-spacing:.05em;margin-bottom:3px}
+.cfi-resolve-text{font-size:12px;color:var(--g700);line-height:1.5}
+.no-consult-placeholder{text-align:center;padding:48px 20px;color:var(--g300)}
+.no-consult-icon{font-size:38px;margin-bottom:10px}
+.no-consult-text{font-size:13px}
+
+/* ── Parent Analysis Result ── */
+.analysis-btn{width:100%;padding:13px;font-size:14px;font-weight:800;border:none;border-radius:var(--r2);background:linear-gradient(135deg,var(--purple),#4C1D95);color:var(--white);cursor:pointer;font-family:inherit;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s}
+.analysis-btn:hover{opacity:.9}
+.analysis-btn:disabled{background:var(--g300);cursor:not-allowed}
+.analysis-result{display:none}
+.analysis-result.show{display:block}
+.analysis-section{background:var(--white);border-radius:var(--r2);border:1px solid var(--g150);overflow:hidden;margin-bottom:12px;box-shadow:var(--sh)}
+.as-hd{padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--g100)}
+.as-icon{width:30px;height:30px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.as-title{font-size:13px;font-weight:700;color:var(--g800)}
+.as-body{padding:12px 16px;font-size:13px;color:var(--g700);line-height:1.75}
+.personality-tag{display:inline-block;padding:5px 13px;border-radius:20px;font-size:12px;font-weight:700;margin:3px}
+.caution-list{margin:0;padding:0;list-style:none}
+.caution-item{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--g100);font-size:13px;color:var(--g700);line-height:1.5}
+.caution-item:last-child{border-bottom:none}
+.caution-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.analysis-loading{text-align:center;padding:30px;color:var(--g500);font-size:13px}
+
+/* ══ 학생부 ══ */
+.sb-layout{display:grid;grid-template-columns:270px 1fr;gap:20px;align-items:start}
+.sb-student-list{}
+.sb-st-item{padding:11px 16px;border-bottom:1px solid var(--g100);cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s}
+.sb-st-item:hover{background:var(--g50)}
+.sb-st-item.active{background:var(--blue-l);border-right:3px solid var(--blue)}
+.sb-st-name{font-size:13px;font-weight:700;color:var(--g900)}
+.sb-st-info{font-size:11px;color:var(--g400);margin-top:1px}
+.sb-st-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:auto;flex-shrink:0}
+.sb-main{}
+.sb-student-header{background:var(--white);border-radius:var(--r2);border:1px solid var(--g150);padding:18px 22px;margin-bottom:14px;display:flex;align-items:center;gap:16px;box-shadow:var(--sh)}
+.sb-big-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.sb-student-name{font-size:18px;font-weight:800;color:var(--g900);letter-spacing:-.02em}
+.sb-student-meta{font-size:13px;color:var(--g500);margin-top:3px}
+.sb-student-tags{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+.sb-header-stats{margin-left:auto;display:grid;grid-template-columns:repeat(4,80px);gap:10px;flex-shrink:0}
+.sb-hs{text-align:center;padding:10px 8px;background:var(--g50);border-radius:var(--r);border:1px solid var(--g150)}
+.sb-hs-val{font-size:18px;font-weight:800;letter-spacing:-.02em}
+.sb-hs-lbl{font-size:10px;color:var(--g500);margin-top:2px}
+/* Date range */
+.date-range-bar{background:var(--white);border-radius:var(--r2);border:1px solid var(--g150);padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh)}
+.date-range-bar input[type=date]{padding:7px 10px;font-size:13px;border:1px solid var(--g200);border-radius:var(--r);background:var(--white);color:var(--g800);font-family:inherit;outline:none}
+.date-range-bar input[type=date]:focus{border-color:var(--blue)}
+.date-range-sep{font-size:13px;color:var(--g400)}
+.btn-apply{padding:8px 18px;font-size:13px;font-weight:700;border:none;border-radius:var(--r);background:var(--blue);color:var(--white);cursor:pointer;font-family:inherit}
+.btn-apply:hover{opacity:.9}
+.btn-preset{padding:7px 12px;font-size:12px;font-weight:600;border:1px solid var(--g200);border-radius:var(--r);background:var(--white);color:var(--g600);cursor:pointer;font-family:inherit;transition:all .12s}
+.btn-preset:hover{background:var(--blue-l);border-color:var(--blue);color:var(--blue)}
+.btn-preset.active{background:var(--blue-l);border-color:var(--blue);color:var(--blue);font-weight:700}
+/* Sub tabs */
+.sb-tabs{display:flex;background:var(--white);border-radius:var(--r2) var(--r2) 0 0;border:1px solid var(--g150);border-bottom:none;overflow:hidden}
+.sb-tab{flex:1;padding:12px 0;font-size:13px;font-weight:600;color:var(--g500);border:none;background:none;cursor:pointer;font-family:inherit;border-bottom:2.5px solid transparent;transition:all .15s}
+.sb-tab.active{color:var(--blue);border-bottom-color:var(--blue);background:var(--white)}
+.sb-tab:hover:not(.active){background:var(--g50);color:var(--g700)}
+.sb-tab-body{background:var(--white);border-radius:0 0 var(--r2) var(--r2);border:1px solid var(--g150);border-top:none;padding:20px;box-shadow:var(--sh)}
+.sb-tc{display:none}.sb-tc.active{display:block}
+/* Summary mini cards */
+.sb-sum-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.sb-sum{background:var(--g50);border-radius:var(--r);border:1px solid var(--g150);padding:13px 15px}
+.sb-sum-val{font-size:22px;font-weight:900;letter-spacing:-.02em}
+.sb-sum-lbl{font-size:11px;color:var(--g500);margin-top:3px}
+.sb-sum-delta{font-size:11px;font-weight:700;margin-top:4px}
+/* WT Chart */
+.wt-chart{margin-bottom:20px}
+.wt-chart-title{font-size:12px;font-weight:700;color:var(--g600);margin-bottom:10px;letter-spacing:.04em}
+.wt-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.wt-month{font-size:11px;color:var(--g500);width:40px;flex-shrink:0;text-align:right}
+.wt-bar-track{flex:1;height:22px;background:var(--g100);border-radius:4px;overflow:hidden;position:relative}
+.wt-bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:var(--white);transition:width .4s ease;position:relative}
+.wt-avg-line{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.5)}
+.wt-score-label{font-size:12px;font-weight:700;width:36px;flex-shrink:0}
+.wt-avg-label{font-size:11px;color:var(--g400);width:60px;flex-shrink:0}
+/* Record table */
+.rec-table{width:100%;border-collapse:collapse;font-size:13px}
+.rec-table th{padding:8px 12px;font-size:11px;font-weight:700;color:var(--g500);letter-spacing:.04em;border-bottom:1.5px solid var(--g150);text-align:left;background:var(--g50)}
+.rec-table td{padding:10px 12px;border-bottom:1px solid var(--g100);color:var(--g800);vertical-align:middle}
+.rec-table tbody tr:last-child td{border-bottom:none}
+.rec-table tbody tr:hover td{background:var(--g50)}
+/* AI Chat */
+.ai-key-bar{background:var(--blue-l);border:1px solid var(--blue-m);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.ai-key-bar input{flex:1;padding:7px 10px;font-size:13px;border:1px solid var(--blue-m);border-radius:6px;background:var(--white);color:var(--g800);font-family:inherit;outline:none}
+.ai-key-bar input:focus{border-color:var(--blue)}
+.ai-key-save{padding:7px 14px;font-size:12px;font-weight:700;border:none;border-radius:6px;background:var(--blue);color:var(--white);cursor:pointer;font-family:inherit}
+.ai-chat-area{height:320px;overflow-y:auto;border:1px solid var(--g200);border-radius:var(--r);padding:14px;margin-bottom:12px;background:var(--g50);display:flex;flex-direction:column;gap:10px}
+.ai-msg{max-width:82%;padding:10px 14px;border-radius:var(--r2);font-size:13px;line-height:1.65}
+.ai-msg.user{background:var(--blue);color:var(--white);align-self:flex-end;border-radius:var(--r2) var(--r2) 4px var(--r2)}
+.ai-msg.assistant{background:var(--white);color:var(--g800);border:1px solid var(--g200);align-self:flex-start;border-radius:var(--r2) var(--r2) var(--r2) 4px}
+.ai-msg.loading{color:var(--g500);background:var(--g100);font-style:italic}
+.ai-presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.ai-preset-btn{padding:6px 12px;font-size:12px;font-weight:600;border:1px solid var(--blue-m);border-radius:20px;background:var(--blue-l);color:var(--blue);cursor:pointer;font-family:inherit;transition:all .12s}
+.ai-preset-btn:hover{background:var(--blue);color:var(--white)}
+.ai-input-row{display:flex;gap:8px}
+.ai-input-row input{flex:1;padding:9px 12px;font-size:13px;border:1px solid var(--g200);border-radius:var(--r);background:var(--white);color:var(--g800);font-family:inherit;outline:none}
+.ai-input-row input:focus{border-color:var(--blue)}
+.ai-send{padding:9px 18px;font-size:13px;font-weight:700;border:none;border-radius:var(--r);background:var(--blue);color:var(--white);cursor:pointer;font-family:inherit}
+.ai-send:hover{opacity:.9}
+.ai-send:disabled{background:var(--g300);cursor:not-allowed}
+/* Report */
+.report-box{background:var(--g50);border-radius:var(--r);border:1px solid var(--g150);padding:20px;font-size:13px;line-height:1.85;color:var(--g800);margin-bottom:14px;white-space:pre-wrap}
+.report-box h3{font-size:14px;font-weight:700;color:var(--navy);margin:14px 0 6px;border-bottom:1px solid var(--g200);padding-bottom:4px}
+.report-box h3:first-child{margin-top:0}
+.report-actions{display:flex;gap:8px}
+.btn-report-action{padding:8px 16px;font-size:13px;font-weight:600;border:1px solid var(--g200);border-radius:var(--r);background:var(--white);color:var(--g700);cursor:pointer;font-family:inherit}
+.btn-report-action:hover{background:var(--g50)}
+.report-month-sel{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.report-month-sel select{padding:8px 12px;font-size:13px;border:1px solid var(--g200);border-radius:var(--r);background:var(--white);color:var(--g800);font-family:inherit;outline:none}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){.dash-cards{grid-template-columns:1fr 1fr}.class-grid{grid-template-columns:1fr 1fr}.sub-summary{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){
+  .sidebar{width:200px;--sidebar:200px}
+  .main{margin-left:200px}
+  .record-layout{grid-template-columns:1fr}
+  .class-grid{grid-template-columns:1fr 1fr}
+  .dash-cards{grid-template-columns:1fr 1fr}
+  .consult-layout{grid-template-columns:1fr}
+  .kakao-layout{grid-template-columns:1fr}
+  .journal-layout{grid-template-columns:1fr}
+  .student-table-header,.student-row{grid-template-columns:130px 72px 110px 110px 72px 1fr 32px}
+}
+@media(max-width:680px){
+  .sidebar{display:none}
+  .main{margin-left:0}
+  .topbar{padding:0 16px}
+  .page-wrap{padding:16px}
+  .class-grid{grid-template-columns:1fr}
+  .dash-cards{grid-template-columns:1fr 1fr}
+  .sub-summary{grid-template-columns:1fr 1fr}
+  .student-table-header{display:none}
+  .student-row{grid-template-columns:1fr;padding:12px 16px;gap:6px}
+  .mobile-label{display:block!important;font-size:10px;color:var(--g500);font-weight:700;margin-bottom:3px}
+  .score-cell{flex-wrap:wrap}
+  .action-row{flex-wrap:wrap}
+  .action-btn{flex:1;min-width:calc(50% - 6px)}
+}
+.mobile-label{display:none}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">C</div>
+    <div class="sb-logo-text">Case<span>Link</span></div>
+  </div>
+  <div class="sb-section">메인 메뉴</div>
+  <div class="sb-nav">
+    <div class="nav-item active" id="nav-dash" onclick="goPage('dash')">
+      <span class="nav-icon">🏠</span>대시보드
+    </div>
+    <div class="nav-item" id="nav-sb" onclick="goPage('sb')" style="background:rgba(30,111,217,.15);color:rgba(255,255,255,.9);font-weight:700">
+      <span class="nav-icon">📓</span>학생부
+      <span style="margin-left:auto;font-size:10px;font-weight:700;background:var(--blue);color:#fff;padding:1px 7px;border-radius:10px">핵심</span>
+    </div>
+  </div>
+  <div class="sb-section">업무 체크사항</div>
+  <div class="sb-nav">
+    <div class="nav-item" id="nav-new" onclick="goPage('new')"><span class="nav-icon">🆕</span>신입 현황</div>
+    <div class="nav-item" id="nav-withdraw" onclick="goPage('withdraw')"><span class="nav-icon">🚪</span>퇴원 현황<span class="nav-dot"></span></div>
+    <div class="nav-item" id="nav-students" onclick="goPage('students')"><span class="nav-icon">👥</span>관리학생수</div>
+    <div class="nav-item" id="nav-urgent" onclick="goPage('urgent')"><span class="nav-icon">🚨</span>긴급업무처리<span style="margin-left:auto;font-size:10px;font-weight:700;background:var(--red);color:#fff;padding:1px 6px;border-radius:10px">4</span></div>
+  </div>
+  <div class="sb-section">수업 관리</div>
+  <div class="sb-nav">
+    <div class="nav-item" id="nav-record" onclick="goPage('record')">
+      <span class="nav-icon">📚</span>수업 기록
+    </div>
+    <div class="nav-item" id="nav-consult" onclick="goPage('consult')">
+      <span class="nav-icon">🗣</span>상담 관리
+      <span class="nav-dot"></span>
+    </div>
+  </div>
+  <div class="sb-section">커뮤니케이션</div>
+  <div class="sb-nav">
+    <div class="nav-item" id="nav-kakao" onclick="goPage('kakao')">
+      <span class="nav-icon">💬</span>알림톡 전송
+    </div>
+    <div class="nav-item" id="nav-journal" onclick="goPage('journal')">
+      <span class="nav-icon">📋</span>업무일지
+    </div>
+  </div>
+  <div class="sb-footer">
+    <div class="sb-avatar">김수</div>
+    <div><div class="sb-user-name">김수학</div><div class="sb-user-role">수학과 · 강사</div></div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-breadcrumb" id="breadcrumb">홈 &rsaquo; <span>대시보드</span></div>
+    <div class="topbar-date"><strong>2025년 4월 3일 (목)</strong> · 오늘 수업 3개 반</div>
+  </div>
+
+  <div class="page-wrap">
+
+    <!-- ════ PAGE: 대시보드 ════ -->
+    <div id="page-dash">
+      <div class="page-header">
+        <div class="page-title">안녕하세요, 김수학 강사님 👋</div>
+        <div class="page-subtitle">오늘 하루 수업 기록을 완료하고 알림톡을 발송해 주세요.</div>
+      </div>
+
+      <div class="dash-cards">
+        <!-- 신입현황 -->
+        <div class="dbc" onclick="goPage('new')">
+          <div class="dbc-bar c-blue"></div>
+          <div class="dbc-body">
+            <div class="dbc-icon c-blue">🆕</div>
+            <div class="dbc-label">신입 현황</div>
+            <div class="dbc-num c-blue">7<span style="font-size:16px;font-weight:700;color:var(--g400);margin-left:4px">명</span></div>
+            <div class="dbc-sub">이번 달 신규 등록<br>상담 대기 <strong style="color:var(--blue)">3명</strong> · 배치 완료 <strong style="color:var(--teal)">4명</strong></div>
+          </div>
+          <div class="dbc-foot"><span>이번 달 누계</span><span class="dbc-pill teal">↑ 전월比 +2</span></div>
+        </div>
+        <!-- 퇴원현황 -->
+        <div class="dbc" onclick="goPage('withdraw')">
+          <div class="dbc-bar c-red"></div>
+          <div class="dbc-body">
+            <div class="dbc-icon c-red">🚪</div>
+            <div class="dbc-label">퇴원 현황</div>
+            <div class="dbc-num c-red">5<span style="font-size:16px;font-weight:700;color:var(--g400);margin-left:4px">명</span></div>
+            <div class="dbc-sub">이번 달 퇴원<br>예상퇴원 위험 <strong style="color:var(--red)">3명</strong> 즉각 관리 필요</div>
+          </div>
+          <div class="dbc-foot"><span>퇴원 예방 필요</span><span class="dbc-pill red">위험 3명</span></div>
+        </div>
+        <!-- 관리학생수 -->
+        <div class="dbc" onclick="goPage('students')">
+          <div class="dbc-bar c-teal"></div>
+          <div class="dbc-body">
+            <div class="dbc-icon c-teal">👥</div>
+            <div class="dbc-label">관리 학생수</div>
+            <div class="dbc-num c-teal">42<span style="font-size:16px;font-weight:700;color:var(--g400);margin-left:4px">명</span></div>
+            <div class="dbc-sub">3개 반 담당 전체<br>주의 관찰 <strong style="color:var(--amber)">5명</strong></div>
+          </div>
+          <div class="dbc-foot"><span>전체 재원생</span><span class="dbc-pill teal">양호</span></div>
+        </div>
+        <!-- 긴급업무처리 -->
+        <div class="dbc" onclick="goPage('urgent')">
+          <div class="dbc-bar c-amber"></div>
+          <div class="dbc-body">
+            <div class="dbc-icon c-amber">🚨</div>
+            <div class="dbc-label">긴급 업무 처리</div>
+            <div class="dbc-num c-amber">4<span style="font-size:16px;font-weight:700;color:var(--g400);margin-left:4px">건</span></div>
+            <div class="dbc-sub">미처리 총 4건<br>오늘 마감 <strong style="color:var(--red)">2건</strong> 즉시 처리 필요</div>
+          </div>
+          <div class="dbc-foot"><span>미처리 업무</span><span class="dbc-pill red">오늘 마감 2건</span></div>
+        </div>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:var(--g600);margin-bottom:12px;letter-spacing:.04em">오늘 수업 반</div>
+      <div class="class-grid">
+        <div class="cls-card" onclick="goPage('record')">
+          <div class="cls-top-bar pending"></div>
+          <div class="cls-card-body">
+            <div class="cls-card-header"><div class="cls-name">중등 수학 기본반</div><span class="status-pill sp-p">입력 대기</span></div>
+            <div class="cls-meta">
+              <div class="cls-meta-item">🕐 15:30 ~ 17:00</div>
+              <div class="cls-meta-item">👥 4명 &nbsp;·&nbsp; 교실 B</div>
+              <div class="cls-meta-item">📖 중1 · 2단원 방정식</div>
+            </div>
+          </div>
+          <div class="cls-card-footer">
+            <button class="btn-sm-ghost" onclick="event.stopPropagation();openDetailModal('중등 수학 기본반','월·수·목','15:30~17:00','4명','중1 전체','김수학','교실 B')">반 정보</button>
+            <button class="btn-sm-blue" onclick="event.stopPropagation();goPage('record')">수업 기록 입력 →</button>
+          </div>
+        </div>
+        <div class="cls-card">
+          <div class="cls-top-bar done"></div>
+          <div class="cls-card-body">
+            <div class="cls-card-header"><div class="cls-name">중등 수학 심화반</div><span class="status-pill sp-d">✓ 기록 완료</span></div>
+            <div class="cls-meta">
+              <div class="cls-meta-item">🕐 17:10 ~ 18:40</div>
+              <div class="cls-meta-item">👥 3명 &nbsp;·&nbsp; 교실 A</div>
+              <div class="cls-meta-item">📖 중2 · 3단원 연립방정식</div>
+            </div>
+          </div>
+          <div class="cls-card-footer">
+            <button class="btn-sm-ghost" onclick="event.stopPropagation();openDetailModal('중등 수학 심화반','월·수·목','17:10~18:40','3명','중2','김수학','교실 A')">반 정보</button>
+            <button class="btn-sm-blue">기록 확인 →</button>
+          </div>
+        </div>
+        <div class="cls-card">
+          <div class="cls-top-bar upcoming"></div>
+          <div class="cls-card-body">
+            <div class="cls-card-header"><div class="cls-name">영재원 준비반</div><span class="status-pill sp-u">수업 예정</span></div>
+            <div class="cls-meta">
+              <div class="cls-meta-item">🕐 19:00 ~ 21:00</div>
+              <div class="cls-meta-item">👥 3명 &nbsp;·&nbsp; 교실 C</div>
+              <div class="cls-meta-item">📖 창의수학 · 도형 논리</div>
+            </div>
+          </div>
+          <div class="cls-card-footer">
+            <button class="btn-sm-ghost" onclick="event.stopPropagation();openDetailModal('영재원 준비반','화·금','19:00~21:00','3명','초6~중1','김수학','교실 C')">반 정보</button>
+            <button class="btn-sm-blue" onclick="event.stopPropagation();goPage('record')">수업 기록 입력 →</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:var(--g600);margin-bottom:12px;letter-spacing:.04em">Daily 마무리</div>
+      <div class="action-row">
+        <button class="action-btn kakao" onclick="goPage('kakao')">💬 알림톡 전송</button>
+        <button class="action-btn consult" onclick="goPage('consult')">🗣 상담 입력 / 조회</button>
+        <button class="action-btn journal" onclick="goPage('journal')">📋 업무일지 작성</button>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: 학생부 ════ -->
+    <div id="page-sb" style="display:none">
+      <div class="page-header">
+        <div class="ph-left" style="flex:1"><div class="page-title">학생부</div><div class="page-subtitle">학생별 누적 학습 기록 조회 · AI 분석 · 학습 보고서 생성</div></div>
+      </div>
+      <div class="sb-layout">
+        <!-- LEFT: 학생 목록 -->
+        <!-- LEFT: 반 선택 + 학생 선택 -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <!-- Step 1: 반 선택 -->
+          <div class="panel">
+            <div class="panel-header"><span class="panel-title">반 선택</span></div>
+            <div style="padding:0">
+              <div class="cls-si active" id="cls-basic" onclick="selectSbClass('basic',this)">
+                <div class="cls-si-dot"></div>
+                <div>
+                  <div class="cls-si-name">중등 수학 기본반</div>
+                  <div class="cls-si-meta">월·수·목 15:30~17:00</div>
+                </div>
+                <span class="cls-si-cnt">4명</span>
+              </div>
+              <div class="cls-si" id="cls-adv" onclick="selectSbClass('adv',this)">
+                <div class="cls-si-dot"></div>
+                <div>
+                  <div class="cls-si-name">중등 수학 심화반</div>
+                  <div class="cls-si-meta">월·수·목 17:10~18:40</div>
+                </div>
+                <span class="cls-si-cnt">2명</span>
+              </div>
+              <div class="cls-si" id="cls-gifted" onclick="selectSbClass('gifted',this)">
+                <div class="cls-si-dot"></div>
+                <div>
+                  <div class="cls-si-name">영재원 준비반</div>
+                  <div class="cls-si-meta">화·금 19:00~21:00</div>
+                </div>
+                <span class="cls-si-cnt">2명</span>
+              </div>
+            </div>
+          </div>
+          <!-- Step 2: 학생 선택 -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">학생 선택</span>
+              <span style="font-size:12px;color:var(--g500)" id="sb-class-count">4명</span>
+            </div>
+            <div id="sb-student-list" style="padding:0"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: 학생 상세 -->
+        <div class="sb-main">
+          <!-- 학생 헤더 -->
+          <div class="sb-student-header" id="sb-header">
+            <div class="sb-big-avatar av-b" id="sb-avatar">박지</div>
+            <div>
+              <div class="sb-student-name" id="sb-name">박지훈</div>
+              <div class="sb-student-meta" id="sb-meta">중1 · 중등 수학 기본반 · 담당: 김수학</div>
+              <div class="sb-student-tags">
+                <span class="tag tag-blue" id="sb-enroll">등록일 2024.06.15</span>
+                <span class="tag tag-gray" id="sb-duration">재원 10개월</span>
+                <span class="tag tag-teal">학습 상태 양호</span>
+              </div>
+            </div>
+            <div class="sb-header-stats" id="sb-stats">
+              <div class="sb-hs"><div class="sb-hs-val" style="color:var(--teal)">97%</div><div class="sb-hs-lbl">출석률</div></div>
+              <div class="sb-hs"><div class="sb-hs-val" style="color:var(--blue)">88점</div><div class="sb-hs-lbl">최근 WT</div></div>
+              <div class="sb-hs"><div class="sb-hs-val" style="color:var(--teal)">우수</div><div class="sb-hs-lbl">과제수행</div></div>
+              <div class="sb-hs"><div class="sb-hs-val" style="color:var(--blue)">+14</div><div class="sb-hs-lbl">WT 성장</div></div>
+            </div>
+          </div>
+
+          <!-- 기간 선택 -->
+          <div class="date-range-bar">
+            <span style="font-size:12px;font-weight:700;color:var(--g600)">조회 기간</span>
+            <input type="date" id="sb-date-from" value="2025-01-01"/>
+            <span class="date-range-sep">~</span>
+            <input type="date" id="sb-date-to" value="2025-04-03"/>
+            <button class="btn-apply" onclick="renderSbData()">조회</button>
+            <div style="margin-left:8px;display:flex;gap:6px">
+              <button class="btn-preset active" onclick="setPreset(1,this)">1개월</button>
+              <button class="btn-preset" onclick="setPreset(3,this)">3개월</button>
+              <button class="btn-preset" onclick="setPreset(6,this)">6개월</button>
+              <button class="btn-preset" onclick="setPreset(0,this)">전체</button>
+            </div>
+          </div>
+
+          <!-- 서브 탭 -->
+          <div class="sb-tabs">
+            <button class="sb-tab active" id="sbt-stat" onclick="switchSbTab('stat')">📊 학습 현황</button>
+            <button class="sb-tab" id="sbt-consult" onclick="switchSbTab('consult')">🗂 상담 기록</button>
+            <button class="sb-tab" id="sbt-ai" onclick="switchSbTab('ai')">🤖 AI 질문</button>
+            <button class="sb-tab" id="sbt-monthly" onclick="switchSbTab('monthly')">📅 월간 보고서</button>
+            <button class="sb-tab" id="sbt-period" onclick="switchSbTab('period')">📋 기간별 보고서</button>
+          </div>
+
+          <!-- ── TAB: 학습 현황 ── -->
+          <div class="sb-tab-body">
+            <div class="sb-tc active" id="sbtc-stat">
+              <!-- 요약 -->
+              <div class="sb-sum-row" id="sb-sum-row">
+                <div class="sb-sum"><div class="sb-sum-val" style="color:var(--teal)" id="ss-att">97%</div><div class="sb-sum-lbl">출석률</div><div class="sb-sum-delta" style="color:var(--teal)">결석 1회</div></div>
+                <div class="sb-sum"><div class="sb-sum-val" style="color:var(--blue)" id="ss-hw">88%</div><div class="sb-sum-lbl">과제 수행도</div><div class="sb-sum-delta" style="color:var(--blue)">우수 이상 비율</div></div>
+                <div class="sb-sum"><div class="sb-sum-val" style="color:var(--blue)" id="ss-wt">85점</div><div class="sb-sum-lbl">WT 기간 평균</div><div class="sb-sum-delta" style="color:var(--teal)">↑ 상승 추세</div></div>
+                <div class="sb-sum"><div class="sb-sum-val" style="color:var(--teal)" id="ss-pt">우수</div><div class="sb-sum-lbl">수업 참여도</div><div class="sb-sum-delta" style="color:var(--teal)">지속 유지</div></div>
+              </div>
+              <!-- WT 추이 차트 -->
+              <div class="wt-chart">
+                <div class="wt-chart-title">WT 점수 추이 (월별 · 막대: 학생 / 점선: 반 평균)</div>
+                <div id="wt-chart-body"></div>
+              </div>
+              <!-- 수업 기록 테이블 -->
+              <div style="font-size:12px;font-weight:700;color:var(--g600);margin-bottom:8px;letter-spacing:.04em">수업별 기록</div>
+              <table class="rec-table" style="margin-bottom:18px">
+                <thead><tr><th>날짜</th><th>출결</th><th>진도</th><th>과제 수행도</th><th>참여도</th><th>WT 점수</th><th>특이사항</th></tr></thead>
+                <tbody id="sb-rec-tbody"></tbody>
+              </table>
+              <!-- 상담 이력 -->
+              <div style="font-size:12px;font-weight:700;color:var(--g600);margin-bottom:8px;letter-spacing:.04em">상담 이력</div>
+              <div id="sb-consult-history"></div>
+            </div>
+
+            <!-- ── TAB: AI 질문 ── -->
+            <div class="sb-tc" id="sbtc-consult">
+              <!-- 전체 상담 이력 -->
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <div>
+                  <div style="font-size:14px;font-weight:700;color:var(--g900)">전체 상담 기록</div>
+                  <div style="font-size:12px;color:var(--g500);margin-top:2px" id="consult-count-info">로딩 중...</div>
+                </div>
+                <button class="btn-apply" onclick="goPage('consult')" style="font-size:12px;padding:7px 14px">+ 상담 추가</button>
+              </div>
+              <div id="consult-full-list" style="margin-bottom:24px"></div>
+
+              <!-- 학부모 성향 AI 분석 -->
+              <div style="background:linear-gradient(135deg,#F0E9FF,#EBF3FF);border-radius:var(--r2);padding:16px;margin-bottom:14px;border:1px solid rgba(107,47,186,.15)">
+                <div style="font-size:13px;font-weight:700;color:var(--purple);margin-bottom:4px">🧠 학부모 성향 AI 분석</div>
+                <div style="font-size:12px;color:var(--g600);line-height:1.6;margin-bottom:12px">상담 이력 전체를 AI가 분석하여 학부모의 <strong>요구사항·성향·반복 패턴·상담 유의사항</strong>을 도출합니다.</div>
+                <button class="analysis-btn" id="analysis-btn" onclick="runParentAnalysis()">
+                  🔍 학부모 성향 분석 실행
+                </button>
+              </div>
+
+              <!-- 분석 결과 -->
+              <div class="analysis-result" id="analysis-result">
+                <div style="font-size:12px;font-weight:700;color:var(--g600);letter-spacing:.04em;margin-bottom:10px">AI 분석 결과 — <span id="analysis-student-name"></span> 학부모</div>
+
+                <div class="analysis-section">
+                  <div class="as-hd">
+                    <div class="as-icon" style="background:#FEF3C7">📋</div>
+                    <div class="as-title">핵심 요구사항</div>
+                  </div>
+                  <div class="as-body" id="as-demands"></div>
+                </div>
+
+                <div class="analysis-section">
+                  <div class="as-hd">
+                    <div class="as-icon" style="background:var(--purple-l)">👤</div>
+                    <div class="as-title">학부모 성향 · 특성</div>
+                  </div>
+                  <div class="as-body">
+                    <div id="as-personality-tags" class="analysis-tag-row" style="margin-bottom:10px"></div>
+                    <div id="as-personality-desc"></div>
+                  </div>
+                </div>
+
+                <div class="analysis-section">
+                  <div class="as-hd">
+                    <div class="as-icon" style="background:var(--blue-l)">🔄</div>
+                    <div class="as-title">반복 패턴 · 주요 관심사</div>
+                  </div>
+                  <div class="as-body" id="as-patterns"></div>
+                </div>
+
+                <div class="analysis-section">
+                  <div class="as-hd">
+                    <div class="as-icon" style="background:var(--red-l)">⚠️</div>
+                    <div class="as-title">상담 시 유의사항</div>
+                  </div>
+                  <div class="as-body">
+                    <ul class="caution-list" id="as-cautions"></ul>
+                  </div>
+                </div>
+
+                <div class="analysis-section">
+                  <div class="as-hd">
+                    <div class="as-icon" style="background:var(--teal-l)">💡</div>
+                    <div class="as-title">다음 상담 추천 접근법</div>
+                  </div>
+                  <div class="as-body" id="as-approach"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── TAB: AI 질문 ── -->
+            <div class="sb-tc" id="sbtc-ai">
+              <div class="ai-key-bar" id="ai-key-bar">
+                <span style="font-size:12px;font-weight:700;color:var(--blue);white-space:nowrap">API Key</span>
+                <input type="password" id="ai-key-input" placeholder="sk-ant-api03-... (Anthropic API Key)"/>
+                <button class="ai-key-save" onclick="saveApiKey()">저장</button>
+              </div>
+              <div style="font-size:12px;color:var(--g500);margin-bottom:10px">이 학생의 학습 데이터를 바탕으로 AI에게 질문하세요.</div>
+              <div class="ai-presets">
+                <button class="ai-preset-btn" onclick="askPreset('이 학생의 학습 강점과 약점을 분석해줘')">강점·약점 분석</button>
+                <button class="ai-preset-btn" onclick="askPreset('학습 개선을 위한 구체적인 방향을 제안해줘')">학습 개선 방향</button>
+                <button class="ai-preset-btn" onclick="askPreset('학부모 상담 시 어떤 내용을 중점적으로 전달하면 좋을까?')">학부모 상담 팁</button>
+                <button class="ai-preset-btn" onclick="askPreset('이 학생에게 맞는 다음 학습 단계를 추천해줘')">다음 단계 추천</button>
+                <button class="ai-preset-btn" onclick="askPreset('퇴원 위험이 있는지 평가하고, 예방 방안을 알려줘')">퇴원 위험 평가</button>
+              </div>
+              <div class="ai-chat-area" id="ai-chat-area">
+                <div class="ai-msg assistant">안녕하세요! 저는 케이스수학과학학원 AI 분석 도우미입니다. 선택된 학생의 학습 데이터를 바탕으로 질문에 답변드립니다. 위의 빠른 질문 버튼을 누르거나 직접 질문해 주세요.</div>
+              </div>
+              <div class="ai-input-row">
+                <input type="text" id="ai-user-input" placeholder="이 학생에 대해 궁금한 점을 입력하세요..." onkeydown="if(event.key==='Enter')sendAiQuestion()"/>
+                <button class="ai-send" id="ai-send-btn" onclick="sendAiQuestion()">전송</button>
+              </div>
+            </div>
+
+            <!-- ── TAB: 월간 보고서 ── -->
+            <div class="sb-tc" id="sbtc-monthly">
+              <div class="report-month-sel">
+                <span style="font-size:13px;font-weight:700;color:var(--g700)">보고 월 선택</span>
+                <select id="report-month-sel" onchange="renderMonthlyReport()">
+                  <option value="202504">2025년 4월</option>
+                  <option value="202503" selected>2025년 3월</option>
+                  <option value="202502">2025년 2월</option>
+                  <option value="202501">2025년 1월</option>
+                </select>
+                <button class="btn-apply" onclick="renderMonthlyReport()">보고서 생성</button>
+              </div>
+              <div id="monthly-report-box" class="report-box"></div>
+              <div class="report-actions">
+                <button class="btn-report-action" onclick="copyReport('monthly-report-box')">📋 복사</button>
+                <button class="btn-report-action" onclick="printReport('monthly-report-box')">🖨️ 인쇄</button>
+              </div>
+            </div>
+
+            <!-- ── TAB: 기간별 보고서 ── -->
+            <div class="sb-tc" id="sbtc-period">
+              <div style="margin-bottom:14px;font-size:13px;color:var(--g600)">
+                위에서 설정한 기간 (<span id="period-range-label">2025.01.01 ~ 2025.04.03</span>) 의 학습 종합 보고서입니다.
+              </div>
+              <div id="period-report-box" class="report-box"></div>
+              <div class="report-actions">
+                <button class="btn-report-action" onclick="copyReport('period-report-box')">📋 복사</button>
+                <button class="btn-report-action" onclick="printReport('period-report-box')">🖨️ 인쇄</button>
+              </div>
+            </div>
+          </div><!-- /sb-tab-body -->
+        </div><!-- /sb-main -->
+      </div><!-- /sb-layout -->
+    </div>
+
+    <!-- ════ PAGE: 신입 현황 ════ -->
+    <div id="page-new" style="display:none">
+      <div class="page-header">
+        <div class="ph-left" style="flex:1">
+          <div class="page-title">신입 현황</div>
+          <div class="page-subtitle">이번 달 신규 등록 및 상담 대기 현황</div>
+        </div>
+        <button class="btn-sm-blue" style="padding:9px 18px;font-size:13px;border-radius:var(--r2);flex:none" onclick="goPage('consult');setTimeout(()=>{document.getElementById('ct-new')?.click()},100)">+ 신입 상담 입력</button>
+      </div>
+      <!-- 요약 -->
+      <div class="sub-summary">
+        <div class="ssc" style="border-left:3px solid var(--blue)"><div class="ssc-val" style="color:var(--blue)">7</div><div class="ssc-lbl">이번 달 신입</div><div class="ssc-delta" style="color:var(--teal)">↑ 전월比 +2명</div></div>
+        <div class="ssc" style="border-left:3px solid var(--amber)"><div class="ssc-val" style="color:var(--amber)">3</div><div class="ssc-lbl">상담 대기 / 배치 미완료</div><div class="ssc-delta" style="color:var(--amber)">진단평가 전</div></div>
+        <div class="ssc" style="border-left:3px solid var(--teal)"><div class="ssc-val" style="color:var(--teal)">4</div><div class="ssc-lbl">등록 완료 · 수업 중</div><div class="ssc-delta" style="color:var(--teal)">정상 출석 중</div></div>
+        <div class="ssc" style="border-left:3px solid var(--g300)"><div class="ssc-val" style="color:var(--g500)">58%</div><div class="ssc-lbl">문의 → 등록 전환율</div><div class="ssc-delta" style="color:var(--g400)">목표 65%</div></div>
+      </div>
+      <!-- 등록 프로세스 퍼널 -->
+      <div class="panel" style="margin-bottom:18px">
+        <div class="panel-header"><span class="panel-title">📊 이번 달 신입 등록 프로세스</span></div>
+        <div class="panel-body">
+          <div class="funnel-row">
+            <div class="funnel-step"><div class="fn" style="color:var(--blue)">12</div><div class="fl2">문의 접수</div><div class="fs" style="color:var(--g500)">이번 달</div></div>
+            <div class="funnel-step"><div class="fn" style="color:#3730A3">9</div><div class="fl2">신입 상담 진행</div><div class="fs" style="color:#3730A3">75% 전환</div></div>
+            <div class="funnel-step"><div class="fn" style="color:var(--teal)">7</div><div class="fl2">등록 결정</div><div class="fs" style="color:var(--teal)">78% 전환</div></div>
+            <div class="funnel-step"><div class="fn" style="color:var(--amber)">3</div><div class="fl2">배치 대기</div><div class="fs" style="color:var(--amber)">진단평가 전</div></div>
+            <div class="funnel-step"><div class="fn" style="color:var(--navy)">4</div><div class="fl2">수업 시작</div><div class="fs" style="color:var(--teal)">완료</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- 신입생 목록 -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">신입생 목록 — 이번 달</span><span style="font-size:12px;color:var(--g500)">7명</span></div>
+        <table class="data-table"><thead><tr><th>학생</th><th>학년</th><th>등록일</th><th>배치 반</th><th>진단평가</th><th>상태</th><th>담당 강사</th></tr></thead>
+        <tbody>
+          <tr><td><div class="sc"><div class="mini-avatar av-b">박민</div><div><div style="font-size:13px;font-weight:700">박민준</div><div style="font-size:11px;color:var(--g400)">010-1234-0001</div></div></div></td><td>초6</td><td>04.01</td><td>영재원 준비반</td><td><span class="tag tag-amber">04.08 예정</span></td><td><span class="tag tag-amber">배치 대기</span></td><td>김수학</td></tr>
+          <tr><td><div class="sc"><div class="mini-avatar av-t">이나</div><div><div style="font-size:13px;font-weight:700">이나연</div><div style="font-size:11px;color:var(--g400)">010-2345-0002</div></div></div></td><td>중1</td><td>04.01</td><td>기본반</td><td><span class="tag tag-teal">완료 (84점)</span></td><td><span class="tag tag-teal">수업 중</span></td><td>김수학</td></tr>
+          <tr><td><div class="sc"><div class="mini-avatar av-a">정태</div><div><div style="font-size:13px;font-weight:700">정태양</div><div style="font-size:11px;color:var(--g400)">010-3456-0003</div></div></div></td><td>중2</td><td>03.28</td><td>심화반</td><td><span class="tag tag-teal">완료 (91점)</span></td><td><span class="tag tag-teal">수업 중</span></td><td>김수학</td></tr>
+          <tr><td><div class="sc"><div class="mini-avatar av-r">한소</div><div><div style="font-size:13px;font-weight:700">한소희</div><div style="font-size:11px;color:var(--g400)">010-4567-0004</div></div></div></td><td>중1</td><td>04.02</td><td>미정</td><td><span class="tag tag-amber">04.09 예정</span></td><td><span class="tag tag-amber">배치 대기</span></td><td>미배정</td></tr>
+          <tr><td><div class="sc"><div class="mini-avatar" style="background:var(--g100);color:var(--g500)">오성</div><div><div style="font-size:13px;font-weight:700">오성민</div><div style="font-size:11px;color:var(--g400)">010-5678-0005</div></div></div></td><td>초5</td><td>04.03</td><td>미정</td><td><span class="tag tag-gray">미예약</span></td><td><span class="tag tag-gray">상담 대기</span></td><td>미배정</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: 퇴원 현황 ════ -->
+    <div id="page-withdraw" style="display:none">
+      <div class="page-header">
+        <div class="ph-left" style="flex:1">
+          <div class="page-title">퇴원 현황</div>
+          <div class="page-subtitle">이번 달 퇴원 처리 및 예상 퇴원 위험군 관리</div>
+        </div>
+        <button style="padding:9px 18px;font-size:13px;font-weight:700;border:none;border-radius:var(--r2);background:var(--red);color:var(--white);cursor:pointer;font-family:inherit;flex:none" onclick="goPage('consult')">+ 퇴원 상담 입력</button>
+      </div>
+      <div class="sub-summary">
+        <div class="ssc" style="border-left:3px solid var(--red)"><div class="ssc-val" style="color:var(--red)">5</div><div class="ssc-lbl">이번 달 퇴원</div><div class="ssc-delta" style="color:var(--red)">↑ 전월比 +2명</div></div>
+        <div class="ssc" style="border-left:3px solid var(--amber)"><div class="ssc-val" style="color:var(--amber)">3</div><div class="ssc-lbl">예상퇴원 위험</div><div class="ssc-delta" style="color:var(--amber)">즉각 관리 필요</div></div>
+        <div class="ssc" style="border-left:3px solid var(--teal)"><div class="ssc-val" style="color:var(--teal)">2</div><div class="ssc-lbl">퇴원 예방 성공</div><div class="ssc-delta" style="color:var(--teal)">이번 달 유지</div></div>
+        <div class="ssc" style="border-left:3px solid var(--g300)"><div class="ssc-val" style="color:var(--g500)">8.2%</div><div class="ssc-lbl">이번 달 퇴원율</div><div class="ssc-delta" style="color:var(--amber)">목표 5% 이하</div></div>
+      </div>
+      <!-- 위험군 -->
+      <div class="panel" style="margin-bottom:18px">
+        <div class="panel-header"><span class="panel-title" style="color:var(--amber)">⚠️ 예상 퇴원 위험군 — 즉각 관리 필요</span><span style="font-size:12px;color:var(--g500)">3명</span></div>
+        <table class="data-table"><thead><tr><th>학생</th><th>반</th><th>재원기간</th><th>주요 징후</th><th>WT 추이</th><th>참여도</th><th>과제</th><th>액션</th></tr></thead>
+        <tbody>
+          <tr class="risk-row"><td><div class="sc"><div class="mini-avatar av-a">최다</div><span style="font-size:13px;font-weight:700">최다은</span></div></td><td>기본반</td><td>8개월</td><td><span class="tag tag-amber">과제 거부</span></td><td><span class="tr-dn">76→68→58 ↓</span></td><td><span style="color:var(--red);font-weight:700">하</span></td><td><span style="color:var(--red);font-weight:700">2회 미제출</span></td><td><button class="btn-sm-blue" style="padding:5px 12px;font-size:12px;border-radius:6px" onclick="goPage('consult')">상담 입력</button></td></tr>
+          <tr class="risk-row"><td><div class="sc"><div class="mini-avatar av-r">이수</div><span style="font-size:13px;font-weight:700">이수민</span></div></td><td>기본반</td><td>5개월</td><td><span class="tag tag-amber">지각 잦음</span></td><td><span class="tr-dn">72→67→61 ↓</span></td><td><span style="color:var(--amber);font-weight:700">중하</span></td><td><span style="color:var(--amber);font-weight:700">미흡</span></td><td><button class="btn-sm-blue" style="padding:5px 12px;font-size:12px;border-radius:6px" onclick="goPage('consult')">상담 입력</button></td></tr>
+          <tr class="risk-row"><td><div class="sc"><div class="mini-avatar" style="background:var(--purple-l);color:var(--purple)">강준</div><span style="font-size:13px;font-weight:700">강준혁</span></div></td><td>심화반</td><td>3개월</td><td><span class="tag tag-red">학부모 연락</span></td><td><span class="tr-fl">68→67→67 —</span></td><td><span style="color:var(--amber);font-weight:700">중</span></td><td><span style="color:var(--g500)">보통</span></td><td><button class="btn-sm-blue" style="padding:5px 12px;font-size:12px;border-radius:6px" onclick="goPage('consult')">상담 입력</button></td></tr>
+        </tbody></table>
+      </div>
+      <!-- 이번 달 퇴원 목록 -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">이번 달 퇴원 목록</span><span style="font-size:12px;color:var(--g500)">5명</span></div>
+        <table class="data-table"><thead><tr><th>학생</th><th>반</th><th>재원기간</th><th>퇴원일</th><th>퇴원 사유</th><th>담임 진단</th><th>분류</th></tr></thead>
+        <tbody>
+          <tr><td><div class="sc"><div class="mini-avatar av-b">김하</div><span style="font-size:13px;font-weight:700">김하은</span></div></td><td>기본반</td><td>12개월</td><td>04.01</td><td>학교 내신 집중</td><td>성적 목표 달성 후 자기주도 전환</td><td><span class="tag tag-gray">자발적</span></td></tr>
+          <tr><td><div class="sc"><div class="mini-avatar av-t">박도</div><span style="font-size:13px;font-weight:700">박도윤</span></div></td><td>영재원</td><td>2개월</td><td>03.28</td><td>지역 이동</td><td>이사로 인한 부득이한 퇴원</td><td><span class="tag tag-gray">불가피</span></td></tr>
+          <tr><td><div class="sc"><div class="mini-avatar av-a">신예</div><span style="font-size:13px;font-weight:700">신예린</span></div></td><td>기본반</td><td>6개월</td><td>03.25</td><td>타학원 이동</td><td>성적 정체로 인한 환경 변화 희망</td><td><span class="tag tag-red">예방 가능</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: 관리학생수 ════ -->
+    <div id="page-students" style="display:none">
+      <div class="page-header">
+        <div class="ph-left" style="flex:1">
+          <div class="page-title">관리 학생수</div>
+          <div class="page-subtitle">담당 전체 재원생 현황 및 학습 상태 모니터링</div>
+        </div>
+      </div>
+      <div class="sub-summary" style="grid-template-columns:repeat(5,1fr)">
+        <div class="ssc" style="border-left:3px solid var(--navy)"><div class="ssc-val" style="color:var(--navy)">42</div><div class="ssc-lbl">전체 재원생</div></div>
+        <div class="ssc" style="border-left:3px solid var(--blue)"><div class="ssc-val" style="color:var(--blue)">14</div><div class="ssc-lbl">기본반</div></div>
+        <div class="ssc" style="border-left:3px solid var(--purple)"><div class="ssc-val" style="color:var(--purple)">12</div><div class="ssc-lbl">심화반</div></div>
+        <div class="ssc" style="border-left:3px solid var(--teal)"><div class="ssc-val" style="color:var(--teal)">10</div><div class="ssc-lbl">영재원 준비반</div></div>
+        <div class="ssc" style="border-left:3px solid var(--amber)"><div class="ssc-val" style="color:var(--amber)">5</div><div class="ssc-lbl">⚠ 주의 관찰</div><div class="ssc-delta" style="color:var(--amber)">즉각 개입 필요</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">전체 학생 학습 현황</span>
+          <select style="padding:6px 10px;font-size:12px;border:1px solid var(--g200);border-radius:var(--r);background:var(--white);color:var(--g700);font-family:inherit;appearance:none;padding-right:24px">
+            <option>전체 반</option><option>기본반</option><option>심화반</option><option>영재원 준비반</option>
+          </select>
+        </div>
+        <table class="data-table"><thead><tr><th>학생</th><th>반</th><th>재원기간</th><th>최근 WT</th><th>WT 추이 (3주)</th><th>과제 수행도</th><th>참여도</th><th>상태</th></tr></thead>
+        <tbody>
+          <tr><td><div class="sc"><div class="mini-avatar av-b">박지</div><div><div style="font-size:13px;font-weight:700">박지훈</div><div style="font-size:11px;color:var(--g400)">중1</div></div></div></td><td>기본반</td><td>10개월</td><td><span class="score-high">88점</span></td><td><span class="tr-up">82→85→88 ↑</span></td><td><span class="tag tag-teal">매우 우수</span></td><td><span class="tag tag-teal">우수</span></td><td><span class="tag tag-teal">양호</span></td></tr>
+          <tr><td><div class="sc"><div class="mini-avatar av-t">이수</div><div><div style="font-size:13px;font-weight:700">이수민</div><div style="font-size:11px;color:var(--g400)">중1</div></div></div></td><td>기본반</td><td>5개월</td><td><span class="score-low">61점</span></td><td><span class="tr-dn">72→67→61 ↓</span></td><td><span class="tag tag-amber">미흡</span></td><td><span class="tag tag-amber">보통</span></td><td><span class="tag tag-amber">주의</span></td></tr>
+          <tr><td><div class="sc"><div class="mini-avatar av-a">최다</div><div><div style="font-size:13px;font-weight:700">최다은</div><div style="font-size:11px;color:var(--g400)">중1</div></div></div></td><td>기본반</td><td>8개월</td><td><span class="score-danger">58점</span></td><td><span class="tr-dn">76→68→58 ↓</span></td><td><span class="tag tag-red">매우 미흡</span></td><td><span class="tag tag-red">미흡</span></td><td><span class="tag tag-red">위험</span></td></tr>
+          <tr><td><div class="sc"><div class="mini-avatar av-r">정민</div><div><div style="font-size:13px;font-weight:700">정민서</div><div style="font-size:11px;color:var(--g400)">중1</div></div></div></td><td>기본반</td><td>14개월</td><td><span class="score-mid">79점</span></td><td><span class="tr-up">75→77→79 ↑</span></td><td><span class="tag tag-blue">우수</span></td><td><span class="tag tag-teal">우수</span></td><td><span class="tag tag-teal">양호</span></td></tr>
+          <tr><td><div class="sc"><div class="mini-avatar" style="background:var(--purple-l);color:var(--purple)">강준</div><div><div style="font-size:13px;font-weight:700">강준혁</div><div style="font-size:11px;color:var(--g400)">중2</div></div></div></td><td>심화반</td><td>3개월</td><td><span class="score-low">67점</span></td><td><span class="tr-fl">68→67→67 —</span></td><td><span class="tag tag-gray">보통</span></td><td><span class="tag tag-gray">보통</span></td><td><span class="tag tag-amber">주의</span></td></tr>
+          <tr><td><div class="sc"><div class="mini-avatar" style="background:var(--g100);color:var(--g500)">한지</div><div><div style="font-size:13px;font-weight:700">한지우</div><div style="font-size:11px;color:var(--g400)">중2</div></div></div></td><td>심화반</td><td>20개월</td><td><span class="score-high">94점</span></td><td><span class="tr-up">90→92→94 ↑</span></td><td><span class="tag tag-teal">매우 우수</span></td><td><span class="tag tag-teal">우수</span></td><td><span class="tag tag-teal">최우수</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: 긴급업무처리 ════ -->
+    <div id="page-urgent" style="display:none">
+      <div class="page-header">
+        <div class="ph-left" style="flex:1">
+          <div class="page-title">긴급 업무 처리</div>
+          <div class="page-subtitle">미처리 긴급 업무 및 오늘 마감 사항</div>
+        </div>
+      </div>
+      <div class="sub-summary">
+        <div class="ssc" style="border-left:3px solid var(--red)"><div class="ssc-val" style="color:var(--red)">2</div><div class="ssc-lbl">오늘 마감</div><div class="ssc-delta" style="color:var(--red)">즉시 처리 필요</div></div>
+        <div class="ssc" style="border-left:3px solid var(--amber)"><div class="ssc-val" style="color:var(--amber)">2</div><div class="ssc-lbl">이번 주 마감</div><div class="ssc-delta" style="color:var(--amber)">우선 처리</div></div>
+        <div class="ssc" style="border-left:3px solid var(--teal)"><div class="ssc-val" style="color:var(--teal)" id="completed-count">5</div><div class="ssc-lbl">오늘 완료</div><div class="ssc-delta" style="color:var(--teal)">처리 완료</div></div>
+        <div class="ssc" style="border-left:3px solid var(--g300)"><div class="ssc-val" style="color:var(--g500)">4</div><div class="ssc-lbl">총 미처리</div></div>
+      </div>
+      <!-- 오늘 마감 -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-header"><span class="panel-title" style="color:var(--red)">🔴 오늘 마감 — 즉시 처리</span></div>
+        <div class="task-item" id="task-1">
+          <div class="t-dot high"></div>
+          <div style="flex:1"><div class="t-title">최다은 예상퇴원 상담 후 부서장 보고서 제출</div><div class="t-meta">상담 완료 후 부서장 보고 필요 · 퇴원 현황 연동</div></div>
+          <div class="t-right"><span class="t-deadline">오늘 18:00</span><button class="t-done-btn" onclick="completeTask('task-1',this)">처리 완료</button></div>
+        </div>
+        <div class="task-item" id="task-2">
+          <div class="t-dot high"></div>
+          <div style="flex:1"><div class="t-title">4월 수업 진도 계획표 부서장 제출</div><div class="t-meta">중등부 전체 강사 공통 제출 사항</div></div>
+          <div class="t-right"><span class="t-deadline">오늘 20:00</span><button class="t-done-btn" onclick="completeTask('task-2',this)">처리 완료</button></div>
+        </div>
+      </div>
+      <!-- 이번 주 마감 -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-header"><span class="panel-title" style="color:var(--amber)">🟡 이번 주 마감</span></div>
+        <div class="task-item" id="task-3">
+          <div class="t-dot mid"></div>
+          <div style="flex:1"><div class="t-title">이수민 학부모 상담 콜백 (학습 방향 논의)</div><div class="t-meta">학부모 요청 — WT 점수 하락 관련 면담</div></div>
+          <div class="t-right"><span class="t-deadline" style="color:var(--amber)">04.05 (토)</span><button class="t-done-btn" onclick="completeTask('task-3',this)">처리 완료</button></div>
+        </div>
+        <div class="task-item" id="task-4">
+          <div class="t-dot mid"></div>
+          <div style="flex:1"><div class="t-title">신입생 박민준 진단평가 일정 확정</div><div class="t-meta">영재원 준비반 배치를 위한 진단평가 예약 필요</div></div>
+          <div class="t-right"><span class="t-deadline" style="color:var(--amber)">04.07 (월)</span><button class="t-done-btn" onclick="completeTask('task-4',this)">처리 완료</button></div>
+        </div>
+      </div>
+      <!-- 완료 목록 -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title" style="color:var(--teal)">✅ 오늘 완료된 업무</span></div>
+        <div class="task-item" style="opacity:.5"><div class="t-dot" style="background:var(--teal)"></div><div style="flex:1"><div class="t-title" style="text-decoration:line-through">중등 수학 심화반 수업 기록 제출</div><div class="t-meta">17:10 수업 기록 완료</div></div><div class="t-right"><span class="tag tag-teal">완료</span></div></div>
+        <div class="task-item" style="opacity:.5"><div class="t-dot" style="background:var(--teal)"></div><div style="flex:1"><div class="t-title" style="text-decoration:line-through">박민준 신입상담 진행 및 기록</div><div class="t-meta">10:30 상담 완료</div></div><div class="t-right"><span class="tag tag-teal">완료</span></div></div>
+        <div id="newly-completed"></div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: 수업 기록 ════ -->
+    <div id="page-record" style="display:none">
+      <div class="page-header">
+        <div class="page-title">수업 기록 — 중등 수학 기본반</div>
+        <div class="page-subtitle">월·수·목 15:30~17:00 · 4명 · 중1 방정식</div>
+      </div>
+      <div class="record-layout">
+        <!-- LEFT: 반 공통 입력 -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">🗂 반 공통 입력</span>
+            <span class="req">필수</span>
+          </div>
+          <div class="panel-body">
+            <div class="fg"><div class="fl">오늘 진도 — 단원 / 차시</div><input class="fi" type="text" id="c-unit" placeholder="예) 2단원 5차시 · 일차방정식의 활용"/></div>
+            <div class="fg"><div class="fl">교재 페이지</div><input class="fi" type="text" id="c-page" placeholder="예) 교재 p.58~64"/></div>
+            <div class="fg"><div class="fl">오늘 과제</div><input class="fi" type="text" id="c-hw" placeholder="예) 교재 p.65~70 연습문제 전체"/></div>
+            <div class="g2">
+              <div class="fg" style="margin-bottom:0"><div class="fl">제출 기한</div><input class="fi" type="text" id="c-due" placeholder="다음 수업 전"/></div>
+              <div class="fg" style="margin-bottom:0"><div class="fl">분량</div><input class="fi" type="text" id="c-amount" placeholder="15문제"/></div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="fg">
+              <div class="fl">
+                <label class="test-toggle-row" style="cursor:pointer"><input type="checkbox" id="test-yn" onchange="toggleTest(this)" style="width:14px;height:14px;margin-right:4px"/>테스트 있음</label>
+              </div>
+            </div>
+            <div id="test-body" style="display:none">
+              <div class="g2">
+                <div class="fg"><div class="fl">테스트 종류</div><select class="fsel" id="c-ttype"><option value="">선택</option><option>단원평가</option><option>월말고사</option><option>진단평가</option><option>쪽지시험</option><option>모의고사</option></select></div>
+                <div class="fg"><div class="fl">난이도</div><select class="fsel" id="c-tdiff"><option value="">선택</option><option>하</option><option>중하</option><option>중</option><option>중상</option><option>상</option></select></div>
+              </div>
+              <div class="fg"><div class="fl">테스트 범위</div><input class="fi" type="text" id="c-trange" placeholder="예) 1단원 ~ 2단원 전체"/></div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="fg"><div class="fl">반별 특이사항</div><textarea class="fta" id="c-note" rows="3" placeholder="반 전체 분위기, 공지사항, 다음 수업 준비사항 등..."></textarea></div>
+            <button class="common-save-btn" onclick="saveCommon()">공통 내용 저장</button>
+          </div>
+        </div>
+
+        <!-- RIGHT: 학생별 입력 -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">👤 학생별 입력</span>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-size:12px;color:var(--g500)">반 평균</div>
+              <div style="font-size:16px;font-weight:800;color:var(--blue)" id="cls-avg">—</div>
+              <span class="auto-bdg">자동계산</span>
+            </div>
+          </div>
+          <div class="student-table-header">
+            <div>학생</div><div>출결</div><div>과제 수행도</div><div>수업 참여도</div><div>점수</div><div>특이사항</div><div></div>
+          </div>
+
+          <!-- 학생 1 -->
+          <div class="student-row-wrap">
+            <div class="student-row">
+              <div class="student-name-cell"><div class="mini-avatar av-b">박지</div><div><div class="st-nm">박지훈</div><div class="st-ct">010-1234-5678</div></div></div>
+              <div>
+                <div class="mobile-label">출결</div>
+                <div class="att-pick">
+                  <button class="att-btn sp" onclick="selAtt(1,'p',this)" title="출석">출</button>
+                  <button class="att-btn" onclick="selAtt(1,'l',this)" title="지각">지</button>
+                  <button class="att-btn" onclick="selAtt(1,'a',this)" title="결석">결</button>
+                </div>
+              </div>
+              <div><div class="mobile-label">과제 수행도</div><select class="cell-select" id="hw-1"><option value="">선택</option><option>매우 우수</option><option>우수</option><option>보통</option><option>미흡</option><option>매우 미흡</option></select></div>
+              <div><div class="mobile-label">수업 참여도</div><select class="cell-select" id="pt-1"><option value="">선택</option><option>우수</option><option>보통</option><option>미흡</option></select></div>
+              <div><div class="mobile-label">점수</div><div class="score-cell"><input class="score-input" type="number" min="0" max="100" placeholder="—" id="sc-1" oninput="calcAvg()"/></div></div>
+              <div><div class="mobile-label">특이사항</div><input class="note-input" type="text" id="nt-1" placeholder="특이사항 입력..."/></div>
+              <div><button class="expand-btn" onclick="toggleConsultRow(1)" title="상담 입력">🗣</button></div>
+            </div>
+            <div class="student-consult-row" id="cr-1">
+              <button class="add-consult-inline" onclick="openConsultPanel('박지훈')">+ 이 학생 상담 입력</button>
+              <div id="st-consult-mini-1" style="display:inline-block;margin-left:10px;font-size:12px;color:var(--g500)"></div>
+            </div>
+          </div>
+
+          <!-- 학생 2 -->
+          <div class="student-row-wrap">
+            <div class="student-row">
+              <div class="student-name-cell"><div class="mini-avatar av-t">이수</div><div><div class="st-nm">이수민</div><div class="st-ct">010-2345-6789</div></div></div>
+              <div>
+                <div class="mobile-label">출결</div>
+                <div class="att-pick">
+                  <button class="att-btn" onclick="selAtt(2,'p',this)" title="출석">출</button>
+                  <button class="att-btn sl" onclick="selAtt(2,'l',this)" title="지각">지</button>
+                  <button class="att-btn" onclick="selAtt(2,'a',this)" title="결석">결</button>
+                </div>
+              </div>
+              <div><div class="mobile-label">과제 수행도</div><select class="cell-select" id="hw-2"><option value="">선택</option><option>매우 우수</option><option>우수</option><option>보통</option><option>미흡</option><option>매우 미흡</option></select></div>
+              <div><div class="mobile-label">수업 참여도</div><select class="cell-select" id="pt-2"><option value="">선택</option><option>우수</option><option>보통</option><option>미흡</option></select></div>
+              <div><div class="mobile-label">점수</div><div class="score-cell"><input class="score-input" type="number" min="0" max="100" placeholder="—" id="sc-2" oninput="calcAvg()"/></div></div>
+              <div><div class="mobile-label">특이사항</div><input class="note-input" type="text" id="nt-2" placeholder="특이사항 입력..."/></div>
+              <div><button class="expand-btn" onclick="toggleConsultRow(2)" title="상담 입력">🗣</button></div>
+            </div>
+            <div class="student-consult-row" id="cr-2">
+              <button class="add-consult-inline" onclick="openConsultPanel('이수민')">+ 이 학생 상담 입력</button>
+            </div>
+          </div>
+
+          <!-- 학생 3 -->
+          <div class="student-row-wrap">
+            <div class="student-row">
+              <div class="student-name-cell"><div class="mini-avatar av-a">최다</div><div><div class="st-nm">최다은</div><div class="st-ct">010-3456-7890</div></div></div>
+              <div>
+                <div class="mobile-label">출결</div>
+                <div class="att-pick">
+                  <button class="att-btn" onclick="selAtt(3,'p',this)" title="출석">출</button>
+                  <button class="att-btn" onclick="selAtt(3,'l',this)" title="지각">지</button>
+                  <button class="att-btn sa" onclick="selAtt(3,'a',this)" title="결석">결</button>
+                </div>
+              </div>
+              <div><div class="mobile-label">과제 수행도</div><select class="cell-select" id="hw-3"><option value="">선택</option><option>매우 우수</option><option>우수</option><option>보통</option><option>미흡</option><option>매우 미흡</option></select></div>
+              <div><div class="mobile-label">수업 참여도</div><select class="cell-select" id="pt-3"><option value="">선택</option><option>우수</option><option>보통</option><option>미흡</option></select></div>
+              <div><div class="mobile-label">점수</div><div class="score-cell"><input class="score-input" type="number" min="0" max="100" placeholder="—" id="sc-3" oninput="calcAvg()"/></div></div>
+              <div><div class="mobile-label">특이사항</div><input class="note-input" type="text" id="nt-3" placeholder="특이사항 입력..."/></div>
+              <div><button class="expand-btn" onclick="toggleConsultRow(3)" title="상담 입력">🗣</button></div>
+            </div>
+            <div class="student-consult-row" id="cr-3">
+              <button class="add-consult-inline" onclick="openConsultPanel('최다은')">+ 이 학생 상담 입력</button>
+            </div>
+          </div>
+
+          <!-- 학생 4 -->
+          <div class="student-row-wrap">
+            <div class="student-row">
+              <div class="student-name-cell"><div class="mini-avatar av-r">정민</div><div><div class="st-nm">정민서</div><div class="st-ct">010-4567-8901</div></div></div>
+              <div>
+                <div class="mobile-label">출결</div>
+                <div class="att-pick">
+                  <button class="att-btn sp" onclick="selAtt(4,'p',this)" title="출석">출</button>
+                  <button class="att-btn" onclick="selAtt(4,'l',this)" title="지각">지</button>
+                  <button class="att-btn" onclick="selAtt(4,'a',this)" title="결석">결</button>
+                </div>
+              </div>
+              <div><div class="mobile-label">과제 수행도</div><select class="cell-select" id="hw-4"><option value="">선택</option><option>매우 우수</option><option>우수</option><option>보통</option><option>미흡</option><option>매우 미흡</option></select></div>
+              <div><div class="mobile-label">수업 참여도</div><select class="cell-select" id="pt-4"><option value="">선택</option><option>우수</option><option>보통</option><option>미흡</option></select></div>
+              <div><div class="mobile-label">점수</div><div class="score-cell"><input class="score-input" type="number" min="0" max="100" placeholder="—" id="sc-4" oninput="calcAvg()"/></div></div>
+              <div><div class="mobile-label">특이사항</div><input class="note-input" type="text" id="nt-4" placeholder="특이사항 입력..."/></div>
+              <div><button class="expand-btn" onclick="toggleConsultRow(4)" title="상담 입력">🗣</button></div>
+            </div>
+            <div class="student-consult-row" id="cr-4">
+              <button class="add-consult-inline" onclick="openConsultPanel('정민서')">+ 이 학생 상담 입력</button>
+            </div>
+          </div>
+
+          <div class="record-panel-footer">
+            <div class="progress-info">
+              <span id="save-progress-txt" style="font-size:12px;color:var(--g500)">저장 전</span>
+              <div class="prog-mini"><div class="prog-mini-fill" id="prog-fill" style="width:0%"></div></div>
+            </div>
+            <button class="save-all-btn" onclick="saveAll()">전체 저장 완료 →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: 상담 ════ -->
+    <div id="page-consult" style="display:none">
+      <div class="page-header">
+        <div class="page-title">상담 관리</div>
+        <div class="page-subtitle">오늘 상담 이력 및 신규 상담 입력</div>
+      </div>
+      <div class="consult-layout">
+        <!-- LEFT: 상담 로그 -->
+        <div>
+          <!-- 샘플 로그 -->
+          <div class="consult-log-item">
+            <div class="ci-top"><span class="ci-type ct-new">신입상담</span><span class="ci-date">04.03 10:30</span></div>
+            <div class="ci-student">박민준 <span style="font-weight:400;color:var(--g500)">(신입)</span></div>
+            <div class="ci-cls">신규 등록 예정</div>
+            <div class="ci-content">초4 수학 전반 학습 수준 파악. 분수 개념 미숙, 연산 속도 다소 느림. 중등부 기본반 배치 예정.</div>
+            <div class="ci-resolve"><div class="ci-resolve-lbl">해결방안 / 다음 계획</div><div class="ci-resolve-text">다음 주 진단평가 후 반 배치 확정. 커리큘럼 안내 카톡 발송 예정.</div></div>
+          </div>
+          <div class="consult-log-item" style="border-left:3px solid var(--amber)">
+            <div class="ci-top"><span class="ci-type ct-exp">예상퇴원상담</span><span class="ci-date">04.03 11:00</span></div>
+            <div class="ci-student">최다은</div>
+            <div class="ci-cls">중등 수학 기본반</div>
+            <div class="ci-content">학부모 연락 — 최근 과제 부담으로 학원 거부 반응. 퇴원 고려 중.</div>
+            <div class="ci-resolve"><div class="ci-resolve-lbl">해결방안 / 다음 계획</div><div class="ci-resolve-text">과제량 일시 조정 제안. 2주 관찰 후 재상담. 참여도 개선 시 유지 가능.</div></div>
+            <div class="boss-badge">🔴 부서장 알림 전송됨</div>
+          </div>
+          <div id="new-consult-log"></div>
+        </div>
+
+        <!-- RIGHT: 신규 상담 입력 폼 -->
+        <div class="consult-form-sticky">
+          <div class="panel">
+            <div class="panel-header"><span class="panel-title">+ 새 상담 입력</span></div>
+            <div class="panel-body">
+              <div class="fg"><div class="fl">상담 종류</div>
+                <div class="ctype-grid">
+                  <button class="ctype-btn" id="ct-new" onclick="selConsultType('new')"><div class="ct-title">🆕 신입상담</div><div class="ct-sub">신규 등록 학생</div></button>
+                  <button class="ctype-btn" id="ct-reg" onclick="selConsultType('reg')"><div class="ct-title">💬 재원생 상담</div><div class="ct-sub">일반 학습/생활</div></button>
+                  <button class="ctype-btn" id="ct-urg" onclick="selConsultType('urg')"><div class="ct-title">🚨 긴급상담</div><div class="ct-sub">즉각 대응 필요</div></button>
+                  <button class="ctype-btn" id="ct-exp" onclick="selConsultType('exp')"><div class="ct-title">⚠️ 예상퇴원</div><div class="ct-sub">퇴원 징후 포착</div></button>
+                </div>
+                <button class="ctype-btn" id="ct-out" style="width:100%" onclick="selConsultType('out')"><div class="ct-title">🚪 퇴원상담</div><div class="ct-sub">퇴원 의사 확인 및 처리</div></button>
+              </div>
+
+              <!-- 예상퇴원/퇴원 전용 섹션 -->
+              <div id="cs-risk-section" style="display:none">
+                <div class="boss-alert-strip">⚠️ <strong>저장 즉시 부서장 알림이 전송됩니다.</strong> 상담 내용을 정확히 기록해 주세요.</div>
+                <div class="auto-data-block">
+                  <div class="auto-data-hd"><span>📊 학생 학원생활 데이터</span><span class="auto-bdg">자동 불러옴</span></div>
+                  <div class="auto-data-bd">
+                    <div class="data-row"><span class="dk">수업 참여도</span><span class="dv dv-warn">하 (3주 하락)</span></div>
+                    <div class="data-row"><span class="dk">과제 수행도</span><span class="dv dv-danger">미흡 (2회 미제출)</span></div>
+                    <div class="data-row"><span class="dk">WT 최근</span><span class="dv">58점 <span style="color:var(--g400);font-weight:400;font-size:11px">(반평균 74점)</span></span></div>
+                    <div class="data-row"><span class="dk">WT 추이</span><span class="dv dv-danger">76→68→58 하락</span></div>
+                    <div class="data-row"><span class="dk">재원 기간</span><span class="dv">8개월 (중기)</span></div>
+                  </div>
+                </div>
+                <div class="tips-block">
+                  <div class="tips-hd">💡 상담 진행 팁</div>
+                  <div class="tips-bd" id="cs-tips-body">
+                    <div class="tip-item"><div class="tip-n">1</div><div>과제량 부담을 인정하고 <strong>일시적 조정</strong>을 제안하세요.</div></div>
+                    <div class="tip-item"><div class="tip-n">2</div><div>WT 점수 하락을 <strong>방법론 문제</strong>로 접근하세요.</div></div>
+                    <div class="tip-item"><div class="tip-n">3</div><div>즉답 대신 <strong>재상담 일정</strong>으로 시간을 버세요.</div></div>
+                    <div class="tip-item"><div class="tip-n">4</div><div>학생의 <strong>강점을 먼저</strong> 언급하세요.</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="g2">
+                <div class="fg"><div class="fl">학생 이름</div><input class="fi" type="text" id="cs-name" placeholder="학생 이름"/></div>
+                <div class="fg"><div class="fl">상담 방식</div><select class="fsel" id="cs-method"><option>전화</option><option>대면</option><option>문자/카톡</option></select></div>
+              </div>
+              <div class="fg"><div class="fl">반</div><input class="fi" type="text" id="cs-class" placeholder="예) 중등 수학 기본반"/></div>
+              <div class="fg"><div class="fl">상담 내용 (학부모 이야기)</div><textarea class="fta" id="cs-content" rows="3" placeholder="학부모님이 말씀하신 내용, 주요 질문, 우려사항 등..."></textarea></div>
+              <div class="fg"><div class="fl">해결방안 / 다음 계획</div><textarea class="fta" id="cs-resolve" rows="3" placeholder="강사가 제안한 해결책, 합의된 조치, 다음 상담 일정 등..."></textarea></div>
+              <div class="fg"><div class="fl">다음 상담 예정일</div><input class="fi" type="date" id="cs-next"/></div>
+              <button class="consult-submit-btn" onclick="saveConsult()">상담 저장</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: 알림톡 ════ -->
+    <div id="page-kakao" style="display:none">
+      <div class="page-header"><div class="page-title">알림톡 전송</div><div class="page-subtitle">수업 기록을 바탕으로 학부모 카카오톡 알림톡을 발송합니다.</div></div>
+      <div class="kakao-layout">
+        <div class="panel kakao-student-list">
+          <div class="panel-header"><span class="panel-title">학생 선택</span></div>
+          <div class="panel-body" style="padding:0">
+            <div class="kakao-st-item active" onclick="selectKakao(1,this)">
+              <div class="mini-avatar av-b">박지</div>
+              <div><div class="kakao-st-item-name">박지훈</div><div class="kakao-st-item-meta">010-1234-5678</div></div>
+            </div>
+            <div class="kakao-st-item" onclick="selectKakao(2,this)">
+              <div class="mini-avatar av-t">이수</div>
+              <div><div class="kakao-st-item-name">이수민</div><div class="kakao-st-item-meta">010-2345-6789</div></div>
+            </div>
+            <div class="kakao-st-item" onclick="selectKakao(3,this)">
+              <div class="mini-avatar av-a">최다</div>
+              <div><div class="kakao-st-item-name">최다은</div><div class="kakao-st-item-meta">010-3456-7890</div></div>
+            </div>
+            <div class="kakao-st-item" onclick="selectKakao(4,this)">
+              <div class="mini-avatar av-r">정민</div>
+              <div><div class="kakao-st-item-name">정민서</div><div class="kakao-st-item-meta">010-4567-8901</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title" id="kakao-panel-label">박지훈 학부모님께</span><span class="auto-bdg">자동 생성</span></div>
+          <div class="panel-body">
+            <div class="msg-preview-area" id="kakao-msg-body"></div>
+            <div class="send-actions">
+              <button class="btn-send-one" id="send-one-btn" onclick="sendOne()">이 학생만 전송</button>
+            </div>
+            <div class="bulk-section">
+              <div class="bulk-title">전체 발송</div>
+              <div class="bulk-sub">오늘 기록된 전체 학생 학부모님께 한 번에 발송합니다.</div>
+              <button class="btn-send-all" onclick="sendAll()">💬 전체 학부모 알림톡 전송</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: 업무일지 ════ -->
+    <div id="page-journal" style="display:none">
+      <div class="page-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div><div class="page-title">업무일지</div><div class="page-subtitle">2025년 4월 3일 (목)</div></div>
+          <div id="j-status" style="font-size:12px;font-weight:700;color:var(--blue);padding:6px 14px;border:1px solid var(--blue-m);border-radius:var(--r);background:var(--blue-l)">작성 중</div>
+        </div>
+      </div>
+      <div class="journal-layout">
+        <!-- LEFT: 자동 요약 -->
+        <div>
+          <div class="auto-sum-card">
+            <div class="asm-header"><span class="asm-title">📋 오늘 수업 자동 요약</span><span class="asm-badge">자동 생성</span></div>
+            <div class="asm-body">
+              <strong>■ 중등 수학 기본반</strong> (15:30~17:00 · 4명)<br>
+              진도: 2단원 5차시 일차방정식의 활용 / 교재 p.58~64<br>
+              과제: 교재 p.65~70 연습문제 전체 (다음 수업 전 제출)<br>
+              테스트: 단원평가 · 중 난이도 · 1~2단원 범위<br>
+              반 평균: — 점<br><br>
+              <strong>■ 중등 수학 심화반</strong> (17:10~18:40 · 3명)<br>
+              진도: 3단원 2차시 연립방정식의 풀이 / 교재 p.82~88<br>
+              과제: 개념 노트 정리 + 연습문제 홀수번<br>
+              테스트: 없음
+            </div>
+          </div>
+          <div class="notice-card">
+            <div class="notice-title">⚠️ 특이사항 학생</div>
+            <div class="notice-body">
+              최다은 (기본반) — 결석, 보충 수업 필요<br>
+              이수민 (기본반) — 지각, 수업 집중도 저하 관찰<br>
+              <span style="color:var(--red);font-weight:700">최다은 예상퇴원상담 진행 — 부서장 알림 전송됨</span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><span class="panel-title">오늘 상담 요약</span></div>
+            <div class="panel-body" style="font-size:13px;color:var(--g700);line-height:1.7">
+              신입상담 1건 (박민준) · 예상퇴원상담 1건 (최다은)<br>
+              예상퇴원상담 — 과제 부담 조정 및 2주 관찰 합의
+            </div>
+          </div>
+        </div>
+        <!-- RIGHT: 입력 폼 -->
+        <div class="journal-form-sticky">
+          <div class="panel" style="margin-bottom:14px">
+            <div class="panel-header"><span class="panel-title">📣 오늘 보고 사항</span></div>
+            <div class="panel-body"><textarea class="fta" id="j-report" rows="4" placeholder="부서장 또는 원장님께 보고가 필요한 사항을 입력하세요.&#10;예) 특정 학생 학습 이탈 징후 / 학부모 민원 등"></textarea></div>
+          </div>
+          <div class="panel" style="margin-bottom:14px">
+            <div class="panel-header"><span class="panel-title">💡 건의사항</span></div>
+            <div class="panel-body"><textarea class="fta" id="j-suggest" rows="4" placeholder="수업 운영, 교재, 시설, 시스템 등 건의하고 싶은 내용을 자유롭게 입력하세요."></textarea></div>
+          </div>
+          <button class="submit-btn" onclick="submitJournal()">📋 업무일지 제출</button>
+          <button class="action-btn kakao" style="width:100%;border-radius:var(--r)" onclick="goPage('kakao')">💬 이어서 알림톡 전송하기</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-wrap -->
+</div><!-- /main -->
+
+<!-- 반 상세 모달 -->
+<div class="modal-bg" id="detail-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box">
+    <div class="modal-hd"><div class="modal-title" id="m-name"></div><button class="modal-close" onclick="document.getElementById('detail-modal').classList.remove('open')">✕</button></div>
+    <div class="modal-body">
+      <div class="modal-row"><span class="mk">수업 요일</span><span class="mv" id="m-days"></span></div>
+      <div class="modal-row"><span class="mk">수업 시간</span><span class="mv" id="m-time"></span></div>
+      <div class="modal-row"><span class="mk">수강 인원</span><span class="mv" id="m-count"></span></div>
+      <div class="modal-row"><span class="mk">대상 학년</span><span class="mv" id="m-grade"></span></div>
+      <div class="modal-row"><span class="mk">담당 강사</span><span class="mv" id="m-teacher"></span></div>
+      <div class="modal-row"><span class="mk">강의실</span><span class="mv" id="m-room"></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── NAVIGATION ──
+const pages=['dash','sb','new','withdraw','students','urgent','record','consult','kakao','journal'];
+const breadcrumbs={dash:'대시보드',sb:'학생부',new:'신입 현황',withdraw:'퇴원 현황',students:'관리학생수',urgent:'긴급업무처리',record:'수업 기록',consult:'상담 관리',kakao:'알림톡 전송',journal:'업무일지'};
+function goPage(id){
+  pages.forEach(p=>{
+    const el=document.getElementById('page-'+p);
+    if(el)el.style.display=p===id?'block':'none';
+    const nav=document.getElementById('nav-'+p);
+    if(nav)nav.classList.toggle('active',p===id);
+  });
+  document.getElementById('breadcrumb').innerHTML='홈 &rsaquo; <span>'+breadcrumbs[id]+'</span>';
+  if(id==='kakao')initKakao();
+  if(id==='sb'){currentSbClass='basic';currentSbStudentId=1;renderSbClassList();renderSbStudentList();renderSbStudent();renderSbData();}
+  window.scrollTo(0,0);
+}
+
+// ── URGENT TASKS ──
+let completedExtra=0;
+function completeTask(taskId,btn){
+  const item=document.getElementById(taskId);
+  const title=item.querySelector('.t-title').textContent;
+  btn.className='t-done-btn done';btn.textContent='✓ 완료';
+  item.style.opacity='.4';item.style.pointerEvents='none';
+  completedExtra++;
+  const countEl=document.getElementById('completed-count');
+  if(countEl)countEl.textContent=5+completedExtra;
+  document.getElementById('newly-completed').insertAdjacentHTML('beforeend',`<div class="task-item" style="opacity:.45"><div class="t-dot" style="background:var(--teal)"></div><div style="flex:1"><div class="t-title" style="text-decoration:line-through">${title}</div><div class="t-meta">방금 완료</div></div><div class="t-right"><span class="tag tag-teal">완료</span></div></div>`);
+  toast('✅ 업무가 완료 처리되었습니다');
+}
+
+// ════ 학생부 DATA ════
+const sbClasses={
+  basic:{name:'중등 수학 기본반',count:4,students:[1,2,3,4]},
+  adv:{name:'중등 수학 심화반',count:2,students:[5,6]},
+  gifted:{name:'영재원 준비반',count:2,students:[7,8]}
+};
+let currentSbClass='basic';
+
+const sbProfiles={
+  1:{name:'박지훈',grade:'중1',cls:'중등 수학 기본반',clsKey:'basic',teacher:'김수학',enroll:'2024.06.15',duration:'10개월',parent:'010-1234-5678',parentName:'박지훈 어머니',avatarCls:'av-b',avatarTxt:'박지',statusTag:'tag-teal',statusLbl:'양호',stats:{att:'97%',wt:'88점',hw:'우수',growth:'+14'},summary:{att:'97%',hw:'88%',wt:85,pt:'우수'},wtHistory:[{m:'24.09',s:74,a:72},{m:'24.10',s:76,a:73},{m:'24.11',s:79,a:74},{m:'24.12',s:80,a:75},{m:'25.01',s:82,a:76},{m:'25.02',s:85,a:77},{m:'25.03',s:88,a:78}],records:[{d:'04.03',att:'출석',prog:'2단원 5차시',hw:'우수',pt:'우수',score:88,note:''},{d:'04.01',att:'출석',prog:'2단원 4차시',hw:'매우우수',pt:'우수',score:null,note:''},{d:'03.27',att:'출석',prog:'2단원 3차시',hw:'우수',pt:'보통',score:null,note:'집중도 잠시 흔들림'},{d:'03.25',att:'출석',prog:'2단원 2차시',hw:'우수',pt:'우수',score:null,note:''},{d:'03.20',att:'출석',prog:'2단원 1차시',hw:'매우우수',pt:'우수',score:85,note:''}],
+    consultations:[
+      {d:'25.03.15',type:'재원생 상담',typeCls:'ct-reg',method:'전화',content:'수업 이해도가 매우 좋다고 칭찬해드렸고, 심화반 이동을 제안드렸습니다. 어머니는 "아이가 지금 반 친구들과 잘 지내고 있어서 옮기는 게 맞는지 모르겠다"고 하셨습니다.',resolve:'학부모 요청으로 기본반 유지. 기말고사 이후 심화반 전환 여부 재논의하기로 합의.'},
+      {d:'24.12.10',type:'재원생 상담',typeCls:'ct-reg',method:'대면',content:'어머니가 "아이가 요즘 수학 재미있어 한다"고 말씀하심. 겨울방학 특강 신청 의향 물어보셨습니다. 학습 진도 현황 설명드림.',resolve:'겨울방학 특강 신청 완료. 방학 중 선행 진도 나가기로 함.'}
+    ]
+  },
+  2:{name:'이수민',grade:'중1',cls:'중등 수학 기본반',clsKey:'basic',teacher:'김수학',enroll:'2024.11.10',duration:'5개월',parent:'010-2345-6789',parentName:'이수민 어머니',avatarCls:'av-t',avatarTxt:'이수',statusTag:'tag-amber',statusLbl:'주의',stats:{att:'82%',wt:'61점',hw:'미흡',growth:'-11'},summary:{att:'82%',hw:'38%',wt:66,pt:'보통'},wtHistory:[{m:'24.12',s:72,a:75},{m:'25.01',s:74,a:76},{m:'25.02',s:68,a:77},{m:'25.03',s:61,a:78}],records:[{d:'04.03',att:'지각',prog:'2단원 5차시',hw:'미흡',pt:'보통',score:61,note:'지각 15분, 수업 시작 부분 놓침'},{d:'04.01',att:'출석',prog:'2단원 4차시',hw:'미흡',pt:'보통',score:null,note:''},{d:'03.27',att:'결석',prog:'—',hw:'미제출',pt:'—',score:null,note:'미연락 결석'},{d:'03.25',att:'출석',prog:'2단원 2차시',hw:'보통',pt:'보통',score:null,note:''}],
+    consultations:[
+      {d:'25.03.20',type:'재원생 상담',typeCls:'ct-reg',method:'전화',content:'잦은 지각 관련 연락드렸습니다. 어머니는 "아이가 아침에 일어나기 힘들어 해서 어쩔 수 없다"고 하시며, 오히려 수업 시간 변경이 가능한지 물어보셨습니다. 시간 변경은 어렵다고 안내드림.',resolve:'지각 시 선생님께 개별 보충 요청하기로 합의. 어머니가 조금 더 신경 써주시기로 하심.'},
+      {d:'25.02.05',type:'재원생 상담',typeCls:'ct-reg',method:'전화',content:'WT 점수 하락 관련 연락드렸습니다. "학교 시험 준비로 바빴다"고 하셨고, "선생님만 믿겠다"고 하셨습니다. 과제 미제출 문제도 말씀드렸더니 "아이한테 얘기하겠다"고 하심.',resolve:'학교 시험 기간 이후 집중 보완 진행하기로. 가정에서 과제 확인 협조 요청.'},
+      {d:'25.01.15',type:'재원생 상담',typeCls:'ct-reg',method:'대면',content:'등록 후 첫 대면 상담. 어머니는 "수학을 아예 못하진 않는데 기초가 약한 것 같다"고 하심. 학원 주 3회 출석과 과제 관리를 중점으로 하겠다고 말씀드렸습니다. 성과에 대한 기대가 높아 보이셨습니다.',resolve:'매달 WT 결과 공유 및 진도 현황 알림톡 발송하기로 함.'}
+    ]
+  },
+  3:{name:'최다은',grade:'중1',cls:'중등 수학 기본반',clsKey:'basic',teacher:'김수학',enroll:'2024.08.05',duration:'8개월',parent:'010-3456-7890',parentName:'최다은 어머니',avatarCls:'av-a',avatarTxt:'최다',statusTag:'tag-red',statusLbl:'위험',stats:{att:'78%',wt:'58점',hw:'매우미흡',growth:'-18'},summary:{att:'78%',hw:'20%',wt:65,pt:'미흡'},wtHistory:[{m:'24.09',s:76,a:72},{m:'24.10',s:74,a:73},{m:'24.11',s:72,a:74},{m:'24.12',s:70,a:75},{m:'25.01',s:68,a:76},{m:'25.02',s:63,a:77},{m:'25.03',s:58,a:78}],records:[{d:'04.03',att:'결석',prog:'—',hw:'미제출',pt:'—',score:null,note:'무단결석. 학부모 연락 안 받음.'},{d:'04.01',att:'출석',prog:'2단원 4차시',hw:'매우미흡',pt:'미흡',score:null,note:'과제 또 미제출, 수업 집중 어려움'},{d:'03.27',att:'지각',prog:'2단원 3차시',hw:'미제출',pt:'미흡',score:null,note:''},{d:'03.25',att:'출석',prog:'2단원 2차시',hw:'미흡',pt:'미흡',score:null,note:''}],
+    consultations:[
+      {d:'25.04.03',type:'예상퇴원상담',typeCls:'ct-exp',method:'전화',content:'어머니가 먼저 연락 주셨습니다. "아이가 학원 가기 싫다고 하고, 과제가 너무 많다고 불만이 많다. 솔직히 이번 달 다니고 그만둘 것 같다"고 하셨습니다. 매우 단호한 말투였고, 설득에 다소 부정적인 반응이셨습니다.',resolve:'과제량 2주 일시 조정 제안. 아이와 직접 상담 후 재연락 드리기로 함. 부서장 즉시 보고.',bossAlert:true},
+      {d:'25.03.10',type:'재원생 상담',typeCls:'ct-reg',method:'전화',content:'"선생님, 저희 아이 요즘 과제를 통 안 해오는 것 같던데 왜 그런가요?"라며 연락하셨습니다. 아이의 과제 수행 현황 공유드림. 어머니는 "집에서 하는 건 보는데 분량이 너무 많은 것 아닌가요?"라고 하셨습니다.',resolve:'과제 분량 조정 검토하겠다고 말씀드림. 아이 개별 면담 후 피드백 공유.'},
+      {d:'25.01.20',type:'재원생 상담',typeCls:'ct-reg',method:'전화',content:'WT 점수 하락 알림 후 어머니 연락 주셨습니다. "학교 공부가 어렵다 보니 여기 과제까지 하기 힘들다고 하더라"고 하시면서 "과제를 조금 줄여주시면 안 되나요?"라고 요청하셨습니다.',resolve:'핵심 과제만 선별하여 제공하기로 조정. 2주 관찰 후 피드백 드리기로 함.'},
+      {d:'24.10.05',type:'재원생 상담',typeCls:'ct-reg',method:'대면',content:'수업 2개월 차 상담. 어머니는 "처음보다는 낫다고 하는데 솔직히 많이 올랐으면 좋겠다"고 하셨습니다. WT 점수 향상이 느리다고 느끼시는 것 같았습니다. "매달 점수가 얼마나 오르는지 보고 결정하겠다"고 하심.',resolve:'월별 성취 공유 강화. 매달 1회 카톡 성적표 공유 시작.'}
+    ]
+  },
+  4:{name:'정민서',grade:'중1',cls:'중등 수학 기본반',clsKey:'basic',teacher:'김수학',enroll:'2024.02.01',duration:'14개월',parent:'010-4567-8901',parentName:'정민서 아버지',avatarCls:'av-r',avatarTxt:'정민',statusTag:'tag-blue',statusLbl:'우수',stats:{att:'99%',wt:'79점',hw:'우수',growth:'+7'},summary:{att:'99%',hw:'91%',wt:77,pt:'우수'},wtHistory:[{m:'24.09',s:72,a:72},{m:'24.10',s:73,a:73},{m:'24.11',s:74,a:74},{m:'24.12',s:75,a:75},{m:'25.01',s:76,a:76},{m:'25.02',s:77,a:77},{m:'25.03',s:79,a:78}],records:[{d:'04.03',att:'출석',prog:'2단원 5차시',hw:'우수',pt:'우수',score:79,note:''},{d:'04.01',att:'출석',prog:'2단원 4차시',hw:'우수',pt:'우수',score:null,note:''},{d:'03.27',att:'출석',prog:'2단원 3차시',hw:'매우우수',pt:'우수',score:null,note:''},{d:'03.25',att:'출석',prog:'2단원 2차시',hw:'우수',pt:'우수',score:null,note:''}],
+    consultations:[
+      {d:'25.02.20',type:'재원생 상담',typeCls:'ct-reg',method:'전화',content:'아버지가 연락 주셔서 심화반 전환 가능 시점에 대해 물어보셨습니다. "이번 학기 중간고사까지만 기다리고, 그 이후엔 심화반으로 넘기고 싶다"고 하셨습니다. 매우 계획적이고 진로에 관심이 많은 편이셨습니다.',resolve:'기말고사 이후 심화반 전환 검토. 진단 테스트 후 배치 확정하기로 함.'}
+    ]
+  },
+  5:{name:'한지우',grade:'중2',cls:'중등 수학 심화반',clsKey:'adv',teacher:'김수학',enroll:'2023.09.01',duration:'20개월',parent:'010-5678-0001',parentName:'한지우 어머니',avatarCls:'av-g',avatarTxt:'한지',statusTag:'tag-teal',statusLbl:'최우수',stats:{att:'100%',wt:'94점',hw:'매우우수',growth:'+12'},summary:{att:'100%',hw:'97%',wt:91,pt:'우수'},wtHistory:[{m:'24.09',s:82,a:78},{m:'24.10',s:85,a:79},{m:'24.11',s:87,a:80},{m:'24.12',s:89,a:80},{m:'25.01',s:91,a:81},{m:'25.02',s:93,a:81},{m:'25.03',s:94,a:82}],records:[{d:'04.03',att:'출석',prog:'3단원 4차시',hw:'매우우수',pt:'우수',score:94,note:'오늘 특히 날카로운 풀이 보여줌'},{d:'04.01',att:'출석',prog:'3단원 3차시',hw:'매우우수',pt:'우수',score:null,note:''},{d:'03.27',att:'출석',prog:'3단원 2차시',hw:'매우우수',pt:'우수',score:null,note:''}],
+    consultations:[
+      {d:'25.03.05',type:'재원생 상담',typeCls:'ct-reg',method:'전화',content:'어머니가 "고등부 준비를 위해 어떻게 해야 하는지" 상담 요청. 현재 성취 수준 공유드리고 고등부 전환 시점 논의함.',resolve:'중3 진학 전 고등수학 선행 시작. 방학 특강 신청 예정.'}
+    ]
+  },
+  6:{name:'강준혁',grade:'중2',cls:'중등 수학 심화반',clsKey:'adv',teacher:'김수학',enroll:'2025.01.10',duration:'3개월',parent:'010-6789-0002',parentName:'강준혁 어머니',avatarCls:'av-p',avatarTxt:'강준',statusTag:'tag-amber',statusLbl:'주의',stats:{att:'88%',wt:'67점',hw:'보통',growth:'-1'},summary:{att:'88%',hw:'55%',wt:67,pt:'보통'},wtHistory:[{m:'25.01',s:68,a:78},{m:'25.02',s:67,a:79},{m:'25.03',s:67,a:80}],records:[{d:'04.03',att:'출석',prog:'3단원 4차시',hw:'보통',pt:'보통',score:67,note:''},{d:'04.01',att:'출석',prog:'3단원 3차시',hw:'미흡',pt:'보통',score:null,note:''},{d:'03.27',att:'결석',prog:'—',hw:'—',pt:'—',score:null,note:'사전 연락 없는 결석'}],
+    consultations:[
+      {d:'25.03.15',type:'재원생 상담',typeCls:'ct-reg',method:'전화',content:'반 적응 관련 상담. 어머니가 "심화반이 애한테 너무 어려운 건 아닌지 걱정된다"고 하심. 현재 성취 수준 솔직하게 공유드림.',resolve:'한 달 더 지켜보고 기본반 재배치 여부 검토하기로.'}
+    ]
+  },
+  7:{name:'이나연',grade:'중1',cls:'영재원 준비반',clsKey:'gifted',teacher:'김수학',enroll:'2025.04.01',duration:'1개월',parent:'010-7890-0003',parentName:'이나연 어머니',avatarCls:'av-t',avatarTxt:'이나',statusTag:'tag-blue',statusLbl:'우수',stats:{att:'100%',wt:'84점',hw:'우수',growth:'신규'},summary:{att:'100%',hw:'85%',wt:84,pt:'우수'},wtHistory:[{m:'25.04',s:84,a:80}],records:[{d:'04.03',att:'출석',prog:'창의수학 1단원',hw:'우수',pt:'우수',score:84,note:'신입생, 매우 빠른 적응'}],
+    consultations:[
+      {d:'25.04.01',type:'신입상담',typeCls:'ct-new',method:'대면',content:'신입 상담. 어머니는 "영재원 대비가 목표"라며 적극적으로 질문하셨습니다. 학원 커리큘럼, 수업 방식, 교재 등 상세히 물어보심. 결과에 대한 기대치가 매우 높아 보임.',resolve:'월별 진도 현황과 영재원 대비 체크리스트 공유하기로 약속.'}
+    ]
+  },
+  8:{name:'정태양',grade:'중2',cls:'영재원 준비반',clsKey:'gifted',teacher:'김수학',enroll:'2025.03.28',duration:'1개월',parent:'010-8901-0004',parentName:'정태양 아버지',avatarCls:'av-a',avatarTxt:'정태',statusTag:'tag-teal',statusLbl:'양호',stats:{att:'100%',wt:'91점',hw:'우수',growth:'신규'},summary:{att:'100%',hw:'90%',wt:91,pt:'우수'},wtHistory:[{m:'25.04',s:91,a:80}],records:[{d:'04.03',att:'출석',prog:'창의수학 1단원',hw:'우수',pt:'우수',score:91,note:''}],
+    consultations:[]
+  }
+};
+let currentSbStudentId=1;
+
+// ── Class Selection ──
+function renderSbClassList(){
+  // Handled statically in HTML; just update active state
+  document.querySelectorAll('.cls-si').forEach(el=>el.classList.remove('active'));
+  const target=document.getElementById('cls-'+currentSbClass);
+  if(target)target.classList.add('active');
+}
+
+function selectSbClass(clsKey,el){
+  currentSbClass=clsKey;
+  document.querySelectorAll('.cls-si').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  // Select first student of that class
+  const studs=sbClasses[clsKey].students;
+  currentSbStudentId=studs[0];
+  renderSbStudentList();renderSbStudent();renderSbData();
+}
+
+function renderSbStudentList(){
+  const clsData=sbClasses[currentSbClass];
+  document.getElementById('sb-class-count').textContent=clsData.count+'명';
+  const studs=clsData.students;
+  const avCls=['av-b','av-t','av-a','av-r','av-g','av-p'];
+  const html=studs.map((id,i)=>{
+    const p=sbProfiles[id];
+    return`<div class="sb-st-item ${id===currentSbStudentId?'active':''}" id="sb-item-${id}" onclick="selectSbStudent(${id},this)">
+      <div class="mini-avatar ${p.avatarCls}">${p.avatarTxt}</div>
+      <div style="flex:1;overflow:hidden">
+        <div class="sb-st-name">${p.name}</div>
+        <div class="sb-st-info">${p.grade} · ${p.duration} · 상담 ${p.consultations.length}건</div>
+      </div>
+      <span class="sb-st-badge ${p.statusTag}">${p.statusLbl}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('sb-student-list').innerHTML=html;
+}
+
+function selectSbStudent(id,el){
+  currentSbStudentId=id;
+  document.querySelectorAll('.sb-st-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  renderSbStudent();renderSbData();
+}
+
+function renderSbStudent(){
+  const p=sbProfiles[currentSbStudentId];
+  document.getElementById('sb-avatar').className='sb-big-avatar '+p.avatarCls;
+  document.getElementById('sb-avatar').textContent=p.avatarTxt;
+  document.getElementById('sb-name').textContent=p.name;
+  document.getElementById('sb-meta').textContent=p.grade+' · '+p.cls+' · 담당: '+p.teacher;
+  document.getElementById('sb-enroll').textContent='등록일 '+p.enroll;
+  document.getElementById('sb-duration').textContent='재원 '+p.duration;
+  const statsEl=document.getElementById('sb-stats');
+  statsEl.innerHTML=`
+    <div class="sb-hs"><div class="sb-hs-val" style="color:var(--teal)">${p.stats.att}</div><div class="sb-hs-lbl">출석률</div></div>
+    <div class="sb-hs"><div class="sb-hs-val" style="color:var(--blue)">${p.stats.wt}</div><div class="sb-hs-lbl">최근 WT</div></div>
+    <div class="sb-hs"><div class="sb-hs-val" style="color:var(--${p.stats.hw==='우수'||p.stats.hw==='매우우수'?'teal':'red'})">${p.stats.hw}</div><div class="sb-hs-lbl">과제수행</div></div>
+    <div class="sb-hs"><div class="sb-hs-val" style="color:var(--${String(p.stats.growth).startsWith('+')?'teal':p.stats.growth==='신규'?'blue':'red'})">${p.stats.growth}</div><div class="sb-hs-lbl">WT 성장</div></div>`;
+  document.getElementById('ai-chat-area').innerHTML='<div class="ai-msg assistant">안녕하세요! <strong>'+p.name+'</strong> 학생의 데이터가 로드되었습니다. 빠른 질문 버튼을 누르거나 직접 질문해 주세요.</div>';
+  // Hide previous analysis
+  const ar=document.getElementById('analysis-result');
+  if(ar)ar.classList.remove('show');
+  const ab=document.getElementById('analysis-btn');
+  if(ab){ab.disabled=false;ab.innerHTML='🔍 학부모 성향 분석 실행';}
+}
+
+function renderSbData(){
+  const p=sbProfiles[currentSbStudentId];
+  const attColor=parseFloat(p.summary.att)>=90?'var(--teal)':'var(--amber)';
+  const hwColor=parseFloat(p.summary.hw)>=70?'var(--blue)':'var(--red)';
+  const wtColor=p.summary.wt>=80?'var(--teal)':p.summary.wt>=70?'var(--blue)':'var(--amber)';
+  const ptColor=p.summary.pt==='우수'?'var(--teal)':p.summary.pt==='보통'?'var(--blue)':'var(--red)';
+  document.getElementById('ss-att').textContent=p.summary.att;document.getElementById('ss-att').style.color=attColor;
+  document.getElementById('ss-hw').textContent=p.summary.hw;document.getElementById('ss-hw').style.color=hwColor;
+  document.getElementById('ss-wt').textContent=p.summary.wt+'점';document.getElementById('ss-wt').style.color=wtColor;
+  document.getElementById('ss-pt').textContent=p.summary.pt;document.getElementById('ss-pt').style.color=ptColor;
+
+  // WT Chart
+  const chartHtml=p.wtHistory.map(row=>{
+    const pct=Math.round(row.s/100*100);
+    const aPct=Math.round((row.a||75)/100*100);
+    const barColor=row.s>=80?'var(--teal)':row.s>=70?'var(--blue)':row.s>=60?'var(--amber)':'var(--red)';
+    return`<div class="wt-bar-row">
+      <span class="wt-month">${row.m}</span>
+      <div class="wt-bar-track">
+        <div class="wt-bar-fill" style="width:${pct}%;background:${barColor}">${row.s}
+          <div class="wt-avg-line" style="left:${aPct}%"></div>
+        </div>
+      </div>
+      <span class="wt-score-label" style="color:${barColor}">${row.s}점</span>
+      <span class="wt-avg-label">평균 ${row.a||75}점</span>
+    </div>`;
+  }).join('');
+  document.getElementById('wt-chart-body').innerHTML=chartHtml;
+
+  // Records table
+  const hwColor2=(v)=>v==='매우우수'?'var(--teal)':v==='우수'?'var(--blue)':v==='보통'?'var(--g500)':v==='미흡'?'var(--amber)':v==='미제출'?'var(--red)':'var(--red)';
+  const attPill=(v)=>v==='출석'?'tag-teal':v==='지각'?'tag-amber':'tag-red';
+  const tbody=p.records.map(r=>`<tr>
+    <td>${r.d}</td>
+    <td><span class="tag ${attPill(r.att)}">${r.att}</span></td>
+    <td>${r.prog}</td>
+    <td style="font-weight:700;color:${hwColor2(r.hw)}">${r.hw}</td>
+    <td style="font-weight:700;color:${hwColor2(r.pt)}">${r.pt}</td>
+    <td>${r.score!==null&&r.score!==undefined?'<strong style="color:var(--blue)">'+r.score+'점</strong>':'—'}</td>
+    <td style="font-size:12px;color:var(--g500)">${r.note||'—'}</td>
+  </tr>`).join('');
+  document.getElementById('sb-rec-tbody').innerHTML=tbody;
+
+  // Consultation history (in 학습현황 tab)
+  renderConsultHistory();
+  // Full consultation list (in 상담기록 tab)
+  renderFullConsultList();
+
+  // Reports
+  renderMonthlyReport();renderPeriodReport();updatePeriodLabel();
+}
+
+// ── Consultation rendering ──
+function renderConsultHistory(){
+  const p=sbProfiles[currentSbStudentId];
+  if(!p.consultations.length){
+    document.getElementById('sb-consult-history').innerHTML='<div style="font-size:13px;color:var(--g400);padding:12px 0">상담 이력 없음</div>';
+    return;
+  }
+  const html=p.consultations.slice(0,2).map(c=>`
+    <div style="background:var(--white);border-radius:var(--r);border:1px solid var(--g150);padding:11px 14px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+        <span class="ci-type ${c.typeCls}">${c.type}</span>
+        <span style="font-size:11px;color:var(--g400)">${c.d} · ${c.method||'전화'}</span>
+        ${c.bossAlert?'<span style="font-size:11px;font-weight:700;color:var(--red);margin-left:auto">🔴 부서장 알림</span>':''}
+      </div>
+      <div style="font-size:13px;color:var(--g700);line-height:1.55">${c.content.slice(0,80)}${c.content.length>80?'…':''}</div>
+    </div>`).join('');
+  const more=p.consultations.length>2?`<button class="btn-preset" onclick="switchSbTab('consult')" style="font-size:12px;padding:6px 12px">전체 ${p.consultations.length}건 보기 →</button>`:'';
+  document.getElementById('sb-consult-history').innerHTML=html+more;
+}
+
+function renderFullConsultList(){
+  const p=sbProfiles[currentSbStudentId];
+  document.getElementById('consult-count-info').textContent=
+    p.consultations.length?`총 ${p.consultations.length}건 · ${p.parentName}`:'상담 이력이 없습니다';
+  if(!p.consultations.length){
+    document.getElementById('consult-full-list').innerHTML=`
+      <div class="no-consult-placeholder">
+        <div class="no-consult-icon">🗂</div>
+        <div class="no-consult-text">${p.name} 학생의 상담 이력이 없습니다</div>
+      </div>`;
+    const btn=document.getElementById('analysis-btn');
+    if(btn){btn.disabled=true;btn.innerHTML='상담 이력이 없어 분석할 수 없습니다';}
+    return;
+  }
+  const html=p.consultations.map((c,i)=>`
+    <div class="consult-full-item">
+      <div class="cfi-top">
+        <span class="cfi-num">${i+1}</span>
+        <span class="ci-type ${c.typeCls}">${c.type}</span>
+        <span style="font-size:12px;color:var(--g500)">${c.d}</span>
+        <span style="font-size:11px;color:var(--g400);background:var(--g100);padding:2px 8px;border-radius:10px">${c.method||'전화'}</span>
+        ${c.bossAlert?'<span style="font-size:11px;font-weight:700;color:var(--red);margin-left:auto;display:flex;align-items:center;gap:3px">🔴 부서장 알림 전송</span>':''}
+      </div>
+      <div class="cfi-content">${c.content}</div>
+      ${c.resolve?`<div class="cfi-resolve"><div class="cfi-resolve-lbl">해결방안 · 다음 계획</div><div class="cfi-resolve-text">${c.resolve}</div></div>`:''}
+    </div>`).join('');
+  document.getElementById('consult-full-list').innerHTML=html;
+  const btn=document.getElementById('analysis-btn');
+  if(btn){btn.disabled=false;btn.innerHTML='🔍 학부모 성향 분석 실행';}
+}
+
+// ── Parent Personality Analysis ──
+async function runParentAnalysis(){
+  const p=sbProfiles[currentSbStudentId];
+  if(!p.consultations.length){toast('상담 이력이 없습니다');return;}
+  const btn=document.getElementById('analysis-btn');
+  btn.disabled=true;btn.innerHTML='⏳ AI 분석 중...';
+  document.getElementById('analysis-result').classList.remove('show');
+  // Build consultation context
+  const consultText=p.consultations.map((c,i)=>
+    `[상담 ${i+1}] ${c.d} (${c.type})\n학부모 내용: ${c.content}\n해결방안: ${c.resolve||'없음'}`
+  ).join('\n\n');
+  const systemPrompt=`당신은 학원 부서장을 돕는 학부모 상담 분석 AI입니다.
+주어진 상담 이력을 분석하여 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 절대 포함하지 마세요.
+{
+  "demands": "핵심 요구사항 2-3가지를 한 문단으로",
+  "personality_tags": ["태그1","태그2","태그3"],
+  "personality_desc": "학부모 성향을 3-4문장으로 구체적으로 서술",
+  "patterns": "반복되는 패턴과 주요 관심사를 2-3가지 항목으로",
+  "cautions": ["유의사항1","유의사항2","유의사항3"],
+  "approach": "다음 상담에서 효과적인 접근법을 구체적으로 2-3문장으로"
+}
+학생: ${p.name} / 학부모: ${p.parentName}`;
+  try{
+    const apiKey=savedApiKey||document.getElementById('ai-key-input')?.value?.trim()||'';
+    const headers={'Content-Type':'application/json','anthropic-version':'2023-06-01'};
+    if(apiKey)headers['x-api-key']=apiKey;
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers,
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,
+        system:systemPrompt,messages:[{role:'user',content:'다음 상담 이력을 분석해주세요:\n\n'+consultText}]})
+    });
+    const data=await res.json();
+    const raw=data.content?.[0]?.text||'{}';
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const result=JSON.parse(clean);
+    renderAnalysisResult(p,result);
+  }catch(e){
+    // Fallback: use rule-based analysis
+    renderAnalysisResult(p,buildFallbackAnalysis(p));
+  }
+  btn.disabled=false;btn.innerHTML='🔄 다시 분석';
+}
+
+function buildFallbackAnalysis(p){
+  const types=p.consultations.map(c=>c.type);
+  const hasExp=types.some(t=>t.includes('퇴원'));
+  const contents=p.consultations.map(c=>c.content).join(' ');
+  const hasHwConcern=contents.includes('과제');
+  const hasScoreConcern=contents.includes('점수')||contents.includes('성적');
+  const tags=[];
+  if(hasExp)tags.push('퇴원 위험');
+  if(hasHwConcern)tags.push('과제 민감');
+  if(hasScoreConcern)tags.push('성과 중시');
+  if(p.consultations.length>=3)tags.push('적극 소통형');
+  tags.push(contents.includes('바쁘다')||contents.includes('어렵다')?'시간 제약':'협조적');
+  return{
+    demands:hasHwConcern?'과제 부담 경감을 지속적으로 요청하고 있습니다. 수업 시간 조정에 대한 관심도 보였습니다. 자녀의 학습 성과보다 생활 스트레스에 민감하게 반응하는 경향이 있습니다.'
+      :'자녀의 학습 성과와 성적 향상에 높은 관심을 보이고 있습니다. 정기적인 진도 현황 공유와 성취 확인을 중요하게 생각합니다.',
+    personality_tags:tags.length?tags:['관찰 중','상담 이력 부족'],
+    personality_desc:hasExp?'퇴원을 고려할 만큼 자녀의 학습 스트레스에 민감하게 반응하는 편입니다. 강사에 대한 신뢰보다는 자녀의 의견을 우선시하는 경향이 있어 설득이 쉽지 않을 수 있습니다. 단호한 말투를 사용하지만, 제안에 여지를 남기는 경우가 있어 적절한 해결책 제시가 중요합니다.'
+      :'전반적으로 학원에 대한 신뢰가 높고 협조적인 편입니다. 상담 시 경청하는 태도를 보이며, 강사의 제안을 잘 수용하는 특징이 있습니다.',
+    patterns:p.consultations.length>=2?'1. 과제 또는 성적 이슈 발생 시 직접 연락하는 능동적 소통 패턴\n2. 자녀의 불편함이나 스트레스를 빠르게 전달하는 경향\n3. 즉각적인 해결책보다 공감과 경청을 먼저 기대하는 패턴'
+      :'상담 이력이 적어 패턴 분석이 제한적입니다. 추가 상담 이력 축적이 필요합니다.',
+    cautions:hasExp?['퇴원 의사를 직접 표현한 적이 있어 매우 조심스러운 접근 필요','설득보다 공감이 선행되어야 함. 즉각적인 반박은 역효과','과제 관련 언급 시 분량·난이도 조정 옵션을 먼저 제시']
+      :['성과 기대치가 높아 점수 하락 시 민감할 수 있음','약속한 진도 공유나 연락을 반드시 이행해야 신뢰 유지 가능','자녀에게 직접 확인 후 연락 오는 경우가 많아 아이와의 관계 관리 중요'],
+    approach:hasExp?'먼저 자녀의 어려움에 공감하는 말로 시작하고, 즉시 해결책(과제 조정, 개별 지도 강화)을 제시하세요. 퇴원 결정을 강요하지 말고 "2주만 더 지켜봐 주세요"로 시간을 확보하세요.'
+      :'정기적인 성취 공유를 통해 신뢰를 유지하고, 학습 목표와 현재 진행 상황을 데이터 기반으로 설명하세요. 다음 목표를 함께 설정하면 좋습니다.'
+  };
+}
+
+function renderAnalysisResult(p,r){
+  document.getElementById('analysis-student-name').textContent=p.parentName;
+  document.getElementById('as-demands').innerHTML=r.demands||'—';
+  const tagColors=['tag-blue','tag-amber','tag-red','tag-teal','tag-purple','tag-gray'];
+  const tagsHtml=(r.personality_tags||[]).map((t,i)=>`<span class="personality-tag ${tagColors[i%tagColors.length]}">${t}</span>`).join('');
+  document.getElementById('as-personality-tags').innerHTML=tagsHtml;
+  document.getElementById('as-personality-desc').innerHTML=(r.personality_desc||'').replace(/\n/g,'<br>');
+  document.getElementById('as-patterns').innerHTML=(r.patterns||'').replace(/\n/g,'<br>');
+  const cautionsHtml=(r.cautions||[]).map(c=>`<li class="caution-item"><div class="caution-dot" style="background:var(--amber)"></div><span>${c}</span></li>`).join('');
+  document.getElementById('as-cautions').innerHTML=cautionsHtml;
+  document.getElementById('as-approach').innerHTML=(r.approach||'').replace(/\n/g,'<br>');
+  document.getElementById('analysis-result').classList.add('show');
+}
+
+function switchSbTab(t){
+  ['stat','consult','ai','monthly','period'].forEach(x=>{
+    const btn=document.getElementById('sbt-'+x);
+    const body=document.getElementById('sbtc-'+x);
+    if(btn)btn.classList.toggle('active',x===t);
+    if(body)body.classList.toggle('active',x===t);
+  });
+}
+
+function setPreset(months,btn){
+  document.querySelectorAll('.btn-preset').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const to=new Date();
+  const from=new Date();
+  if(months>0)from.setMonth(from.getMonth()-months);
+  else from.setFullYear(from.getFullYear()-5);
+  document.getElementById('sb-date-from').value=from.toISOString().split('T')[0];
+  document.getElementById('sb-date-to').value=to.toISOString().split('T')[0];
+  renderSbData();
+}
+
+function updatePeriodLabel(){
+  const f=document.getElementById('sb-date-from').value;
+  const t=document.getElementById('sb-date-to').value;
+  const el=document.getElementById('period-range-label');
+  if(el)el.textContent=f.replace(/-/g,'.')+' ~ '+t.replace(/-/g,'.');
+}
+
+// ── Monthly Report Generator ──
+function renderMonthlyReport(){
+  const p=sbProfiles[currentSbStudentId];
+  const sel=document.getElementById('report-month-sel');
+  const monthLabel=sel?sel.options[sel.selectedIndex].text:'2025년 3월';
+  const lastWt=p.wtHistory[p.wtHistory.length-1];
+  const prevWt=p.wtHistory.length>1?p.wtHistory[p.wtHistory.length-2]:lastWt;
+  const diff=lastWt.s-prevWt.s;
+  const diffStr=(diff>=0?'+':'')+diff+'점';
+  const report=`<h3>📌 ${monthLabel} 학습 월간 보고서</h3>` +
+`학생명: ${p.name}   학년: ${p.grade}   담당 반: ${p.cls}
+담당 강사: ${p.teacher}   재원 기간: ${p.duration}
+보고 생성일: ${new Date().toLocaleDateString('ko-KR')}
+
+<h3>1. 출결 현황</h3>` +
+`출석률 ${p.summary.att} (이번 달 수업 기준)
+${parseFloat(p.summary.att)>=95?'출석 상태 매우 양호. 한 번도 지각·결석 없이 성실하게 등원하였습니다.':parseFloat(p.summary.att)>=85?'전반적으로 출석은 유지되었으나 지각 또는 결석이 일부 있었습니다. 지속적인 관찰이 필요합니다.':'출석률이 낮아 학습 연속성에 영향을 주고 있습니다. 학부모 상담을 통한 원인 파악이 필요합니다.'}
+
+<h3>2. 학습 성취 (WT 점수)</h3>` +
+`이번 달 WT 점수: ${lastWt.s}점  (반 평균: ${lastWt.a}점 / 전월比 ${diffStr})
+${diff>=3?'점수가 상승하고 있어 학습 성과가 긍정적으로 나타나고 있습니다.':diff>=-2?'점수가 안정적으로 유지되고 있습니다.':'점수 하락이 관찰됩니다. 원인 분석 및 보완 수업이 필요합니다.'}
+
+<h3>3. 과제 수행도</h3>` +
+`과제 수행도 평균: ${p.summary.hw} (우수 이상 비율 ${p.summary.hw}%)
+${parseFloat(p.summary.hw)>=80?'과제를 성실히 완료하여 자기주도 학습 습관이 잘 형성되어 있습니다.':parseFloat(p.summary.hw)>=60?'과제 수행이 대체로 이루어지고 있으나 일부 미흡한 경우가 있었습니다.':'과제 미제출 또는 불성실 제출 횟수가 많아 학습 습관 개선이 시급합니다.'}
+
+<h3>4. 수업 참여도</h3>` +
+`참여도 평가: ${p.summary.pt}
+${p.summary.pt==='우수'?'수업 중 집중도와 발표·질문 참여가 활발하여 수업 효율이 높습니다.':p.summary.pt==='보통'?'수업 참여는 이루어지고 있으나 적극성을 더욱 이끌어낼 필요가 있습니다.':'수업 집중도가 낮아 학습 효율에 영향을 주고 있습니다. 개별 지도가 필요합니다.'}
+
+<h3>5. 강사 종합 의견</h3>` +
+`${p.name} 학생은 이번 달 ${parseFloat(p.summary.att)>=90&&lastWt.s>=75?'전반적으로 안정적인 학습 흐름을 유지하였습니다. 꾸준한 성취를 보여주고 있으며, 다음 단계 학습으로의 연계가 자연스럽게 이루어질 것으로 기대됩니다.':lastWt.s<65||parseFloat(p.summary.att)<85?'학습 전반에 걸쳐 개선이 필요한 상황입니다. 학부모님과의 긴밀한 소통을 통해 학습 동기 회복을 최우선으로 진행할 예정입니다.':'학습 태도와 성취 측면에서 일부 개선 포인트가 있습니다. 강사가 개별 지도를 강화하여 안정적인 성장을 이끌어가겠습니다.'}
+
+────────────────────────────
+케이스수학과학학원 · 담당: ${p.teacher}`;
+  document.getElementById('monthly-report-box').innerHTML=report;
+}
+
+// ── Period Report Generator ──
+function renderPeriodReport(){
+  const p=sbProfiles[currentSbStudentId];
+  const f=document.getElementById('sb-date-from')?.value.replace(/-/g,'.')||'2025.01.01';
+  const t=document.getElementById('sb-date-to')?.value.replace(/-/g,'.')||'2025.04.03';
+  const wtFirst=p.wtHistory[0];const wtLast=p.wtHistory[p.wtHistory.length-1];
+  const wtDiff=wtLast.s-wtFirst.s;
+  const report=`<h3>📋 기간별 학습 종합 보고서</h3>` +
+`학생명: ${p.name}   학년: ${p.grade}   담당 반: ${p.cls}
+조회 기간: ${f} ~ ${t}   담당 강사: ${p.teacher}
+보고 생성일: ${new Date().toLocaleDateString('ko-KR')}
+
+<h3>1. 기간 개요</h3>` +
+`재원 기간: ${p.duration}  /  조회 기간 내 수업 횟수: ${p.records.length}회
+출석률: ${p.summary.att}  /  과제 수행도 평균: ${p.summary.hw} 이상 비율 ${p.summary.hw}%
+수업 참여도: ${p.summary.pt}
+
+<h3>2. WT 점수 성장 분석</h3>` +
+`기간 초 점수: ${wtFirst.s}점 → 기간 말 점수: ${wtLast.s}점
+총 변화: ${wtDiff>=0?'+':''}${wtDiff}점  /  기간 평균: ${p.summary.wt}점
+${p.wtHistory.map(w=>`  ${w.m}: ${w.s}점 (반평균 ${w.a}점)`).join('\n')}
+
+${wtDiff>=10?'장기간에 걸쳐 꾸준한 점수 상승을 보이고 있습니다. 학습 내용의 누적 효과가 나타나고 있으며 앞으로의 성장이 기대됩니다.':wtDiff>=-5?'점수가 안정적으로 유지되고 있습니다. 기복 없이 일관된 실력을 보여주고 있습니다.':'기간 내 점수 하락이 관찰됩니다. 단원별 이해도 점검과 부진 부분 재지도가 필요합니다.'}
+
+<h3>3. 과제 및 참여도 분석</h3>` +
+`${p.records.filter(r=>r.hw==='우수'||r.hw==='매우우수').length}/${p.records.length}회 우수 이상 과제 제출
+참여도 우수 비율: 약 ${p.summary.pt==='우수'?'80':'50'}%
+
+<h3>4. 상담 이력 요약</h3>` +
+(p.consultations.length?p.consultations.map(c=>`  - ${c.d} [${c.type}]: ${c.content.slice(0,40)}...`).join('\n'):'  상담 이력 없음')+`
+
+<h3>5. 종합 평가 및 다음 단계 제안</h3>` +
+`${p.name} 학생의 ${f}~${t} 학습 현황을 종합하면, ${wtLast.s>=80?'전반적으로 우수한 학습 성과를 보이고 있습니다. 현재 반에서의 학습이 안정적으로 이루어지고 있으며, 추후 심화 과정으로의 전환을 검토해볼 시점입니다.':wtLast.s>=65?'학습이 이루어지고 있으나 일부 취약 단원에 대한 집중 보완이 필요합니다. 현재 수준을 유지하면서 부진 부분을 점진적으로 개선해 나가는 것을 권장합니다.':'학습 전반에 걸쳐 개선이 필요합니다. 기초 개념부터 체계적인 재정리와 학부모 협력이 요구되는 시점입니다.'}
+
+────────────────────────────
+케이스수학과학학원 · 담당: ${p.teacher}`;
+  document.getElementById('period-report-box').innerHTML=report;
+  updatePeriodLabel();
+}
+
+// ── AI Chat ──
+let savedApiKey='';
+function saveApiKey(){
+  const k=document.getElementById('ai-key-input').value.trim();
+  if(k){savedApiKey=k;toast('API Key 저장됨');document.getElementById('ai-key-bar').style.opacity='.6';}
+}
+function askPreset(q){
+  document.getElementById('ai-user-input').value=q;
+  sendAiQuestion();
+}
+async function sendAiQuestion(){
+  const input=document.getElementById('ai-user-input');
+  const q=input.value.trim();if(!q)return;
+  const p=sbProfiles[currentSbStudentId];
+  const chatArea=document.getElementById('ai-chat-area');
+  const sendBtn=document.getElementById('ai-send-btn');
+  // User message
+  chatArea.insertAdjacentHTML('beforeend',`<div class="ai-msg user">${q}</div>`);
+  input.value='';sendBtn.disabled=true;
+  // Loading
+  const loadId='load-'+Date.now();
+  chatArea.insertAdjacentHTML('beforeend',`<div class="ai-msg loading" id="${loadId}">분석 중...</div>`);
+  chatArea.scrollTop=chatArea.scrollHeight;
+  // Build context
+  const ctx=`[학생 정보]\n이름: ${p.name} / 학년: ${p.grade} / 반: ${p.cls} / 재원: ${p.duration}\n출석률: ${p.summary.att} / 최근 WT: ${p.stats.wt} / 과제수행: ${p.summary.hw}% / 참여도: ${p.summary.pt}\nWT 추이: ${p.wtHistory.map(w=>w.m+':'+w.s+'점').join(', ')}\n최근 기록: ${p.records.slice(0,3).map(r=>r.d+' 출결:'+r.att+' WT:'+r.score+'점').join(' | ')}\n상담이력: ${p.consultations.length?p.consultations.map(c=>c.d+' '+c.type+' — '+c.content).join('; '):'없음'}`;
+  try{
+    const apiKey=savedApiKey||document.getElementById('ai-key-input').value.trim();
+    const headers={'Content-Type':'application/json','anthropic-version':'2023-06-01'};
+    if(apiKey)headers['x-api-key']=apiKey;
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers,
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:800,
+        system:'당신은 케이스수학과학학원의 AI 학습 분석 도우미입니다. 강사의 질문에 학생 데이터 기반으로 구체적이고 실용적인 조언을 한국어로 제공해주세요. 답변은 3-5문장으로 간결하게.'+'\n\n'+ctx,
+        messages:[{role:'user',content:q}]
+      })
+    });
+    const data=await res.json();
+    document.getElementById(loadId).remove();
+    const answer=data.content?.[0]?.text||'응답을 받지 못했습니다.';
+    chatArea.insertAdjacentHTML('beforeend',`<div class="ai-msg assistant">${answer.replace(/\n/g,'<br>')}</div>`);
+  }catch(e){
+    document.getElementById(loadId).textContent='API 키를 입력하거나 연결을 확인해주세요. (오류: '+e.message+')';
+    document.getElementById(loadId).style.color='var(--red)';
+  }
+  sendBtn.disabled=false;
+  chatArea.scrollTop=chatArea.scrollHeight;
+}
+
+// ── Report Utilities ──
+function copyReport(id){
+  const el=document.getElementById(id);
+  const text=el.innerText||el.textContent;
+  navigator.clipboard.writeText(text).then(()=>toast('보고서가 클립보드에 복사되었습니다'));
+}
+function printReport(id){
+  const content=document.getElementById(id).innerHTML;
+  const w=window.open('','_blank');
+  w.document.write('<html><head><title>학습 보고서</title><style>body{font-family:\'Noto Sans KR\',sans-serif;font-size:13px;line-height:1.8;padding:30px;max-width:700px;margin:0 auto}h3{font-size:14px;font-weight:700;border-bottom:1px solid #ddd;padding-bottom:4px;margin:16px 0 8px}</style></head><body>'+content+'</body></html>');
+  w.document.close();w.print();
+}
+
+// ── TEST TOGGLE ──
+function toggleTest(cb){document.getElementById('test-body').style.display=cb.checked?'block':'none';}
+
+// ── ATT ──
+function selAtt(id,type,btn){
+  btn.parentElement.querySelectorAll('.att-btn').forEach(b=>b.className='att-btn');
+  btn.classList.add({p:'sp',l:'sl',a:'sa'}[type]);
+}
+
+// ── AVG ──
+function calcAvg(){
+  const scores=[];
+  for(let i=1;i<=4;i++){const e=document.getElementById('sc-'+i);if(e&&e.value!=='')scores.push(parseFloat(e.value));}
+  const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b)/scores.length):null;
+  document.getElementById('cls-avg').textContent=avg!==null?avg+'점':'—';
+}
+
+// ── SAVE ──
+function saveCommon(){toast('반 공통 내용이 저장되었습니다');}
+let savedCount=0;
+function saveAll(){
+  savedCount=4;
+  document.getElementById('prog-fill').style.width='100%';
+  document.getElementById('save-progress-txt').textContent='4 / 4 저장 완료';
+  toast('🎉 전체 저장 완료!');
+}
+
+// ── CONSULT ROW TOGGLE ──
+function toggleConsultRow(id){
+  const row=document.getElementById('cr-'+id);
+  row.classList.toggle('open');
+}
+
+// ── CONSULT TYPE ──
+let consultType=null;
+const typeMap={
+  new:{cls:'ct-new',label:'신입상담',btnCls:'sel-new',risk:false},
+  reg:{cls:'ct-reg',label:'재원생 상담',btnCls:'sel-reg',risk:false},
+  urg:{cls:'ct-urg',label:'긴급상담',btnCls:'sel-urg',risk:false},
+  exp:{cls:'ct-exp',label:'예상퇴원상담',btnCls:'sel-exp',risk:true},
+  out:{cls:'ct-out',label:'퇴원상담',btnCls:'sel-out',risk:true}
+};
+function selConsultType(type){
+  consultType=type;
+  Object.keys(typeMap).forEach(k=>{
+    const btn=document.getElementById('ct-'+k);
+    if(btn){btn.className='ctype-btn'+(type===k?' '+typeMap[k].btnCls:'');}
+  });
+  const isRisk=typeMap[type].risk;
+  document.getElementById('cs-risk-section').style.display=isRisk?'block':'none';
+  if(isRisk&&type==='out'){
+    document.getElementById('cs-tips-body').innerHTML=`
+      <div class="tip-item"><div class="tip-n">1</div><div>퇴원 의사를 <strong>존중하는 태도</strong>로 경청부터 시작하세요.</div></div>
+      <div class="tip-item"><div class="tip-n">2</div><div>퇴원 사유를 <strong>구체적으로 파악</strong>하세요.</div></div>
+      <div class="tip-item"><div class="tip-n">3</div><div>반 이동·과제 조정 등 <strong>조건부 유지 옵션</strong>을 제시하세요.</div></div>
+      <div class="tip-item"><div class="tip-n">4</div><div>최종 결정이면 <strong>좋은 마무리</strong>로 재등록 가능성을 열어두세요.</div></div>`;
+  }
+}
+
+function openConsultPanel(name){
+  goPage('consult');
+  document.getElementById('cs-name').value=name;
+  document.getElementById('cs-class').value='중등 수학 기본반';
+  document.getElementById('cs-name').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function saveConsult(){
+  const name=document.getElementById('cs-name').value.trim();
+  const content=document.getElementById('cs-content').value.trim();
+  if(!name){toast('학생 이름을 입력해주세요');return;}
+  if(!content){toast('상담 내용을 입력해주세요');return;}
+  if(!consultType){toast('상담 종류를 선택해주세요');return;}
+  const resolve=document.getElementById('cs-resolve').value.trim();
+  const cls=document.getElementById('cs-class').value.trim();
+  const isRisk=typeMap[consultType].risk;
+  const wrap=document.getElementById('new-consult-log');
+  const date=new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  wrap.insertAdjacentHTML('afterbegin',`
+    <div class="consult-log-item"${isRisk?' style="border-left:3px solid var(--amber)"':''}>
+      <div class="ci-top"><span class="ci-type ${typeMap[consultType].cls}">${typeMap[consultType].label}</span><span class="ci-date">${date}</span></div>
+      <div class="ci-student">${name}</div>${cls?`<div class="ci-cls">${cls}</div>`:''}
+      <div class="ci-content">${content}</div>
+      ${resolve?`<div class="ci-resolve"><div class="ci-resolve-lbl">해결방안 / 다음 계획</div><div class="ci-resolve-text">${resolve}</div></div>`:''}
+      ${isRisk?'<div class="boss-badge">🔴 부서장 알림 전송됨</div>':''}
+    </div>`);
+  document.getElementById('cs-name').value='';
+  document.getElementById('cs-content').value='';
+  document.getElementById('cs-resolve').value='';
+  consultType=null;
+  Object.keys(typeMap).forEach(k=>{const b=document.getElementById('ct-'+k);if(b)b.className='ctype-btn';});
+  document.getElementById('cs-risk-section').style.display='none';
+  toast(isRisk?'⚠️ 상담 저장 + 부서장 알림 전송됨':'상담 내용이 저장되었습니다');
+}
+
+// ── KAKAO ──
+const students=[
+  {id:1,name:'박지훈',parent:'010-1234-5678'},
+  {id:2,name:'이수민',parent:'010-2345-6789'},
+  {id:3,name:'최다은',parent:'010-3456-7890'},
+  {id:4,name:'정민서',parent:'010-4567-8901'}
+];
+const sentMsg={};
+let currentKakaoId=1;
+function buildMsg(st){
+  const unit=document.getElementById('c-unit')?.value||'2단원 5차시 일차방정식의 활용';
+  const hw=document.getElementById('c-hw')?.value||'교재 p.65~70 연습문제';
+  const due=document.getElementById('c-due')?.value||'다음 수업 전';
+  const hasTest=document.getElementById('test-yn')?.checked;
+  const score=document.getElementById('sc-'+st.id)?.value||'—';
+  const avg=document.getElementById('cls-avg')?.textContent||'—';
+  const note=document.getElementById('nt-'+st.id)?.value||'';
+  const cls='중등 수학 기본반';
+  const today=new Date();
+  const d=today.getFullYear()+'년 '+(today.getMonth()+1)+'월 '+today.getDate()+'일';
+  const attBtns=document.querySelectorAll(`#page-record .student-row-wrap:nth-child(${st.id}) .att-btn`);
+  let att='출석';
+  attBtns.forEach(b=>{if(b.classList.contains('sp'))att='출석';if(b.classList.contains('sl'))att='지각';if(b.classList.contains('sa'))att='결석';});
+  const hwSel=document.getElementById('hw-'+st.id)?.value||'—';
+  const ptSel=document.getElementById('pt-'+st.id)?.value||'—';
+  let msg=`[케이스수학과학학원]\n안녕하세요, ${st.name} 학부모님.\n오늘(${d}) 수업 내용을 안내드립니다.\n\n📌 반: ${cls}\n✅ 출결: ${att}\n📖 오늘 진도: ${unit}\n📝 오늘 과제: ${hw} (${due})`;
+  if(hasTest)msg+=`\n📊 테스트${score!=='—'?' | 점수 '+score+'점 (반 평균 '+avg+')':''}`;
+  msg+=`\n\n📋 과제 수행도: ${hwSel||'—'}\n🎯 수업 참여도: ${ptSel||'—'}`;
+  if(note)msg+=`\n\n💬 특이사항\n${note}`;
+  msg+=`\n\n감사합니다.\n케이스수학과학학원 드림 📚`;
+  return msg;
+}
+function initKakao(){selectKakao(1,document.querySelector('.kakao-st-item'));}
+function selectKakao(id,el){
+  currentKakaoId=id;
+  document.querySelectorAll('.kakao-st-item').forEach(i=>i.classList.remove('active'));
+  if(el)el.classList.add('active');
+  const st=students.find(s=>s.id===id);
+  document.getElementById('kakao-panel-label').textContent=st.name+' 학부모님께';
+  document.getElementById('kakao-msg-body').textContent=buildMsg(st);
+  const btn=document.getElementById('send-one-btn');
+  btn.textContent=sentMsg[id]?'✓ 전송 완료':'이 학생만 전송';
+  btn.className='btn-send-one'+(sentMsg[id]?' sent':'');
+}
+function sendOne(){
+  sentMsg[currentKakaoId]=true;
+  const st=students.find(s=>s.id===currentKakaoId);
+  document.getElementById('send-one-btn').textContent='✓ 전송 완료';
+  document.getElementById('send-one-btn').className='btn-send-one sent';
+  const listItem=document.querySelector(`.kakao-st-item:nth-child(${currentKakaoId})`);
+  if(listItem&&!listItem.querySelector('.sent-mark')){
+    listItem.insertAdjacentHTML('beforeend','<span class="sent-mark">✓ 전송</span>');
+  }
+  toast('💬 '+st.name+' 학부모님께 발송 완료');
+}
+function sendAll(){
+  students.forEach(s=>sentMsg[s.id]=true);
+  document.querySelectorAll('.kakao-st-item').forEach(item=>{
+    if(!item.querySelector('.sent-mark'))item.insertAdjacentHTML('beforeend','<span class="sent-mark">✓ 전송</span>');
+  });
+  toast('💬 전체 학부모 알림톡 발송 완료!');
+}
+
+// ── JOURNAL ──
+function submitJournal(){
+  const el=document.getElementById('j-status');
+  el.textContent='제출 완료 ✓';el.style.color='var(--teal)';el.style.background='var(--teal-l)';el.style.borderColor='var(--teal)';
+  toast('📋 업무일지가 제출되었습니다');
+}
+
+// ── MODAL ──
+function openDetailModal(name,days,time,count,grade,teacher,room){
+  document.getElementById('m-name').textContent=name;
+  document.getElementById('m-days').textContent=days;
+  document.getElementById('m-time').textContent=time;
+  document.getElementById('m-count').textContent=count;
+  document.getElementById('m-grade').textContent=grade;
+  document.getElementById('m-teacher').textContent=teacher;
+  document.getElementById('m-room').textContent=room;
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+// ── TOAST ──
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// INIT
+initKakao();
+</script>
+</body>
+</html>

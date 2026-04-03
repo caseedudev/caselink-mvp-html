@@ -1,0 +1,2461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>케이스수학과학학원 퇴원 예정 및 처리서</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+    background: #f1f5f9;
+    min-height: 100vh;
+    color: #1e293b;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #0f2d5c, #1d4ed8);
+    color: #fff;
+    padding: 0;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.22);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    gap: 16px;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .header-logo-box {
+    width: 46px;
+    height: 46px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -1px;
+    flex-shrink: 0;
+    border: 1.5px solid rgba(255,255,255,0.25);
+  }
+  .header-brand-text .academy-name {
+    font-size: 18px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .header-brand-text .academy-sub {
+    font-size: 11px;
+    color: #93c5fd;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+  .header-right {
+    text-align: right;
+  }
+  .header-right .doc-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    opacity: 0.95;
+  }
+  .header-right .doc-sub {
+    font-size: 10px;
+    color: #93c5fd;
+    letter-spacing: 0.06em;
+    margin-top: 3px;
+  }
+  .header-divider {
+    height: 3px;
+    background: linear-gradient(90deg, #60a5fa, #818cf8, #a78bfa);
+  }
+
+  /* Step Nav */
+  .step-nav {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    overflow-x: auto;
+    padding: 0 16px;
+  }
+  .step-btn {
+    padding: 10px 14px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    color: #94a3b8;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .step-btn.active { color: #1d4ed8; border-bottom-color: #1d4ed8; font-weight: 700; }
+  .step-btn.done { color: #10b981; }
+
+  /* Content */
+  .content { max-width: 700px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  /* Page */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Card */
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border-left: 4px solid #3b82f6;
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    color: #3b82f6;
+  }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin-bottom: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px 16px; margin-bottom: 12px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px 16px; margin-bottom: 12px; }
+  .grid-1 { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px; }
+
+  /* Field */
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 5px;
+  }
+  .field label .req { color: #ef4444; margin-left: 2px; }
+
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1e293b;
+    background: #fff;
+    outline: none;
+    font-family: inherit;
+    transition: border 0.15s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: #3b82f6; }
+  textarea { resize: vertical; }
+  select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+
+  /* Sub-section label */
+  .sub-label { font-size: 12px; font-weight: 600; color: #64748b; margin: 10px 0 6px; }
+
+  /* Radio */
+  .radio-group { display: flex; gap: 20px; padding-top: 4px; }
+  .radio-group label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; color: #475569; }
+
+  /* Nav Buttons */
+  .nav-btns { display: flex; gap: 12px; margin-top: 16px; }
+  .btn-prev {
+    flex: 1; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    background: #fff; color: #64748b; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: all 0.15s;
+  }
+  .btn-prev:hover { border-color: #94a3b8; color: #334155; }
+  .btn-next {
+    flex: 2; padding: 12px; border: none; border-radius: 10px;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: #fff; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 3px 10px rgba(99,102,241,0.25);
+    transition: all 0.15s;
+  }
+  .btn-next:hover { opacity: 0.92; box-shadow: 0 4px 14px rgba(99,102,241,0.35); }
+
+  /* Consultation cards */
+  .consult-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border-left: 4px solid #3b82f6;
+  }
+  .consult-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .consult-title { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #3b82f6; }
+  .btn-remove {
+    padding: 4px 10px; border: 1px solid #fca5a5; border-radius: 6px;
+    background: #fff; color: #dc2626; font-size: 12px; cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-add {
+    width: 100%; padding: 11px; border: 2px dashed #94a3b8; border-radius: 10px;
+    background: transparent; color: #64748b; font-size: 13px; cursor: pointer;
+    font-weight: 600; font-family: inherit; transition: all 0.2s; margin-top: 4px;
+  }
+  .btn-add:hover { border-color: #3b82f6; color: #3b82f6; }
+
+  /* Info banner */
+  .info-banner {
+    background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
+    padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #1d4ed8;
+  }
+
+  /* Summary bar */
+  .summary-bar {
+    background: #f8fafc; border-radius: 10px; padding: 12px 16px;
+    margin-bottom: 16px; font-size: 12px; color: #64748b;
+    border: 1px solid #e2e8f0; line-height: 1.7;
+  }
+  .summary-bar strong { color: #374151; }
+
+  /* Report type selector */
+  .report-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .report-type-btn {
+    padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px;
+    background: #fff; cursor: pointer; text-align: left;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .report-type-btn.selected { border-color: #3b82f6; background: #eff6ff; }
+  .report-type-btn .rt-title { font-size: 14px; font-weight: 700; color: #1e293b; }
+  .report-type-btn.selected .rt-title { color: #1d4ed8; }
+  .report-type-btn .rt-desc { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+  /* Generate button */
+  .btn-generate {
+    width: 100%; padding: 14px; border: none; border-radius: 12px;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+    font-family: inherit; transition: all 0.2s; margin-bottom: 16px;
+  }
+  .btn-generate:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; }
+  .btn-generate:not(:disabled):hover { opacity: 0.92; }
+
+  /* Error */
+  .error-box {
+    background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px;
+    padding: 12px; color: #dc2626; font-size: 13px; margin-bottom: 12px;
+  }
+
+  /* Output */
+  .output-box {
+    background: #fff; border-radius: 14px; padding: 22px 24px;
+    border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .output-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+  }
+  .output-title { font-size: 14px; font-weight: 700; color: #1e293b; }
+  .btn-copy {
+    padding: 5px 12px; border: 1px solid #e2e8f0; border-radius: 6px;
+    background: #f8fafc; font-size: 12px; cursor: pointer; color: #64748b;
+    font-family: inherit;
+  }
+  .output-content {
+    font-size: 13px; color: #334155; line-height: 1.85; white-space: pre-wrap;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  /* Markdown-like styling in output */
+  .output-content h1, .output-content h2, .output-content h3 {
+    font-weight: 700; color: #1e293b; margin: 16px 0 8px;
+  }
+
+  /* Accent colors per card */
+  .accent-blue { border-left-color: #3b82f6; } .accent-blue .card-title, .accent-blue .consult-title { color: #3b82f6; }
+  .accent-purple { border-left-color: #8b5cf6; } .accent-purple .card-title { color: #8b5cf6; }
+  .accent-green { border-left-color: #10b981; } .accent-green .card-title { color: #10b981; }
+  .accent-amber { border-left-color: #f59e0b; } .accent-amber .card-title { color: #f59e0b; }
+  .accent-red { border-left-color: #ef4444; } .accent-red .card-title { color: #ef4444; }
+  .accent-indigo { border-left-color: #6366f1; } .accent-indigo .card-title { color: #6366f1; }
+  .accent-orange { border-left-color: #f97316; } .accent-orange .card-title { color: #f97316; }
+  .accent-crimson { border-left-color: #dc2626; } .accent-crimson .card-title { color: #dc2626; }
+  .accent-violet { border-left-color: #7c3aed; } .accent-violet .card-title { color: #7c3aed; }
+
+  @media (max-width: 520px) {
+    .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .report-type-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════ 로그인 화면 ════ -->
+<div id="loginScreen" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#0f2d5c 0%,#1d4ed8 60%,#312e81 100%);
+  display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:20px;padding:40px 36px;max-width:400px;width:100%;
+    box-shadow:0 24px 80px rgba(0,0,0,0.3);">
+    <!-- 로고 -->
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="width:64px;height:64px;background:linear-gradient(135deg,#0f2d5c,#1d4ed8);
+        border-radius:18px;display:flex;align-items:center;justify-content:center;
+        font-size:28px;font-weight:900;color:#fff;margin:0 auto 14px;
+        box-shadow:0 8px 24px rgba(29,78,216,0.35);">C</div>
+      <div style="font-size:20px;font-weight:900;color:#0f2d5c;">케이스수학과학학원</div>
+      <div style="font-size:12px;color:#64748b;letter-spacing:0.06em;margin-top:4px;">CASE MATH ACADEMY</div>
+    </div>
+    <!-- 구분선 -->
+    <div style="height:2px;background:linear-gradient(90deg,#60a5fa,#818cf8);border-radius:2px;margin-bottom:28px;"></div>
+    <!-- 입력 -->
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px;font-weight:700;color:#475569;display:block;margin-bottom:6px;">강사명 <span style="color:#ef4444;">*</span></label>
+      <input id="loginName" type="text" placeholder="예) 홍길동T"
+        style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:10px;
+        font-size:14px;font-family:inherit;outline:none;box-sizing:border-box;"
+        onkeydown="if(event.key==='Enter')doLogin()"
+        onfocus="this.style.borderColor='#1d4ed8'"
+        onblur="this.style.borderColor='#e2e8f0'">
+    </div>
+    <!-- API Key (관리자 키 없을 때만 표시) -->
+    <div id="loginApiKeyWrap" style="margin-bottom:20px;">
+      <label style="font-size:12px;font-weight:700;color:#475569;display:block;margin-bottom:6px;">
+        Anthropic API Key <span style="color:#ef4444;">*</span>
+        <span style="font-weight:400;color:#94a3b8;margin-left:4px;">(1회 저장되며 재입력 불필요)</span>
+      </label>
+      <div style="position:relative;">
+        <input id="loginApiKey" type="password" placeholder="sk-ant-api03-..."
+          style="width:100%;padding:11px 44px 11px 14px;border:1.5px solid #e2e8f0;border-radius:10px;
+          font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;"
+          onkeydown="if(event.key==='Enter')doLogin()"
+          onfocus="this.style.borderColor='#1d4ed8'"
+          onblur="this.style.borderColor='#e2e8f0'">
+        <button onclick="toggleLoginKeyVis()"
+          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+          border:none;background:transparent;cursor:pointer;font-size:16px;color:#94a3b8;padding:0;">👁</button>
+      </div>
+    </div>
+    <div id="loginError" style="display:none;color:#dc2626;font-size:12px;margin-bottom:12px;
+      background:#fef2f2;border-radius:8px;padding:8px 12px;"></div>
+    <button onclick="doLogin()"
+      style="width:100%;padding:13px;border:none;border-radius:12px;
+      background:linear-gradient(135deg,#0f2d5c,#1d4ed8);color:#fff;
+      font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;
+      box-shadow:0 4px 16px rgba(29,78,216,0.3);transition:opacity 0.2s;"
+      onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+      시작하기 →
+    </button>
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:#94a3b8;">
+      퇴원 예정 및 처리서 · AI 분석 시스템
+    </div>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="header-logo-box">C</div>
+      <div class="header-brand-text">
+        <div class="academy-name">케이스수학과학학원</div>
+        <div class="academy-sub">CASE MATH ACADEMY</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="doc-title">퇴원 예정 및 처리서</div>
+      <div class="doc-sub">WITHDRAWAL REPORT &amp; AI ANALYSIS</div>
+      <div id="headerTeacherBadge" style="display:none;margin-top:6px;">
+        <span style="background:rgba(255,255,255,0.15);border-radius:20px;padding:3px 10px;
+          font-size:11px;color:#bfdbfe;border:1px solid rgba(255,255,255,0.2);cursor:pointer;"
+          onclick="doLogout()">
+          <span id="headerTeacherName"></span> &nbsp;·&nbsp; 로그아웃
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="header-divider"></div>
+</div>
+
+<!-- 모드 선택 탭 -->
+<div id="modeNav" style="background:#fff;border-bottom:2px solid #e2e8f0;display:flex;">
+  <button id="modeBtn1" onclick="switchMode(1)"
+    style="flex:1;padding:14px 10px;border:none;border-bottom:3px solid transparent;
+    background:#fff;color:#94a3b8;font-size:13px;font-weight:600;
+    cursor:pointer;font-family:inherit;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;">
+    🛡️ 퇴원 예방 솔루션
+  </button>
+  <button id="modeBtn0" onclick="switchMode(0)"
+    style="flex:1;padding:14px 10px;border:none;border-bottom:3px solid #1d4ed8;
+    background:#eff6ff;color:#1d4ed8;font-size:13px;font-weight:800;
+    cursor:pointer;font-family:inherit;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;">
+    📋 퇴원 분석 보고서
+  </button>
+</div>
+
+<!-- 퇴원 분석 보고서 서브 탭 -->
+<div id="stepNav" style="background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;overflow-x:auto;padding:0 16px;"></div>
+
+<div class="content">
+
+  <!-- Page 0: 학생정보 -->
+  <div class="page active" id="page0">
+    <!-- 새 학생 버튼 -->
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+      <button onclick="resetReport()" style="display:flex;align-items:center;gap:6px;
+        padding:8px 16px;border:1.5px solid #e2e8f0;border-radius:20px;
+        background:#fff;color:#64748b;font-size:12px;font-weight:700;
+        cursor:pointer;font-family:inherit;transition:all 0.2s;"
+        onmouseover="this.style.borderColor='#1d4ed8';this.style.color='#1d4ed8'"
+        onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">
+        ✏️ 새 학생 입력
+      </button>
+    </div>
+    <div class="card accent-blue">
+      <div class="card-title">기본 정보</div>
+      <div class="grid-3">
+        <div class="field"><label>반 <span class="req">*</span></label><input type="text" id="ban" placeholder="1MB"></div>
+        <div class="field"><label>이름 <span class="req">*</span></label><input type="text" id="name" placeholder="홍길동"></div>
+        <div class="field"><label>학년 <span class="req">*</span></label><input type="text" id="grade" placeholder="예비중1"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>학교</label><input type="text" id="school" placeholder="○○초등학교"></div>
+        <div class="field"><label>반 인원</label><input type="number" id="classCount" placeholder="7"></div>
+      </div>
+      <div class="grid-1">
+        <div class="field"><label>학생 성향</label><input type="text" id="tendency" placeholder="내향적"></div>
+      </div>
+      <div class="grid-1">
+        <div class="field"><label>학생에 대한 특이사항</label><textarea id="specialNote" rows="2" placeholder="수업 시간에 시키는 것은 따라오는 편"></textarea></div>
+      </div>
+    </div>
+
+    <div class="card accent-purple">
+      <div class="card-title">재원 기간 및 수강료</div>
+      <div class="grid-3">
+        <div class="field"><label>시작일</label><input type="date" id="startDate"></div>
+        <div class="field"><label>최종일</label><input type="date" id="endDate"></div>
+        <div class="field"><label>구분 <span style="font-size:11px;color:#94a3b8;font-weight:400;">(날짜 입력 시 자동)</span></label>
+          <select id="payType">
+            <option value="">선택</option>
+            <option value="초단기">초단기 (1개월 미만)</option>
+            <option value="단기">단기 (1~3개월)</option>
+            <option value="중기">중기 (3~12개월)</option>
+            <option value="장기">장기 (12개월 초과)</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="field"><label>최근 납부</label><input type="text" id="payRecent" placeholder="1/1"></div>
+        <div class="field"><label>1개월 전</label><input type="text" id="pay1mo" placeholder=""></div>
+        <div class="field"><label>2개월 전</label><input type="text" id="pay2mo" placeholder=""></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>학원 반 레벨</label><input type="text" id="classLevel" placeholder="하"></div>
+        <div class="field"><label>행정실 특이사항</label><input type="text" id="adminNote" placeholder=""></div>
+      </div>
+      <div class="grid-1">
+        <div class="field"><label>담임</label><input type="text" id="teacher" placeholder="홍길동T"></div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-next" onclick="goStep(1)">다음 →</button>
+    </div>
+  </div>
+
+  <!-- Page 1: 성적·생활 -->
+  <div class="page" id="page1">
+    <div class="card accent-green">
+      <div class="card-title">내신 성적</div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:12px;">
+        최근 2개 시험 결과를 입력해 주세요. 해당 학기와 시험 종류를 선택하고 점수를 입력하세요.
+      </div>
+
+      <!-- 1차 성적 -->
+      <div style="background:#f0fdf4;border-radius:10px;padding:14px 16px;margin-bottom:10px;border:1.5px solid #bbf7d0;">
+        <div style="font-size:11px;font-weight:700;color:#16a34a;margin-bottom:10px;">1차 시험</div>
+        <div class="grid-3">
+          <div class="field">
+            <label>학년</label>
+            <select id="exam1Grade">
+              <option value="">선택</option>
+              <option>중1</option><option>중2</option><option>중3</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>학기·시험</label>
+            <select id="exam1Term">
+              <option value="">선택</option>
+              <option>1학기 중간</option><option>1학기 기말</option>
+              <option>2학기 중간</option><option>2학기 기말</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>점수</label>
+            <input type="number" id="score_exam1" placeholder="예) 78" min="0" max="100">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2차 성적 -->
+      <div style="background:#f0fdf4;border-radius:10px;padding:14px 16px;border:1.5px solid #bbf7d0;">
+        <div style="font-size:11px;font-weight:700;color:#16a34a;margin-bottom:10px;">2차 시험</div>
+        <div class="grid-3">
+          <div class="field">
+            <label>학년</label>
+            <select id="exam2Grade">
+              <option value="">선택</option>
+              <option>중1</option><option>중2</option><option>중3</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>학기·시험</label>
+            <select id="exam2Term">
+              <option value="">선택</option>
+              <option>1학기 중간</option><option>1학기 기말</option>
+              <option>2학기 중간</option><option>2학기 기말</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>점수</label>
+            <input type="number" id="score_exam2" placeholder="예) 82" min="0" max="100">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent-amber">
+      <div class="card-title">WT 점수 추이</div>
+      <div class="grid-4">
+        <div class="field"><label>최근</label><input type="number" id="wtScore" placeholder="76"></div>
+        <div class="field"><label>1주 전</label><input type="number" id="week1Score" placeholder="76"></div>
+        <div class="field"><label>2주 전</label><input type="number" id="week2Score" placeholder="58"></div>
+        <div class="field"><label>3주 전</label><input type="number" id="week3Score" placeholder="52"></div>
+      </div>
+      <div class="sub-label">반 평균</div>
+      <div class="grid-4">
+        <div class="field"><label>최근</label><input type="number" id="avgRecent" placeholder="74"></div>
+        <div class="field"><label>1주 전</label><input type="number" id="avg1w" placeholder="71"></div>
+        <div class="field"><label>2주 전</label><input type="number" id="avg2w" placeholder="78"></div>
+        <div class="field"><label>3주 전</label><input type="number" id="avg3w" placeholder=""></div>
+      </div>
+    </div>
+
+    <div class="card accent-red">
+      <div class="card-title">분기고사</div>
+      <div class="grid-2">
+        <div class="field"><label>1차 반</label><input type="text" id="exam1Class" placeholder="중1-2S"></div>
+        <div class="field"><label>1차 점수</label><input type="number" id="exam1Score" placeholder="64"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>2차 반</label><input type="text" id="exam2Class" placeholder="중2-1B"></div>
+        <div class="field"><label>2차 점수</label><input type="number" id="exam2Score" placeholder="68"></div>
+      </div>
+    </div>
+
+    <div class="card accent-indigo">
+      <div class="card-title">학원 생활 (상·중·하)</div>
+      <div class="grid-2">
+        <div class="field"><label>수업참여</label>
+          <select id="attendance"><option value="">선택</option><option>상</option><option>중</option><option>하</option></select>
+        </div>
+        <div class="field"><label>학습의지</label>
+          <select id="motivation"><option value="">선택</option><option>상</option><option>중</option><option>하</option></select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>과제수행도</label>
+          <select id="homework"><option value="">선택</option><option>상</option><option>중</option><option>하</option></select>
+        </div>
+        <div class="field"><label>교우관계</label>
+          <select id="peerRel"><option value="">선택</option><option>상</option><option>중</option><option>하</option></select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>최종 진도 (과정1)</label><input type="text" id="progress1" placeholder="1-2 개념유형 파워"></div>
+        <div class="field"><label>최종 진도 (과정2)</label><input type="text" id="progress2" placeholder="2-1 CASE 개념1"></div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="goStep(0)">← 이전</button>
+      <button class="btn-next" onclick="goStep(2)">다음 →</button>
+    </div>
+  </div>
+
+  <!-- Page 2: 퇴원정보 -->
+  <div class="page" id="page2">
+    <div class="card accent-orange">
+      <div class="card-title">예상 퇴원 징후</div>
+      <div class="field" style="margin-bottom:12px">
+        <label>징후 내용</label>
+        <textarea id="symptomContent" rows="4" placeholder="고양으로 학교를 다녔다고 하심. 기에는 진학을 해서 이제는 괜찮다고 하심..."></textarea>
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>징후 이후 조치 내용</label>
+        <textarea id="symptomAction" rows="3" placeholder="과제가 미흡하여 고 제를 수업 전 일찍 와서 진행할 수 있도록 말씀드림."></textarea>
+      </div>
+      <div class="field">
+        <label>부서장 보고 여부</label>
+        <div class="radio-group">
+          <label><input type="radio" name="reportToBoss" value="Y"> 보고함</label>
+          <label><input type="radio" name="reportToBoss" value="N" checked> 미보고</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent-crimson">
+      <div class="card-title">담임진단 퇴원사유</div>
+      <div class="field">
+        <textarea id="withdrawalReason" rows="3" placeholder="아이가 고양으로 초등학교를 다닌 것도 힘들어 과제를 해오기 싫었고, 과제를 안 하니 학원에 오는 것을 부담스러워한 것으로 판단됨."></textarea>
+      </div>
+    </div>
+
+    <div class="card accent-violet">
+      <div class="card-title">퇴원 분류 (부원장)</div>
+      <div class="grid-2">
+        <div class="field"><label>대분류</label><input type="text" id="bigCategory" placeholder="학습의 어려움"></div>
+        <div class="field"><label>소분류</label><input type="text" id="smallCategory" placeholder="과제 부담"></div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="goStep(1)">← 이전</button>
+      <button class="btn-next" onclick="goStep(3)">다음 →</button>
+    </div>
+  </div>
+
+  <!-- Page 3: 상담기록 -->
+  <div class="page" id="page3">
+
+    <!-- 입력 모드 탭 -->
+    <div style="display:flex;gap:0;background:#fff;border-radius:12px;padding:4px;margin-bottom:16px;border:1.5px solid #e2e8f0;">
+      <button id="tabBulk" onclick="switchConsultTab('bulk')"
+        style="flex:1;padding:9px;border:none;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#6366f1);
+        color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s;">
+        📋 일괄 붙여넣기
+      </button>
+      <button id="tabIndiv" onclick="switchConsultTab('indiv')"
+        style="flex:1;padding:9px;border:none;border-radius:9px;background:transparent;
+        color:#64748b;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;">
+        ✏️ 건별 입력
+      </button>
+    </div>
+
+    <!-- 일괄 붙여넣기 모드 -->
+    <div id="panelBulk">
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#1d4ed8;">
+        💡 아카(ACARA) 등 학원 관리 프로그램에서 상담 내용을 복사한 뒤 아래에 그대로 붙여넣어 주세요.<br>
+        날짜와 내용이 섞여 있어도 AI가 자동으로 분석합니다.
+      </div>
+      <div class="field">
+        <label>상담 내용 전체 붙여넣기 <span class="req">*</span></label>
+        <textarea id="bulkConsult" rows="14"
+          placeholder="예시) 2025.12.09 서연이 계산 실수가 많다고 어머님께 말씀드림. 중등 과정이 처음이라 꼼꼼히 지도하겠다고 함.&#10;&#10;2026.01.02 월간평가 결과 기본문제는 다 맞췄으나 응용이 안 됨. 응용문제 프린트 반복 지도 예정.&#10;&#10;2026.01.28 기본 개념은 확실하나 부호 실수가 많음. 분기고사 대비 사칙연산 집중 풀이 예정."
+          style="font-size:13px;line-height:1.8;"></textarea>
+      </div>
+    </div>
+
+    <!-- 건별 입력 모드 -->
+    <div id="panelIndiv" style="display:none;">
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#166534;">
+        📅 상담 날짜와 내용을 건별로 입력해 주세요.
+      </div>
+      <div id="consultList"></div>
+      <button class="btn-add" onclick="addConsult()">+ 상담 기록 추가</button>
+    </div>
+
+    <div class="nav-btns" style="margin-top:20px">
+      <button class="btn-prev" onclick="goStep(2)">← 이전</button>
+      <button class="btn-next" onclick="goStep(4)">다음 →</button>
+    </div>
+  </div>
+
+  <!-- Page 4: AI 보고서 -->
+  <div class="page" id="page4">
+    <div class="card accent-blue">
+      <div class="card-title">보고서 유형 선택</div>
+      <div class="report-type-grid">
+        <button class="report-type-btn selected" id="rtDetail" onclick="selectReportType('detail')">
+          <div class="rt-title">📄 퇴원 상세 보고서</div>
+          <div class="rt-desc">원장·부원장용 공식 분석 보고서</div>
+        </button>
+        <button class="report-type-btn" id="rtTraining" onclick="selectReportType('training')">
+          <div class="rt-title">🎓 강사 연수 자료</div>
+          <div class="rt-desc">사례 기반 강사 역량 강화 자료</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="summary-bar" id="summaryBar">
+      <strong>📌 입력 요약</strong><br>
+      <span id="summaryText">이전 단계에서 입력된 정보가 여기에 표시됩니다.</span>
+    </div>
+
+    <button class="btn-generate" id="btnGenerate" onclick="generateReport()">✨ AI 보고서 생성</button>
+
+    <div class="error-box" id="errorBox" style="display:none"></div>
+
+    <div class="output-box" id="outputBox" style="display:none">
+      <div class="output-header">
+        <div class="output-title" id="outputTitle"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-copy" id="btnSave" onclick="saveCurrentReport()">💾 저장</button>
+          <button class="btn-copy" onclick="downloadReport()">⬇️ 다운로드</button>
+          <button class="btn-copy" onclick="copyOutput()">📋 복사</button>
+        </div>
+      </div>
+      <div class="output-content" id="outputContent"></div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="goStep(3)">← 이전</button>
+    </div>
+  </div>
+
+  <!-- Page 5: 저장된 보고서 -->
+  <div class="page" id="page5">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="font-size:15px;font-weight:800;color:#1e293b;">저장된 보고서</div>
+      <button onclick="clearAllReports()" style="padding:5px 12px;border:1px solid #fca5a5;border-radius:7px;background:#fff;color:#dc2626;font-size:12px;cursor:pointer;font-family:inherit;">전체 삭제</button>
+    </div>
+    <div id="savedList"></div>
+
+    <!-- 보고서 상세 모달 -->
+    <div id="reportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto;padding:20px;">
+      <div style="max-width:720px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
+          <div id="modalTitle" style="font-size:16px;font-weight:800;"></div>
+          <button onclick="closeModal()" style="border:none;background:rgba(255,255,255,0.2);color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;line-height:1;">×</button>
+        </div>
+        <div style="padding:24px;">
+          <div id="modalMeta" style="font-size:12px;color:#64748b;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #e2e8f0;"></div>
+          <div id="modalContent" style="font-size:13px;color:#334155;line-height:1.85;"></div>
+          <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #e2e8f0;">
+            <button onclick="downloadModalReport()" style="flex:1;padding:10px;border:none;border-radius:9px;background:linear-gradient(135deg,#0f2d5c,#1d4ed8);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">⬇️ 다운로드</button>
+            <button onclick="copyModalContent()" style="flex:1;padding:10px;border:1.5px solid #e2e8f0;border-radius:9px;background:#f8fafc;color:#475569;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">📋 복사</button>
+            <button onclick="closeModal()" style="flex:1;padding:10px;border:none;border-radius:9px;background:#f1f5f9;color:#64748b;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">닫기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page 6: 퇴원 예방 분석 -->
+  <div class="page" id="page6">
+
+    <!-- 안내 배너 -->
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+      <button onclick="resetPrevention()" style="display:flex;align-items:center;gap:6px;
+        padding:8px 16px;border:1.5px solid #e9d5ff;border-radius:20px;
+        background:#fff;color:#7c3aed;font-size:12px;font-weight:700;
+        cursor:pointer;font-family:inherit;transition:all 0.2s;"
+        onmouseover="this.style.background='#faf5ff'"
+        onmouseout="this.style.background='#fff'">
+        ✏️ 새 학생 입력
+      </button>
+    </div>
+    <div style="background:linear-gradient(135deg,#7c3aed,#6366f1);border-radius:14px;padding:18px 20px;margin-bottom:20px;color:#fff;">
+      <div style="font-size:16px;font-weight:900;margin-bottom:6px;">🛡️ 퇴원 예방 솔루션</div>
+      <div style="font-size:13px;opacity:0.9;line-height:1.7;">
+        현재 재원 중인 학생의 상황을 입력하면 AI가 퇴원 위험도를 분석하고<br>
+        강사에게 즉시 실행 가능한 맞춤 솔루션을 제공합니다.
+      </div>
+    </div>
+
+    <!-- A. 학생 기본 정보 -->
+    <div class="card" style="border-left-color:#7c3aed;">
+      <div class="card-title" style="color:#7c3aed;">A. 학생 기본 정보</div>
+      <div class="grid-3">
+        <div class="field"><label>이름 <span class="req">*</span></label><input type="text" id="pv_name" placeholder="홍길동"></div>
+        <div class="field"><label>학년</label><input type="text" id="pv_grade" placeholder="중1"></div>
+        <div class="field"><label>반</label><input type="text" id="pv_ban" placeholder="1MB"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>최초 입학일 <span style="font-size:11px;color:#94a3b8;font-weight:400;">(입력 시 재원기간 자동 계산)</span></label>
+          <input type="date" id="pv_joinDate" onchange="calcPvPeriod()">
+        </div>
+        <div class="field">
+          <label>재원 기간</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="pv_period" placeholder="자동 계산" readonly
+              style="background:#f8fafc;color:#1d4ed8;font-weight:700;cursor:default;">
+            <span id="pv_periodBadge" style="display:none;padding:4px 10px;border-radius:20px;
+              font-size:11px;font-weight:800;white-space:nowrap;"></span>
+          </div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>반 레벨</label>
+          <select id="pv_level">
+            <option value="">선택</option>
+            <option value="상위권">상위권</option>
+            <option value="중위권">중위권</option>
+            <option value="하위권">하위권</option>
+          </select>
+        </div>
+        <div class="field"><label>학생 성향</label>
+          <input type="text" id="pv_tendency" placeholder="예) 내향적, 적극적">
+        </div>
+      </div>
+      <div class="grid-1">
+        <div class="field"><label>학생 특이사항</label>
+          <textarea id="pv_note" rows="2" placeholder="가정환경, 학습 특이사항 등"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- B. 최근 학습 상태 -->
+    <div class="card" style="border-left-color:#f59e0b;">
+      <div class="card-title" style="color:#f59e0b;">B. 최근 학습 상태</div>
+
+      <!-- WT 점수 -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:#b45309;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          <span style="background:#fef3c7;border-radius:6px;padding:2px 8px;border:1px solid #fde68a;">📝 WT 점수</span>
+        </div>
+        <div style="border-radius:10px;overflow:hidden;border:1.5px solid #fde68a;">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+              <tr style="background:#f59e0b;">
+                <th style="padding:8px 10px;color:#fff;font-weight:700;text-align:left;width:90px;">구분</th>
+                <th style="padding:8px 10px;color:#fff;font-weight:700;text-align:center;">이번 주</th>
+                <th style="padding:8px 10px;color:#fff;font-weight:700;text-align:center;">1주 전</th>
+                <th style="padding:8px 10px;color:#fff;font-weight:700;text-align:center;">2주 전</th>
+                <th style="padding:8px 10px;color:#fff;font-weight:700;text-align:center;">3주 전</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background:#fffbeb;">
+                <td style="padding:8px 10px;font-weight:700;color:#92400e;font-size:12px;">학생 점수</td>
+                <td style="padding:6px 8px;"><input type="number" id="pv_wt1" placeholder="—" style="width:100%;padding:5px 6px;border:1px solid #fde68a;border-radius:6px;font-size:12px;text-align:center;outline:none;"></td>
+                <td style="padding:6px 8px;"><input type="number" id="pv_wt2" placeholder="—" style="width:100%;padding:5px 6px;border:1px solid #fde68a;border-radius:6px;font-size:12px;text-align:center;outline:none;"></td>
+                <td style="padding:6px 8px;"><input type="number" id="pv_wt3" placeholder="—" style="width:100%;padding:5px 6px;border:1px solid #fde68a;border-radius:6px;font-size:12px;text-align:center;outline:none;"></td>
+                <td style="padding:6px 8px;"><input type="number" id="pv_wt4" placeholder="—" style="width:100%;padding:5px 6px;border:1px solid #fde68a;border-radius:6px;font-size:12px;text-align:center;outline:none;"></td>
+              </tr>
+              <tr style="background:#fff;">
+                <td style="padding:8px 10px;font-weight:700;color:#92400e;font-size:12px;">반 평균</td>
+                <td style="padding:6px 8px;"><input type="number" id="pv_wtavg1" placeholder="—" style="width:100%;padding:5px 6px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;text-align:center;outline:none;background:#f8fafc;"></td>
+                <td style="padding:6px 8px;"><input type="number" id="pv_wtavg2" placeholder="—" style="width:100%;padding:5px 6px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;text-align:center;outline:none;background:#f8fafc;"></td>
+                <td style="padding:6px 8px;"><input type="number" id="pv_wtavg3" placeholder="—" style="width:100%;padding:5px 6px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;text-align:center;outline:none;background:#f8fafc;"></td>
+                <td style="padding:6px 8px;"><input type="number" id="pv_wtavg4" placeholder="—" style="width:100%;padding:5px 6px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;text-align:center;outline:none;background:#f8fafc;"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MT 점수 -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:#0369a1;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          <span style="background:#eff6ff;border-radius:6px;padding:2px 8px;border:1px solid #bfdbfe;">📊 MT 점수</span>
+        </div>
+        <div style="border-radius:10px;overflow:hidden;border:1.5px solid #bfdbfe;">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+            <thead>
+              <tr style="background:#0369a1;">
+                <th style="padding:8px 10px;color:#fff;font-weight:700;text-align:left;width:90px;">구분</th>
+                <th style="padding:8px 10px;color:#fff;font-weight:700;text-align:center;">이번 달</th>
+                <th style="padding:8px 10px;color:#fff;font-weight:700;text-align:center;">지난 달</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background:#eff6ff;">
+                <td style="padding:8px 10px;font-weight:700;color:#1e40af;font-size:12px;">학생 점수</td>
+                <td style="padding:6px 8px;"><input type="number" id="pv_mt1" placeholder="—" style="width:100%;padding:5px 6px;border:1px solid #bfdbfe;border-radius:6px;font-size:12px;text-align:center;outline:none;"></td>
+                <td style="padding:6px 8px;"><input type="number" id="pv_mt2" placeholder="—" style="width:100%;padding:5px 6px;border:1px solid #bfdbfe;border-radius:6px;font-size:12px;text-align:center;outline:none;"></td>
+              </tr>
+              <tr style="background:#fff;">
+                <td style="padding:8px 10px;font-weight:700;color:#1e40af;font-size:12px;">반 평균</td>
+                <td style="padding:6px 8px;"><input type="number" id="pv_mtavg1" placeholder="—" style="width:100%;padding:5px 6px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;text-align:center;outline:none;background:#f8fafc;"></td>
+                <td style="padding:6px 8px;"><input type="number" id="pv_mtavg2" placeholder="—" style="width:100%;padding:5px 6px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;text-align:center;outline:none;background:#f8fafc;"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 분기고사 -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:#7c3aed;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          <span style="background:#faf5ff;border-radius:6px;padding:2px 8px;border:1px solid #e9d5ff;">🏆 분기고사</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:#faf5ff;border-radius:10px;padding:12px 14px;border:1.5px solid #e9d5ff;">
+            <div style="font-size:11px;font-weight:700;color:#7c3aed;margin-bottom:8px;">1차</div>
+            <div class="field" style="margin-bottom:8px;">
+              <label>학년·학기 직접 입력</label>
+              <input type="text" id="pv_qt1_term" placeholder="예) 중1 2학기" style="font-size:12px;">
+            </div>
+            <div class="grid-2" style="margin-bottom:0;">
+              <div class="field"><label>학생 점수</label><input type="number" id="pv_qt1_score" placeholder="—" style="text-align:center;"></div>
+              <div class="field"><label>반 평균</label><input type="number" id="pv_qt1_avg" placeholder="—" style="text-align:center;background:#f8fafc;"></div>
+            </div>
+          </div>
+          <div style="background:#faf5ff;border-radius:10px;padding:12px 14px;border:1.5px solid #e9d5ff;">
+            <div style="font-size:11px;font-weight:700;color:#7c3aed;margin-bottom:8px;">2차</div>
+            <div class="field" style="margin-bottom:8px;">
+              <label>학년·학기 직접 입력</label>
+              <input type="text" id="pv_qt2_term" placeholder="예) 중2 1학기" style="font-size:12px;">
+            </div>
+            <div class="grid-2" style="margin-bottom:0;">
+              <div class="field"><label>학생 점수</label><input type="number" id="pv_qt2_score" placeholder="—" style="text-align:center;"></div>
+              <div class="field"><label>반 평균</label><input type="number" id="pv_qt2_avg" placeholder="—" style="text-align:center;background:#f8fafc;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 수업참여·과제·결석 -->
+      <div style="border-top:1px solid #fde68a;padding-top:12px;margin-top:4px;">
+        <div class="grid-3">
+          <div class="field"><label>수업 참여도</label>
+            <select id="pv_attend">
+              <option value="">선택</option><option>상</option><option>중</option><option>하</option>
+            </select>
+          </div>
+          <div class="field"><label>과제 수행도</label>
+            <select id="pv_hw">
+              <option value="">선택</option><option>상</option><option>중</option><option>하</option>
+            </select>
+          </div>
+          <div class="field"><label>최근 결석 (1개월 이내)</label>
+            <select id="pv_absent">
+              <option value="">선택</option>
+              <option>없음</option><option>1회</option><option>2~3회</option><option>3회 이상</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C. 위험 신호 체크 -->
+    <div class="card" style="border-left-color:#ef4444;">
+      <div class="card-title" style="color:#ef4444;">C. 위험 신호 체크 (해당되는 것 모두 선택)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <label style="display:flex;align-items:center;gap:8px;background:#fef2f2;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;color:#374151;">
+          <input type="checkbox" id="pv_sig1" style="width:16px;height:16px;accent-color:#ef4444;"> 학원 가기 싫다는 말을 함
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;background:#fef2f2;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;color:#374151;">
+          <input type="checkbox" id="pv_sig2" style="width:16px;height:16px;accent-color:#ef4444;"> 점수가 2주 이상 지속 하락
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;background:#fef2f2;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;color:#374151;">
+          <input type="checkbox" id="pv_sig3" style="width:16px;height:16px;accent-color:#ef4444;"> 과제를 안 해오는 빈도 증가
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;background:#fef2f2;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;color:#374151;">
+          <input type="checkbox" id="pv_sig4" style="width:16px;height:16px;accent-color:#ef4444;"> 수업 중 집중력 저하
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;background:#fef2f2;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;color:#374151;">
+          <input type="checkbox" id="pv_sig5" style="width:16px;height:16px;accent-color:#ef4444;"> 학부모가 걱정·불만 표현
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;background:#fef2f2;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;color:#374151;">
+          <input type="checkbox" id="pv_sig6" style="width:16px;height:16px;accent-color:#ef4444;"> 집에서 짜증이 늘었다고 함
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;background:#fef2f2;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;color:#374151;">
+          <input type="checkbox" id="pv_sig7" style="width:16px;height:16px;accent-color:#ef4444;"> 다른 학원·과외 언급
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;background:#fef2f2;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;color:#374151;">
+          <input type="checkbox" id="pv_sig8" style="width:16px;height:16px;accent-color:#ef4444;"> 수강료 납부 지연
+        </label>
+      </div>
+      <div style="margin-top:10px;" class="field">
+        <label>기타 위험 신호 (직접 입력)</label>
+        <textarea id="pv_sigEtc" rows="2" placeholder="위에 없는 신호가 있으면 입력해 주세요."></textarea>
+      </div>
+    </div>
+
+    <!-- D. 최근 상담 기록 -->
+    <div class="card" style="border-left-color:#0369a1;">
+      <div class="card-title" style="color:#0369a1;">D. 최근 상담 기록 (직전 3개월)</div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:#1d4ed8;">
+        💡 아카(ACA) 등에서 복사해서 그대로 붙여넣어 주세요.
+      </div>
+      <div class="field">
+        <textarea id="pv_consult" rows="8" placeholder="예) 2026.01.15 학생이 수업 중 집중을 잘 못 하는 모습 보임. 과제도 절반만 해옴.&#10;2026.02.03 어머니께서 요즘 학원 가기 싫어한다고 연락 주심. 학생과 면담 진행..."></textarea>
+      </div>
+    </div>
+
+    <!-- E. 강사 소견 -->
+    <div class="card" style="border-left-color:#059669;">
+      <div class="card-title" style="color:#059669;">E. 담임 강사 소견</div>
+      <div class="field">
+        <textarea id="pv_opinion" rows="3" placeholder="현재 학생을 지도하면서 느끼는 점, 우려되는 부분, 시도해본 것들을 자유롭게 적어주세요."></textarea>
+      </div>
+    </div>
+
+    <!-- 분석 버튼 -->
+    <button id="btnPrevent" onclick="runPreventionAnalysis()"
+      style="width:100%;padding:15px;border:none;border-radius:12px;
+      background:linear-gradient(135deg,#7c3aed,#6366f1);
+      color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;
+      box-shadow:0 4px 16px rgba(124,58,237,0.35);margin-bottom:16px;">
+      🛡️ 퇴원 예방 분석 시작
+    </button>
+
+    <div class="error-box" id="pvErrorBox" style="display:none"></div>
+
+    <!-- 분석 결과 -->
+    <div id="pvOutputBox" style="display:none;background:#fff;border-radius:14px;padding:22px 24px;
+      border:1px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <div style="font-size:14px;font-weight:700;color:#1e293b;">🛡️ 퇴원 예방 분석 결과</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button onclick="downloadPvReport()" class="btn-copy">⬇️ 다운로드</button>
+          <button id="btnImgCopy" onclick="copyPvAsImage()" class="btn-copy" style="background:#f0fdf4;border-color:#bbf7d0;color:#15803d;">🖼️ 이미지 복사</button>
+          <button onclick="copyPvOutput()" class="btn-copy">📋 텍스트 복사</button>
+        </div>
+      </div>
+      <div id="pvOutputContent"></div>
+    </div>
+
+  </div>
+
+</div><!-- /content -->
+
+<script>
+const STEPS = ["학생정보", "성적·생활", "퇴원정보", "상담기록", "AI 보고서", "저장된 보고서"];
+// 퇴원 예방은 page6 단독 (서브탭 없음)
+
+var currentMode = 0; // 0: 퇴원분석, 1: 퇴원예방
+
+// ════════════════════════════════════════════════════
+// ★ 원장님 설정 영역 ★
+// API 키를 아래에 입력하면 강사들이 별도로 입력하지 않아도 됩니다.
+// 비워두면 각 강사가 직접 입력합니다.
+var ACADEMY_API_KEY = "";
+// ════════════════════════════════════════════════════
+
+// ── 로그인 ──────────────────────────────────────────
+function toggleLoginKeyVis() {
+  var inp = document.getElementById("loginApiKey");
+  inp.type = inp.type === "password" ? "text" : "password";
+}
+
+function doLogin() {
+  var name = (document.getElementById("loginName").value || "").trim();
+  var keyInput = (document.getElementById("loginApiKey").value || "").trim();
+  var errEl = document.getElementById("loginError");
+
+  if (!name) {
+    errEl.textContent = "강사명을 입력해 주세요.";
+    errEl.style.display = "block";
+    document.getElementById("loginName").focus();
+    return;
+  }
+
+  // API 키 처리
+  if (!ACADEMY_API_KEY) {
+    var savedKey = localStorage.getItem("anthropic_api_key") || keyInput;
+    if (!savedKey) {
+      errEl.textContent = "API 키를 입력해 주세요.";
+      errEl.style.display = "block";
+      document.getElementById("loginApiKey").focus();
+      return;
+    }
+    if (!savedKey.startsWith("sk-ant-")) {
+      errEl.textContent = "올바른 Anthropic API 키가 아닙니다. (sk-ant-... 형식)";
+      errEl.style.display = "block";
+      return;
+    }
+    localStorage.setItem("anthropic_api_key", savedKey);
+  }
+
+  errEl.style.display = "none";
+  sessionStorage.setItem("teacher_name", name);
+
+  // 헤더 강사명 표시
+  document.getElementById("headerTeacherName").textContent = name;
+  document.getElementById("headerTeacherBadge").style.display = "block";
+  // teacher 입력란 자동 채움
+  var teacherInput = document.getElementById("teacher");
+  if (teacherInput && !teacherInput.value) teacherInput.value = name;
+
+  // API 키 카드 숨김 (관리자 키 있으면)
+  if (ACADEMY_API_KEY) {
+    var card = document.getElementById("apiKeyCard");
+    if (card) card.style.display = "none";
+  } else {
+    // 입력된 키 API 키 카드에도 반영 (카드가 있을 경우만)
+    var inp2 = document.getElementById("apiKeyInput");
+    if (inp2) { inp2.value = localStorage.getItem("anthropic_api_key") || ""; }
+  }
+
+  // 로그인 화면 닫기
+  document.getElementById("loginScreen").style.display = "none";
+}
+
+function doLogout() {
+  if (!confirm("로그아웃 하시겠습니까?")) return;
+  sessionStorage.removeItem("teacher_name");
+  document.getElementById("headerTeacherBadge").style.display = "none";
+  document.getElementById("loginName").value = "";
+  document.getElementById("loginApiKey").value = "";
+  document.getElementById("loginError").style.display = "none";
+  document.getElementById("loginScreen").style.display = "flex";
+}
+
+function checkLogin() {
+  // 관리자 키가 있으면 API 키 입력란 숨김
+  if (ACADEMY_API_KEY) {
+    document.getElementById("loginApiKeyWrap").style.display = "none";
+  }
+  var savedName = sessionStorage.getItem("teacher_name");
+  if (savedName) {
+    document.getElementById("loginName").value = savedName;
+    doLogin();
+  } else {
+    document.getElementById("loginScreen").style.display = "flex";
+  }
+}
+// ────────────────────────────────────────────────────
+let currentStep = 0;
+let reportType = "detail";
+let consultCount = 0;
+const CONSULT_COLORS = ["#3b82f6","#10b981","#f59e0b","#ef4444","#8b5cf6","#f97316","#06b6d4"];
+
+// ── 새 학생 입력 리셋 ────────────────────────────────
+function resetReport() {
+  if (!confirm('입력된 내용이 모두 초기화됩니다. 새 학생을 입력하시겠습니까?')) return;
+  // 모든 입력 필드 초기화
+  var inputs = document.querySelectorAll('#page0 input, #page0 select, #page0 textarea, #page1 input, #page1 select, #page1 textarea, #page2 input, #page2 select, #page2 textarea, #page3 textarea');
+  inputs.forEach(function(el) { el.value = ''; });
+  // 상담 기록 초기화
+  var list = document.getElementById('consultList');
+  if (list) list.innerHTML = '';
+  consultCount = 0;
+  addConsult(); addConsult(); addConsult();
+  document.getElementById('bulkConsult') && (document.getElementById('bulkConsult').value = '');
+  // 결과 숨기기
+  document.getElementById('outputBox').style.display = 'none';
+  document.getElementById('errorBox').style.display = 'none';
+  // 라디오 기본값
+  var radio = document.querySelector('input[name="reportToBoss"][value="N"]');
+  if (radio) radio.checked = true;
+  // 1단계로 이동
+  goStep(0);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetPrevention() {
+  if (!confirm('입력된 내용이 모두 초기화됩니다. 새 학생을 입력하시겠습니까?')) return;
+  var ids = ['pv_name','pv_grade','pv_ban','pv_joinDate','pv_period','pv_level','pv_tendency','pv_note',
+    'pv_wt1','pv_wt2','pv_wt3','pv_wt4','pv_wtavg1','pv_wtavg2','pv_wtavg3','pv_wtavg4',
+    'pv_mt1','pv_mt2','pv_mtavg1','pv_mtavg2',
+    'pv_qt1_term','pv_qt1_score','pv_qt1_avg','pv_qt2_term','pv_qt2_score','pv_qt2_avg',
+    'pv_attend','pv_hw','pv_absent','pv_sigEtc','pv_consult','pv_opinion'];
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  // 체크박스 초기화
+  for (var i = 1; i <= 8; i++) {
+    var cb = document.getElementById('pv_sig' + i);
+    if (cb) cb.checked = false;
+  }
+  // 뱃지 숨기기
+  var badge = document.getElementById('pv_periodBadge');
+  if (badge) badge.style.display = 'none';
+  // 결과 숨기기
+  document.getElementById('pvOutputBox').style.display = 'none';
+  document.getElementById('pvErrorBox').style.display = 'none';
+  lastPvReport = null;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+// ─────────────────────────────────────────────────────
+function switchMode(mode) {
+  currentMode = mode;
+  var btn0 = document.getElementById('modeBtn0');
+  var btn1 = document.getElementById('modeBtn1');
+  var stepNavEl = document.getElementById('stepNav');
+
+  if (mode === 0) {
+    // 퇴원 분석 보고서
+    btn0.style.background = '#eff6ff';
+    btn0.style.color = '#1d4ed8';
+    btn0.style.borderBottomColor = '#1d4ed8';
+    btn0.style.fontWeight = '800';
+    btn1.style.background = '#fff';
+    btn1.style.color = '#94a3b8';
+    btn1.style.borderBottomColor = 'transparent';
+    btn1.style.fontWeight = '600';
+    stepNavEl.style.display = 'flex';
+    // 퇴원예방 페이지 숨기고 마지막 보고서 스텝으로
+    document.getElementById('page6').classList.remove('active');
+    goStep(currentStep < 6 ? currentStep : 0);
+  } else {
+    // 퇴원 예방
+    btn1.style.background = '#faf5ff';
+    btn1.style.color = '#7c3aed';
+    btn1.style.borderBottomColor = '#7c3aed';
+    btn1.style.fontWeight = '800';
+    btn0.style.background = '#fff';
+    btn0.style.color = '#94a3b8';
+    btn0.style.borderBottomColor = 'transparent';
+    btn0.style.fontWeight = '600';
+    stepNavEl.style.display = 'none';
+    // 현재 페이지 숨기고 page6 표시
+    document.getElementById('page' + currentStep).classList.remove('active');
+    document.getElementById('page6').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// Init step nav
+function buildNav() {
+  const nav = document.getElementById("stepNav");
+  nav.innerHTML = "";
+  STEPS.forEach((s, i) => {
+    const btn = document.createElement("button");
+    btn.className = "step-btn" + (i === currentStep ? " active" : i < currentStep ? " done" : "");
+    btn.textContent = (i < currentStep ? "✓ " : (i + 1) + ". ") + s;
+    btn.onclick = () => goStep(i);
+    nav.appendChild(btn);
+  });
+}
+
+function goStep(n) {
+  document.getElementById("page" + currentStep).classList.remove("active");
+  currentStep = n;
+  document.getElementById("page" + n).classList.add("active");
+  buildNav();
+  if (n === 4) updateSummary();
+  if (n === 5) renderSavedList();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+// 상담기록 탭 전환
+var consultTab = 'bulk';
+function switchConsultTab(tab) {
+  consultTab = tab;
+  var isBulk = (tab === 'bulk');
+  document.getElementById('panelBulk').style.display = isBulk ? '' : 'none';
+  document.getElementById('panelIndiv').style.display = isBulk ? 'none' : '';
+  var bulkBtn = document.getElementById('tabBulk');
+  var indivBtn = document.getElementById('tabIndiv');
+  bulkBtn.style.background = isBulk ? 'linear-gradient(135deg,#3b82f6,#6366f1)' : 'transparent';
+  bulkBtn.style.color = isBulk ? '#fff' : '#64748b';
+  indivBtn.style.background = isBulk ? 'transparent' : 'linear-gradient(135deg,#3b82f6,#6366f1)';
+  indivBtn.style.color = isBulk ? '#64748b' : '#fff';
+}
+
+// Consultation list
+function addConsult() {
+  const list = document.getElementById("consultList");
+  const idx = consultCount++;
+  const color = CONSULT_COLORS[idx % CONSULT_COLORS.length];
+  const div = document.createElement("div");
+  div.className = "consult-card";
+  div.id = "consult_" + idx;
+  div.style.borderLeftColor = color;
+  div.innerHTML = `
+    <div class="consult-header">
+      <div class="consult-title" style="color:${color}">상담 ${idx + 1}</div>
+      <button class="btn-remove" onclick="removeConsult(${idx})">삭제</button>
+    </div>
+    <div class="field" style="margin-bottom:10px">
+      <label>상담 날짜</label>
+      <input type="date" id="cdate_${idx}">
+    </div>
+    <div class="field">
+      <label>상담 내용</label>
+      <textarea id="ccontent_${idx}" rows="4" placeholder="상담 내용을 상세히 입력해 주세요..."></textarea>
+    </div>
+  `;
+  list.appendChild(div);
+}
+
+function removeConsult(idx) {
+  const el = document.getElementById("consult_" + idx);
+  if (el) el.remove();
+}
+
+// Report type
+function selectReportType(type) {
+  reportType = type;
+  document.getElementById("rtDetail").classList.toggle("selected", type === "detail");
+  document.getElementById("rtTraining").classList.toggle("selected", type === "training");
+}
+
+// Summary
+function updateSummary() {
+  const name = val("name") || "미입력";
+  const grade = val("grade");
+  const ban = val("ban");
+  const start = val("startDate") || "?";
+  const end = val("endDate") || "?";
+  const bigCat = val("bigCategory") || "미입력";
+  document.getElementById("summaryText").innerHTML =
+    `학생: <strong style="color:#1e293b">${name}</strong> (${grade} / ${ban}반) &nbsp;·&nbsp; 수강: ${start} ~ ${end} &nbsp;·&nbsp; 퇴원분류: ${bigCat}`;
+}
+
+function val(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : "";
+}
+
+function radioVal(name) {
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : "";
+}
+
+// Build prompt
+function buildPrompt() {
+  // Collect consultations — bulk or individual
+  var consultText = '';
+  if (consultTab === 'bulk') {
+    consultText = (document.getElementById('bulkConsult') || {value:''}).value.trim();
+  } else {
+    var items = [];
+    document.querySelectorAll("[id^='cdate_']").forEach(function(el) {
+      var idx = el.id.replace("cdate_", "");
+      var date = el.value;
+      var content = (document.getElementById("ccontent_" + idx) || {value:''}).value.trim();
+      if (date || content) items.push('[상담] 날짜: ' + date + '\n내용: ' + content);
+    });
+    consultText = items.join('\n\n');
+  }
+
+  var data = '=== 학생 정보 ===\n'
+    + '이름: ' + val("name") + ' | 반: ' + val("ban") + ' | 학년: ' + val("grade") + ' | 학교: ' + val("school") + '\n'
+    + '성향: ' + val("tendency") + ' | 특이사항: ' + val("specialNote") + '\n'
+    + '수강 기간: ' + val("startDate") + ' ~ ' + val("endDate") + ' | 반 인원: ' + val("classCount") + '명\n'
+    + '수강료 납부: 최근 ' + val("payRecent") + ' / 1개월 전 ' + val("pay1mo") + ' / 2개월 전 ' + val("pay2mo") + '\n'
+    + '학원 반 레벨: ' + val("classLevel") + ' | 담임: ' + val("teacher") + '\n\n'
+    + '=== 성적 및 생활 ===\n'
+    + '내신 성적:\n'
+    + '  1차: ' + (val("exam1Grade") && val("exam1Term") ? val("exam1Grade") + ' ' + val("exam1Term") + ' ' + val("score_exam1") + '점' : '미입력') + '\n'
+    + '  2차: ' + (val("exam2Grade") && val("exam2Term") ? val("exam2Grade") + ' ' + val("exam2Term") + ' ' + val("score_exam2") + '점' : '미입력') + '\n'
+    + 'WT점수: 최근 ' + val("wtScore") + ' / 1주전 ' + val("week1Score") + ' / 2주전 ' + val("week2Score") + ' / 3주전 ' + val("week3Score") + '\n'
+    + '반평균: 최근 ' + val("avgRecent") + ' / 1주전 ' + val("avg1w") + ' / 2주전 ' + val("avg2w") + ' / 3주전 ' + val("avg3w") + '\n'
+    + '분기고사: ' + val("exam1Class") + ' ' + val("exam1Score") + '점 / ' + val("exam2Class") + ' ' + val("exam2Score") + '점\n'
+    + '수업참여: ' + val("attendance") + ' | 학습의지: ' + val("motivation") + ' | 과제수행: ' + val("homework") + ' | 교우관계: ' + val("peerRel") + '\n'
+    + '최종 진행 진도: 과정1 ' + val("progress1") + ' / 과정2 ' + val("progress2") + '\n\n'
+    + '=== 퇴원 정보 ===\n'
+    + '예상 퇴원 징후: ' + val("symptomContent") + '\n'
+    + '예상 징후 이후 조치: ' + val("symptomAction") + '\n'
+    + '부서장 보고: ' + radioVal("reportToBoss") + '\n'
+    + '담임진단 퇴원사유: ' + val("withdrawalReason") + '\n'
+    + '퇴원분류: 대분류 ' + val("bigCategory") + ' / 소분류 ' + val("smallCategory") + '\n\n'
+    + '=== 최근 3개월 상담 기록 ===\n'
+    + (consultText || '없음');
+
+  if (reportType === "detail") {
+    return `당신은 케이스수학과학학원의 퇴원 분석 전문가입니다.
+아래 데이터를 바탕으로 퇴원 상세 보고서를 정확히 아래 JSON 형식으로만 출력하세요.
+JSON 외 다른 텍스트, 설명, 마크다운 코드블록(\`\`\`)을 절대 포함하지 마세요.
+
+[입력 데이터]
+${data}
+
+[출력 JSON 형식]
+{
+  "reportTitle": "${val('name')} 퇴원 상세 보고서",
+  "teacher": "${val('teacher') || '담임'}",
+  "student": {
+    "name": "${val('name')}",
+    "school": "${val('school')}",
+    "grade": "${val('grade')}"
+  },
+  "consultSummary": [
+    {"date": "날짜", "content": "상담 내용 요약 (마침표 기준 줄바꿈 유지)"}
+  ],
+  "withdrawalAnalysis": "퇴원 사유 분석 내용. 마침표 후 줄바꿈. 직접 원인과 근본 원인 구분하여 서술.",
+  "missedPoints": {
+    "mathTeacher": "수학 교사 입장에서 놓친 부분. 부드럽고 조심스럽게. 마침표 후 줄바꿈.",
+    "counselingExpert": "상담 전문가 조언. 부드럽고 조심스럽게. 마침표 후 줄바꿈.",
+    "psychologist": "심리 전문가 조언. 부드럽고 조심스럽게. 마침표 후 줄바꿈."
+  },
+  "improvements": {
+    "mathTeacher": "수학 교사 입장 개선사항. 현장에서 가능한 권유 형식. 마침표 후 줄바꿈.",
+    "counselingExpert": "상담 전문가 조언. 권유형/공손한 어조. 마침표 후 줄바꿈.",
+    "psychologist": "심리 전문가 조언. 권유형/공손한 어조. 마침표 후 줄바꿈."
+  },
+  "messageToTeacher": "강사에게 드리는 따뜻한 메시지. 강사들이 퇴원을 막기 위해 충분히 노력했다는 전제로. 격려와 응원. 마침표 후 줄바꿈."
+}
+
+규칙:
+- consultSummary는 입력된 상담 기록을 날짜순으로 모두 포함
+- 모든 내용은 마침표 기준 줄바꿈 처리 (\\n 사용)
+- 강사 비판 금지, 부드럽고 공손한 권유형 어조 유지
+- JSON만 출력, 다른 텍스트 없음`;
+  } else {
+    return '당신은 학원 교육 전문가입니다. 아래 퇴원 사례를 바탕으로 강사 연수 자료를 JSON 형식으로만 출력하세요.\n'
+      + 'JSON 외 다른 텍스트, 설명, 마크다운 코드블록을 절대 포함하지 마세요.\n\n'
+      + '[입력 데이터]\n' + data + '\n\n'
+      + '[출력 JSON 형식]\n'
+      + '{\n'
+      + '  "trainingTitle": "강사 연수 자료: (핵심 주제 한 줄 제목)",\n'
+      + '  "teacher": "' + val("teacher") + '",\n'
+      + '  "studentGrade": "' + val("grade") + '",\n'
+      + '  "caseSummary": "사례 요약 (익명 처리, 학생명 제외). 마침표 후 줄바꿈.",\n'
+      + '  "warningSignals": [\n'
+      + '    {"level": "HIGH", "label": "즉시 개입 필요", "items": ["신호1", "신호2", "신호3"]},\n'
+      + '    {"level": "MEDIUM", "label": "면밀한 관찰 필요", "items": ["신호1", "신호2"]},\n'
+      + '    {"level": "LOW", "label": "정기 체크 대상", "items": ["신호1", "신호2"]}\n'
+      + '  ],\n'
+      + '  "interventionPoints": {\n'
+      + '    "good": ["잘된 점1", "잘된 점2", "잘된 점3"],\n'
+      + '    "improve": ["개선 포인트1", "개선 포인트2", "개선 포인트3"]\n'
+      + '  },\n'
+      + '  "consultingLanguage": [\n'
+      + '    {"situation": "상황 설명", "example": "권장 표현 예시"},\n'
+      + '    {"situation": "상황 설명", "example": "권장 표현 예시"},\n'
+      + '    {"situation": "상황 설명", "example": "권장 표현 예시"}\n'
+      + '  ],\n'
+      + '  "preventionChecklist": ["체크리스트1", "체크리스트2", "체크리스트3", "체크리스트4", "체크리스트5"],\n'
+      + '  "keyLessons": "핵심 교훈 요약. 마침표 후 줄바꿈.",\n'
+      + '  "discussionQuestions": ["토론 질문1", "토론 질문2", "토론 질문3"]\n'
+      + '}\n\n'
+      + '규칙: JSON만 출력. 각 항목 충분히 상세하게. 강사 비판 금지. 부드럽고 공손한 어조.';
+  }
+}
+
+// Render markdown-ish output
+function renderMarkdown(text) {
+  return text
+    .replace(/^### (.+)$/gm, '<h3 style="font-size:14px;font-weight:700;color:#1e293b;margin:18px 0 8px;">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 style="font-size:16px;font-weight:800;color:#1e293b;margin:22px 0 10px;border-bottom:2px solid #e2e8f0;padding-bottom:6px;">$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1 style="font-size:18px;font-weight:800;color:#1e3a5f;margin:24px 0 12px;">$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^- (.+)$/gm, '<li style="margin:4px 0 4px 16px;">$1</li>')
+    .replace(/^(\d+)\. (.+)$/gm, '<li style="margin:4px 0 4px 16px;"><strong>$1.</strong> $2</li>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+const CASE_LOGO = '<svg width="80" height="38" viewBox="0 0 80 38" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="38" rx="7" fill="#0f2d5c"/><text x="8" y="16" font-family="Georgia,serif" font-weight="700" font-size="13" fill="#ffffff" letter-spacing="1">CASE</text><text x="8" y="29" font-family="Arial" font-size="7.5" fill="#7ab3f5" letter-spacing="0.3">수학과학학원</text><rect x="58" y="5" width="16" height="28" rx="4" fill="#1d4ed8"/><text x="62" y="23" font-family="Georgia,serif" font-weight="900" font-size="14" fill="#fff">C</text></svg>';
+
+function nl2br(str) {
+  if (!str) return "";
+  return String(str).replace(/\\n/g,"<br>").replace(/\n/g,"<br>");
+}
+
+function renderDetailReport(r) {
+  var today = new Date().toLocaleDateString("ko-KR", {year:"numeric",month:"long",day:"numeric"});
+  var mp = r.missedPoints || {};
+  var im = r.improvements || {};
+  var st = r.student || {};
+
+  function sHead(num, label) {
+    return '<div style="display:flex;align-items:center;gap:12px;margin:0 0 18px;">'
+      + '<div style="width:32px;height:32px;background:#0f2d5c;border-radius:8px;'
+      + 'display:flex;align-items:center;justify-content:center;'
+      + 'font-size:13px;font-weight:800;color:#fff;flex-shrink:0;">' + num + '</div>'
+      + '<div style="font-size:16px;font-weight:800;color:#0f2d5c;">' + label + '</div>'
+      + '</div>';
+  }
+
+  function sub(label, content, accent, bg) {
+    return '<div style="margin-bottom:14px;border-radius:12px;overflow:hidden;border:1px solid ' + accent + '44;">'
+      + '<div style="background:' + accent + ';padding:8px 16px;">'
+      + '<span style="font-size:12px;font-weight:700;color:#fff;">' + label + '</span></div>'
+      + '<div style="background:' + bg + ';padding:14px 16px;font-size:13px;color:#374151;line-height:1.85;">'
+      + nl2br(content || '') + '</div></div>';
+  }
+
+  // 상담 테이블
+  var rows = '';
+  var cl = r.consultSummary || [];
+  for (var i = 0; i < cl.length; i++) {
+    var rowbg = (i % 2 === 0) ? '#f7faff' : '#fff';
+    rows += '<tr>'
+      + '<td style="padding:11px 16px;white-space:nowrap;font-weight:700;color:#1d4ed8;'
+      + 'font-size:12.5px;border-right:1px solid #e8eef7;background:' + rowbg + ';vertical-align:top;">'
+      + (cl[i].date || '') + '</td>'
+      + '<td style="padding:11px 16px;font-size:13px;color:#374151;line-height:1.8;background:' + rowbg + ';">'
+      + nl2br(cl[i].content || '') + '</td></tr>';
+  }
+  if (!rows) rows = '<tr><td colspan="2" style="padding:18px;text-align:center;color:#94a3b8;font-size:13px;">상담 기록이 없습니다.</td></tr>';
+
+  // 학생 카드
+  var cards = '';
+  var cardData = [['학생명', st.name], ['학교명', st.school], ['학년', st.grade]];
+  for (var j = 0; j < cardData.length; j++) {
+    cards += '<div style="flex:1;min-width:120px;background:#f7faff;border-radius:10px;padding:14px 16px;border-top:3px solid #1d4ed8;">'
+      + '<div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:6px;">' + cardData[j][0] + '</div>'
+      + '<div style="font-size:16px;font-weight:800;color:#0f2d5c;">' + (cardData[j][1] || '—') + '</div></div>';
+  }
+
+  var h = '';
+  h += '<div style="font-family:\'Noto Sans KR\',sans-serif;color:#1e293b;max-width:100%;">';
+
+  // 헤더 배너
+  h += '<div style="background:linear-gradient(135deg,#0f2d5c 0%,#1d4ed8 100%);'
+     + 'border-radius:16px;padding:24px 28px;margin-bottom:28px;'
+     + 'display:flex;justify-content:space-between;align-items:flex-start;">';
+  h += '<div>' + CASE_LOGO;
+  h += '<div style="margin-top:14px;">'
+     + '<div style="font-size:11px;color:#93c5fd;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Withdrawal Analysis Report</div>'
+     + '<div style="font-size:20px;font-weight:900;color:#fff;line-height:1.2;">' + (r.reportTitle || '퇴원 상세 보고서') + '</div>'
+     + '</div></div>';
+  h += '<div style="text-align:right;flex-shrink:0;">'
+     + '<div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px 16px;">'
+     + '<div style="font-size:11px;color:#93c5fd;margin-bottom:4px;">담당 강사</div>'
+     + '<div style="font-size:15px;font-weight:800;color:#fff;">' + (r.teacher || '—') + '</div></div>'
+     + '<div style="font-size:11px;color:#7ab3f5;margin-top:8px;">작성일: ' + today + '</div>'
+     + '</div></div>';
+
+  // 1. 학생 기본 사항
+  h += '<div style="margin-top:0;">' + sHead(1, '학생 기본 사항');
+  h += '<div style="display:flex;gap:12px;flex-wrap:wrap;">' + cards + '</div></div>';
+
+  // 2. 상담 내역
+  h += '<div style="margin-top:32px;">' + sHead(2, '최근 3개월 상담 내역');
+  h += '<div style="border-radius:12px;overflow:hidden;border:1.5px solid #dbeafe;">'
+     + '<table style="width:100%;border-collapse:collapse;">'
+     + '<thead><tr style="background:#1d4ed8;">'
+     + '<th style="padding:11px 16px;font-size:12px;font-weight:700;color:#fff;text-align:left;white-space:nowrap;width:110px;">날 짜</th>'
+     + '<th style="padding:11px 16px;font-size:12px;font-weight:700;color:#fff;text-align:left;">상담 내용</th>'
+     + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+
+  // 3. 퇴원 사유 분석
+  h += '<div style="margin-top:32px;">' + sHead(3, '퇴원 사유 분석');
+  h += '<div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:12px;padding:18px 20px;">'
+     + '<div style="display:flex;gap:10px;align-items:flex-start;">'
+     + '<div style="font-size:22px;line-height:1;flex-shrink:0;">🔍</div>'
+     + '<div style="font-size:13px;color:#374151;line-height:1.85;">' + nl2br(r.withdrawalAnalysis || '') + '</div>'
+     + '</div></div></div>';
+
+  // 4. 놓친 부분
+  h += '<div style="margin-top:32px;">' + sHead(4, '학원 및 교직원이 놓친 부분');
+  h += sub('① 수학 교사 입장', mp.mathTeacher, '#1d4ed8', '#eff6ff');
+  h += sub('② 상담 전문가의 조언', mp.counselingExpert, '#059669', '#f0fdf4');
+  h += sub('③ 심리 전문가의 조언', mp.psychologist, '#7c3aed', '#faf5ff');
+  h += '</div>';
+
+  // 5. 개선 사항
+  h += '<div style="margin-top:32px;">' + sHead(5, '개선해야 할 사항');
+  h += sub('① 수학 교사 입장 (현장 가능한 권유)', im.mathTeacher, '#1d4ed8', '#eff6ff');
+  h += sub('② 상담 전문가의 조언', im.counselingExpert, '#059669', '#f0fdf4');
+  h += sub('③ 심리 전문가의 조언', im.psychologist, '#7c3aed', '#faf5ff');
+  h += '</div>';
+
+  // 6. 강사 메시지
+  h += '<div style="margin-top:32px;">' + sHead(6, '강사에게 드리는 메시지');
+  h += '<div style="background:linear-gradient(135deg,#0f2d5c,#1d4ed8);border-radius:14px;padding:22px 24px;">'
+     + '<div style="font-size:24px;margin-bottom:12px;">💌</div>'
+     + '<p style="font-size:13.5px;line-height:2;color:#dbeafe;margin:0;">' + nl2br(r.messageToTeacher || '') + '</p>'
+     + '</div></div>';
+
+  // 하단
+  h += '<div style="margin-top:36px;padding-top:18px;border-top:1px solid #e2e8f0;'
+     + 'display:flex;justify-content:space-between;align-items:center;">'
+     + CASE_LOGO
+     + '<div style="font-size:11px;color:#94a3b8;text-align:right;">'
+     + '본 보고서는 케이스수학과학학원 내부 관리용 문서입니다.<br>무단 배포 및 외부 공유를 금합니다.'
+     + '</div></div>';
+
+  h += '</div>';
+  return h;
+}
+
+// API Key management
+function loadApiKey() {
+  var saved = localStorage.getItem("anthropic_api_key") || "";
+  // apiKeyInput 요소가 제거되었으므로 존재할 때만 처리
+  var inp = document.getElementById("apiKeyInput");
+  if (inp && saved) {
+    inp.value = saved;
+    showApiKeyStatus(true);
+  }
+}
+
+function onApiKeyInput() {
+  const status = document.getElementById("apiKeyStatus");
+  status.style.display = "none";
+}
+
+function saveApiKey() {
+  const key = document.getElementById("apiKeyInput").value.trim();
+  if (!key) {
+    setApiKeyStatus("❌ API 키를 입력해 주세요.", "#dc2626");
+    return;
+  }
+  if (!key.startsWith("sk-ant-")) {
+    setApiKeyStatus("⚠️ Anthropic API 키는 'sk-ant-'로 시작합니다. 확인해 주세요.", "#d97706");
+    return;
+  }
+  localStorage.setItem("anthropic_api_key", key);
+  showApiKeyStatus(true);
+}
+
+function showApiKeyStatus(saved) {
+  const key = document.getElementById("apiKeyInput").value.trim();
+  const short = key ? key.slice(0, 12) + "..." + key.slice(-4) : "";
+  setApiKeyStatus(`✅ 저장됨: ${short}`, "#16a34a");
+}
+
+function setApiKeyStatus(msg, color) {
+  const el = document.getElementById("apiKeyStatus");
+  el.textContent = msg;
+  el.style.color = color;
+  el.style.display = "block";
+}
+
+function toggleApiKeyVis() {
+  const input = document.getElementById("apiKeyInput");
+  input.type = input.type === "password" ? "text" : "password";
+}
+
+// Generate report
+async function generateReport() {
+  const btn = document.getElementById("btnGenerate");
+  const errBox = document.getElementById("errorBox");
+  const outBox = document.getElementById("outputBox");
+  const outContent = document.getElementById("outputContent");
+  const outTitle = document.getElementById("outputTitle");
+
+  btn.disabled = true;
+  btn.textContent = "⏳ AI가 보고서를 작성 중입니다...";
+  errBox.style.display = "none";
+  outBox.style.display = "none";
+
+  const apiKey = ACADEMY_API_KEY || localStorage.getItem("anthropic_api_key") || document.getElementById("apiKeyInput").value.trim();
+  if (!apiKey) {
+    errBox.textContent = "⚠️ API 키를 먼저 입력하고 저장해 주세요.";
+    errBox.style.display = "block";
+    btn.disabled = false;
+    btn.textContent = "✨ AI 보고서 생성";
+    document.getElementById("apiKeyCard").scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 4096,
+        messages: [{ role: "user", content: buildPrompt() }],
+      }),
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const text = (data.content || []).map(b => b.text || "").join("\n");
+    currentOutputText = text;
+    outTitle.textContent = reportType === "detail" ? "📄 퇴원 상세 보고서" : "🎓 강사 연수 자료";
+
+    if (reportType === "detail") {
+      try {
+        const clean = text.replace(/^```json\s*/,"").replace(/```\s*$/,"").trim();
+        const rpt = JSON.parse(clean);
+        outContent.innerHTML = renderDetailReport(rpt);
+      } catch(e) {
+        outContent.innerHTML = renderMarkdown(text);
+      }
+    } else {
+      try {
+        const clean = text.replace(/^```json\s*/,"").replace(/```\s*$/,"").trim();
+        const rpt = JSON.parse(clean);
+        outContent.innerHTML = renderTrainingReport(rpt);
+      } catch(e) {
+        outContent.innerHTML = renderMarkdown(text);
+      }
+    }
+    outBox.style.display = "block";
+    outBox.scrollIntoView({ behavior: "smooth" });
+  } catch (e) {
+    errBox.textContent = "API 호출 중 오류가 발생했습니다: " + e.message;
+    errBox.style.display = "block";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "✨ AI 보고서 생성";
+  }
+}
+
+function copyOutput() {
+  const text = document.getElementById("outputContent").innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector(".btn-copy");
+    btn.textContent = "✅ 복사됨";
+    setTimeout(() => { btn.textContent = "📋 복사"; }, 2000);
+  });
+}
+
+// ── 강사 연수 자료 렌더러 ──────────────────────────────
+function renderTrainingReport(r) {
+  var today = new Date().toLocaleDateString("ko-KR", {year:"numeric",month:"long",day:"numeric"});
+
+  function tHead(num, emoji, label, color) {
+    return '<div style="display:flex;align-items:center;gap:12px;margin:0 0 16px;">'
+      + '<div style="width:34px;height:34px;background:' + color + ';border-radius:10px;'
+      + 'display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">' + emoji + '</div>'
+      + '<div style="font-size:15px;font-weight:800;color:' + color + ';">' + label + '</div>'
+      + '</div>';
+  }
+
+  // 위험 신호 섹션
+  var levelColors = {HIGH:'#dc2626', MEDIUM:'#d97706', LOW:'#16a34a'};
+  var levelBg = {HIGH:'#fef2f2', MEDIUM:'#fffbeb', LOW:'#f0fdf4'};
+  var levelBorder = {HIGH:'#fecaca', MEDIUM:'#fde68a', LOW:'#bbf7d0'};
+  var warnHtml = '';
+  var signals = r.warningSignals || [];
+  for (var i = 0; i < signals.length; i++) {
+    var s = signals[i];
+    var c = levelColors[s.level] || '#64748b';
+    var bg = levelBg[s.level] || '#f8fafc';
+    var bd = levelBorder[s.level] || '#e2e8f0';
+    var dot = s.level === 'HIGH' ? '🔴' : s.level === 'MEDIUM' ? '🟡' : '🟢';
+    warnHtml += '<div style="margin-bottom:12px;border-radius:12px;border:1.5px solid ' + bd + ';overflow:hidden;">';
+    warnHtml += '<div style="background:' + bg + ';padding:9px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid ' + bd + ';">';
+    warnHtml += '<span style="font-size:14px;">' + dot + '</span>';
+    warnHtml += '<span style="font-size:12px;font-weight:800;color:' + c + ';">' + s.label + '</span></div>';
+    warnHtml += '<div style="padding:12px 14px;background:#fff;">';
+    var items = s.items || [];
+    for (var k = 0; k < items.length; k++) {
+      warnHtml += '<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:' + (k < items.length-1 ? '1px dashed #f1f5f9' : 'none') + ';">';
+      warnHtml += '<span style="color:' + c + ';font-weight:700;flex-shrink:0;">•</span>';
+      warnHtml += '<span style="font-size:13px;color:#374151;line-height:1.7;">' + items[k] + '</span></div>';
+    }
+    warnHtml += '</div></div>';
+  }
+
+  // 개입 포인트
+  var ip = r.interventionPoints || {};
+  var goodItems = ip.good || [];
+  var improveItems = ip.improve || [];
+  var ipHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+  ipHtml += '<div style="background:#f0fdf4;border-radius:12px;padding:14px 16px;border:1.5px solid #bbf7d0;">';
+  ipHtml += '<div style="font-size:12px;font-weight:800;color:#16a34a;margin-bottom:10px;">✅ 잘된 점</div>';
+  for (var gi = 0; gi < goodItems.length; gi++) {
+    ipHtml += '<div style="font-size:13px;color:#374151;line-height:1.7;padding:4px 0;border-bottom:' + (gi < goodItems.length-1 ? '1px dashed #d1fae5' : 'none') + ';">'
+      + '<span style="color:#16a34a;font-weight:700;">✓</span> ' + goodItems[gi] + '</div>';
+  }
+  ipHtml += '</div>';
+  ipHtml += '<div style="background:#fef2f2;border-radius:12px;padding:14px 16px;border:1.5px solid #fecaca;">';
+  ipHtml += '<div style="font-size:12px;font-weight:800;color:#dc2626;margin-bottom:10px;">⚡ 개선 포인트</div>';
+  for (var ii = 0; ii < improveItems.length; ii++) {
+    ipHtml += '<div style="font-size:13px;color:#374151;line-height:1.7;padding:4px 0;border-bottom:' + (ii < improveItems.length-1 ? '1px dashed #fee2e2' : 'none') + ';">'
+      + '<span style="color:#dc2626;font-weight:700;">→</span> ' + improveItems[ii] + '</div>';
+  }
+  ipHtml += '</div></div>';
+
+  // 상담 언어 예시
+  var cl = r.consultingLanguage || [];
+  var clHtml = '';
+  for (var ci = 0; ci < cl.length; ci++) {
+    clHtml += '<div style="margin-bottom:10px;border-radius:10px;overflow:hidden;border:1.5px solid #e0e7ff;">';
+    clHtml += '<div style="background:#eef2ff;padding:8px 14px;font-size:12px;font-weight:700;color:#4338ca;">' + cl[ci].situation + '</div>';
+    clHtml += '<div style="background:#fff;padding:10px 14px;font-size:13px;color:#374151;line-height:1.7;">';
+    clHtml += '<span style="color:#6366f1;font-weight:700;">" </span>' + cl[ci].example + '<span style="color:#6366f1;font-weight:700;"> "</span></div></div>';
+  }
+
+  // 체크리스트
+  var checks = r.preventionChecklist || [];
+  var chkHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+  for (var chi = 0; chi < checks.length; chi++) {
+    chkHtml += '<div style="display:flex;align-items:flex-start;gap:8px;background:#fff;border-radius:10px;padding:10px 12px;border:1.5px solid #e2e8f0;">';
+    chkHtml += '<div style="width:20px;height:20px;border:2px solid #6366f1;border-radius:5px;flex-shrink:0;margin-top:1px;"></div>';
+    chkHtml += '<span style="font-size:13px;color:#374151;line-height:1.6;">' + checks[chi] + '</span></div>';
+  }
+  chkHtml += '</div>';
+
+  // 토론 질문
+  var dqs = r.discussionQuestions || [];
+  var dqHtml = '';
+  for (var di = 0; di < dqs.length; di++) {
+    dqHtml += '<div style="display:flex;gap:12px;padding:10px 0;border-bottom:' + (di < dqs.length-1 ? '1px solid #e2e8f0' : 'none') + ';">';
+    dqHtml += '<div style="width:26px;height:26px;background:#6366f1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">Q' + (di+1) + '</div>';
+    dqHtml += '<span style="font-size:13px;color:#374151;line-height:1.7;padding-top:3px;">' + dqs[di] + '</span></div>';
+  }
+
+  var h = '';
+  h += '<div style="font-family:\'Noto Sans KR\',sans-serif;color:#1e293b;max-width:100%;">';
+
+  // 헤더
+  h += '<div style="background:linear-gradient(135deg,#312e81 0%,#6366f1 100%);border-radius:16px;padding:24px 28px;margin-bottom:28px;">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
+  h += '<div>' + CASE_LOGO;
+  h += '<div style="margin-top:14px;">';
+  h += '<div style="font-size:11px;color:#c7d2fe;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Teacher Training Material</div>';
+  h += '<div style="font-size:18px;font-weight:900;color:#fff;line-height:1.3;">' + (r.trainingTitle || '강사 연수 자료') + '</div>';
+  h += '</div></div>';
+  h += '<div style="text-align:right;flex-shrink:0;">';
+  h += '<div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px 16px;">';
+  h += '<div style="font-size:11px;color:#c7d2fe;margin-bottom:4px;">담당 강사</div>';
+  h += '<div style="font-size:15px;font-weight:800;color:#fff;">' + (r.teacher || '—') + '</div></div>';
+  h += '<div style="font-size:11px;color:#a5b4fc;margin-top:8px;">작성일: ' + today + '</div>';
+  h += '</div></div></div>';
+
+  // 1. 사례 요약
+  h += '<div style="margin-bottom:24px;">' + tHead(1,'📋','사례 요약','#0f2d5c');
+  h += '<div style="background:#f8faff;border:1.5px solid #dbeafe;border-radius:12px;padding:16px 18px;">';
+  h += '<p style="font-size:13px;color:#374151;line-height:1.85;margin:0;">' + nl2br(r.caseSummary || '') + '</p>';
+  h += '</div></div>';
+
+  // 2. 위험 신호
+  h += '<div style="margin-bottom:24px;">' + tHead(2,'🚨','조기 위험 신호 (Early Warning Signs)','#dc2626');
+  h += warnHtml + '</div>';
+
+  // 3. 개입 포인트
+  h += '<div style="margin-bottom:24px;">' + tHead(3,'🎯','효과적인 개입 포인트 분석','#0369a1');
+  h += ipHtml + '</div>';
+
+  // 4. 상담 언어 예시
+  h += '<div style="margin-bottom:24px;">' + tHead(4,'💬','상담 시 권장 언어·표현 예시','#6366f1');
+  h += clHtml + '</div>';
+
+  // 5. 체크리스트
+  h += '<div style="margin-bottom:24px;">' + tHead(5,'✅','퇴원 예방 실전 체크리스트','#059669');
+  h += chkHtml + '</div>';
+
+  // 6. 핵심 교훈
+  h += '<div style="margin-bottom:24px;">' + tHead(6,'💡','핵심 교훈 요약','#d97706');
+  h += '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:16px 18px;">';
+  h += '<p style="font-size:13px;color:#374151;line-height:1.85;margin:0;">' + nl2br(r.keyLessons || '') + '</p>';
+  h += '</div></div>';
+
+  // 7. 토론 질문
+  h += '<div style="margin-bottom:8px;">' + tHead(7,'🗣️','강사 토론 질문','#7c3aed');
+  h += '<div style="background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:12px;padding:14px 18px;">';
+  h += dqHtml;
+  h += '</div></div>';
+
+  // 하단
+  h += '<div style="margin-top:32px;padding-top:16px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">';
+  h += CASE_LOGO;
+  h += '<div style="font-size:11px;color:#94a3b8;text-align:right;">본 자료는 케이스수학과학학원 내부 강사 연수용 문서입니다.<br>무단 배포 및 외부 공유를 금합니다.</div>';
+  h += '</div></div>';
+
+  return h;
+}
+
+// ── 다운로드 ──────────────────────────────────────────
+function makeDownloadHtml(titleText, innerHtml) {
+  return '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">'
+    + '<meta name="viewport" content="width=device-width,initial-scale=1.0">'
+    + '<title>' + titleText + '</title>'
+    + '<style>'
+    + '@import url(\'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap\');'
+    + 'body{font-family:\'Noto Sans KR\',sans-serif;background:#f1f5f9;margin:0;padding:32px 16px;}'
+    + '.wrap{max-width:780px;margin:0 auto;background:#fff;border-radius:16px;padding:36px 40px;box-shadow:0 4px 24px rgba(0,0,0,0.08);}'
+    + '</style></head><body>'
+    + '<div class="wrap">' + innerHtml + '</div>'
+    + '</body></html>';
+}
+
+function downloadReport() {
+  var content = document.getElementById("outputContent");
+  if (!content) return;
+  var title = document.getElementById("outputTitle").textContent || '보고서';
+  var studentName = val("name") || "학생";
+  var fname = studentName + '_' + title.replace(/[📄🎓\s]/g,'') + '.html';
+  var html = makeDownloadHtml(title, content.innerHTML);
+  triggerDownload(fname, html);
+}
+
+function downloadModalReport() {
+  var content = document.getElementById("modalContent");
+  var title = document.getElementById("modalTitle").textContent || '보고서';
+  var fname = title.replace(/[📄🎓\s]/g,'') + '.html';
+  var html = makeDownloadHtml(title, content.innerHTML);
+  triggerDownload(fname, html);
+}
+
+function triggerDownload(filename, htmlContent) {
+  var blob = new Blob([htmlContent], {type: 'text/html;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function() { URL.revokeObjectURL(url); a.remove(); }, 1000);
+}
+
+// ══════════════════════════════════════════════════════
+// 🛡️ 퇴원 예방 분석
+// ══════════════════════════════════════════════════════
+
+function pvVal(id) {
+  var el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+function pvChk(id) {
+  var el = document.getElementById(id);
+  return el && el.checked;
+}
+
+function calcPvPeriod() {
+  var joinDate = document.getElementById('pv_joinDate').value;
+  if (!joinDate) return;
+  var start = new Date(joinDate);
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  if (start > today) return;
+
+  var totalDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+  var years  = Math.floor(totalDays / 365);
+  var months = Math.floor((totalDays % 365) / 30);
+  var days   = totalDays % 30;
+
+  var periodText = '';
+  if (years > 0)  periodText += years + '년 ';
+  if (months > 0) periodText += months + '개월 ';
+  if (days > 0 && years === 0) periodText += days + '일';
+  periodText = periodText.trim();
+
+  var totalMonths = years * 12 + months;
+  var cat = '', catColor = '', catBg = '';
+  if (totalMonths < 1)        { cat = '초단기'; catColor = '#dc2626'; catBg = '#fef2f2'; }
+  else if (totalMonths < 3)   { cat = '단기';   catColor = '#d97706'; catBg = '#fffbeb'; }
+  else if (totalMonths < 12)  { cat = '중기';   catColor = '#0369a1'; catBg = '#eff6ff'; }
+  else                        { cat = '장기';   catColor = '#16a34a'; catBg = '#f0fdf4'; }
+
+  document.getElementById('pv_period').value = periodText + ' (' + cat + ')';
+
+  var badge = document.getElementById('pv_periodBadge');
+  badge.textContent = cat;
+  badge.style.background = catBg;
+  badge.style.color = catColor;
+  badge.style.border = '1.5px solid ' + catColor + '44';
+  badge.style.display = 'inline-block';
+}
+
+function buildPreventionPrompt() {
+  var signals = [];
+  if (pvChk('pv_sig1')) signals.push('학원 가기 싫다는 말을 함');
+  if (pvChk('pv_sig2')) signals.push('점수가 2주 이상 지속 하락');
+  if (pvChk('pv_sig3')) signals.push('과제 미제출 빈도 증가');
+  if (pvChk('pv_sig4')) signals.push('수업 중 집중력 저하');
+  if (pvChk('pv_sig5')) signals.push('학부모 걱정·불만 표현');
+  if (pvChk('pv_sig6')) signals.push('집에서 짜증 증가');
+  if (pvChk('pv_sig7')) signals.push('다른 학원·과외 언급');
+  if (pvChk('pv_sig8')) signals.push('수강료 납부 지연');
+  if (pvVal('pv_sigEtc')) signals.push(pvVal('pv_sigEtc'));
+
+  var data = '=== 학생 현황 ===\n'
+    + '이름: ' + pvVal('pv_name') + ' | 학년: ' + pvVal('pv_grade') + ' | 반: ' + pvVal('pv_ban') + '\n'
+    + '재원 기간: ' + pvVal('pv_period') + ' | 반 레벨: ' + pvVal('pv_level') + '\n'
+    + '성향: ' + pvVal('pv_tendency') + '\n'
+    + '특이사항: ' + pvVal('pv_note') + '\n\n'
+    + '=== 최근 학습 상태 ===\n'
+    + '[WT 점수]\n'
+    + '           이번주  /  1주전  /  2주전  /  3주전\n'
+    + '학생점수:  ' + (pvVal('pv_wt1')||'—') + '  /  ' + (pvVal('pv_wt2')||'—') + '  /  ' + (pvVal('pv_wt3')||'—') + '  /  ' + (pvVal('pv_wt4')||'—') + '\n'
+    + '반  평균:  ' + (pvVal('pv_wtavg1')||'—') + '  /  ' + (pvVal('pv_wtavg2')||'—') + '  /  ' + (pvVal('pv_wtavg3')||'—') + '  /  ' + (pvVal('pv_wtavg4')||'—') + '\n\n'
+    + '[MT 점수]\n'
+    + '           이번달  /  지난달\n'
+    + '학생점수:  ' + (pvVal('pv_mt1')||'—') + '  /  ' + (pvVal('pv_mt2')||'—') + '\n'
+    + '반  평균:  ' + (pvVal('pv_mtavg1')||'—') + '  /  ' + (pvVal('pv_mtavg2')||'—') + '\n\n'
+    + '[분기고사]\n'
+    + '1차: ' + (pvVal('pv_qt1_term')||'—') + ' / 학생 ' + (pvVal('pv_qt1_score')||'—') + '점 / 반평균 ' + (pvVal('pv_qt1_avg')||'—') + '점\n'
+    + '2차: ' + (pvVal('pv_qt2_term')||'—') + ' / 학생 ' + (pvVal('pv_qt2_score')||'—') + '점 / 반평균 ' + (pvVal('pv_qt2_avg')||'—') + '점\n\n'
+    + '수업참여: ' + pvVal('pv_attend') + ' | 과제수행: ' + pvVal('pv_hw') + ' | 최근결석: ' + pvVal('pv_absent') + '\n\n'
+    + '=== 위험 신호 ===\n'
+    + (signals.length ? signals.map(function(s,i){return (i+1)+'. '+s;}).join('\n') : '없음') + '\n\n'
+    + '=== 최근 상담 기록 ===\n'
+    + (pvVal('pv_consult') || '없음') + '\n\n'
+    + '=== 담임 강사 소견 ===\n'
+    + (pvVal('pv_opinion') || '없음');
+
+  return '당신은 케이스수학과학학원의 학생 관리 전문가입니다.\n'
+    + '아래 재원 중인 학생의 현황을 분석하여 퇴원 예방 솔루션을 JSON 형식으로만 출력하세요.\n'
+    + 'JSON 외 다른 텍스트나 마크다운 코드블록을 절대 포함하지 마세요.\n\n'
+    + '[학생 현황]\n' + data + '\n\n'
+    + '[출력 JSON 형식]\n'
+    + '{\n'
+    + '  "studentName": "학생 이름",\n'
+    + '  "riskLevel": "높음 또는 보통 또는 낮음",\n'
+    + '  "riskReason": "위험도 판단 근거. 마침표 후 줄바꿈.",\n'
+    + '  "signalSummary": ["핵심 위험 신호1", "신호2", "신호3"],\n'
+    + '  "rootCause": "퇴원을 고려하게 될 수 있는 근본 원인. 마침표 후 줄바꿈.",\n'
+    + '  "immediateActions": [\n'
+    + '    {"when": "오늘 당장", "action": "구체적 행동"},\n'
+    + '    {"when": "이번 주 내", "action": "구체적 행동"},\n'
+    + '    {"when": "2주 내", "action": "구체적 행동"}\n'
+    + '  ],\n'
+    + '  "parentScript": [\n'
+    + '    {"situation": "상황 설명", "script": "권장 멘트 예시"},\n'
+    + '    {"situation": "상황 설명", "script": "권장 멘트 예시"}\n'
+    + '  ],\n'
+    + '  "twoWeekPlan": [\n'
+    + '    {"week": "1주차", "focus": "핵심 집중 사항", "actions": ["행동1", "행동2"]},\n'
+    + '    {"week": "2주차", "focus": "핵심 집중 사항", "actions": ["행동1", "행동2"]}\n'
+    + '  ],\n'
+    + '  "encouragement": "담임 강사에게 보내는 따뜻한 응원 메시지. 마침표 후 줄바꿈."\n'
+    + '}\n\n'
+    + '규칙:\n'
+    + '- 위험도는 반드시 높음/보통/낮음 중 하나.\n'
+    + '- 이 학원은 단체수업(그룹 클래스)이므로 "과제량 축소", "개인 커리큘럼 변경", "1:1 맞춤 진도 조정" 등 단체수업에서 불가능한 솔루션은 절대 제시하지 말 것.\n'
+    + '- 대신 수업 중 개별 관심 표현, 칭찬 타이밍, 학부모 상담, 쉬는 시간 대화, 그룹 내 역할 부여 등 단체수업 환경에서 실제로 가능한 행동만 제시할 것.\n'
+    + '- 강사 비판 없이 부드러운 어조.\n'
+    + '- 모든 솔루션은 지금 당장 교실에서 실행 가능한 것으로 한정.';
+}
+
+async function runPreventionAnalysis() {
+  var btn = document.getElementById('btnPrevent');
+  var errBox = document.getElementById('pvErrorBox');
+  var outBox = document.getElementById('pvOutputBox');
+
+  if (!pvVal('pv_name')) {
+    errBox.textContent = '⚠️ 학생 이름을 입력해 주세요.';
+    errBox.style.display = 'block';
+    return;
+  }
+  var apiKey = ACADEMY_API_KEY || localStorage.getItem('anthropic_api_key') || '';
+  if (!apiKey) {
+    errBox.textContent = '⚠️ API 키가 없습니다. AI 보고서 탭에서 먼저 저장해 주세요.';
+    errBox.style.display = 'block';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = '⏳ AI가 분석 중입니다...';
+  errBox.style.display = 'none';
+  outBox.style.display = 'none';
+
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        messages: [{ role: 'user', content: buildPreventionPrompt() }]
+      })
+    });
+    var data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    var text = (data.content || []).map(function(b){ return b.text||''; }).join('\n');
+    var rpt = JSON.parse(text.replace(/^```json\s*/,'').replace(/```\s*$/,'').trim());
+    lastPvReport = rpt;
+    document.getElementById('pvOutputContent').innerHTML = renderPreventionReport(rpt);
+    outBox.style.display = 'block';
+    outBox.scrollIntoView({ behavior: 'smooth' });
+  } catch(e) {
+    errBox.textContent = '오류: ' + e.message;
+    errBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🛡️ 퇴원 예방 분석 시작';
+  }
+}
+
+function renderPreventionReport(r) {
+  var today = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+  var riskColor = r.riskLevel==='높음'?'#dc2626':r.riskLevel==='보통'?'#d97706':'#16a34a';
+  var riskBg    = r.riskLevel==='높음'?'#fef2f2':r.riskLevel==='보통'?'#fffbeb':'#f0fdf4';
+  var riskBd    = r.riskLevel==='높음'?'#fecaca':r.riskLevel==='보통'?'#fde68a':'#bbf7d0';
+  var riskEmoji = r.riskLevel==='높음'?'🔴':r.riskLevel==='보통'?'🟡':'🟢';
+
+  function sHead(emoji,label,color) {
+    return '<div style="display:flex;align-items:center;gap:10px;margin:0 0 14px;">'
+      +'<div style="width:34px;height:34px;background:'+color+';border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">'+emoji+'</div>'
+      +'<div style="font-size:15px;font-weight:800;color:'+color+';">'+label+'</div></div>';
+  }
+
+  var h = '<div style="font-family:\'Noto Sans KR\',sans-serif;color:#1e293b;">';
+
+  // ⚠️ AI 면책 문구 (눈에 잘 띄게)
+  h += '<div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;'
+     + 'border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start;">';
+  h += '<div style="font-size:22px;flex-shrink:0;">⚠️</div>';
+  h += '<div>';
+  h += '<div style="font-size:12px;font-weight:800;color:#92400e;margin-bottom:4px;">AI 분석 결과 안내</div>';
+  h += '<div style="font-size:12px;color:#78350f;line-height:1.75;">';
+  h += 'AI 분석이므로 실제 교실에서의 모습을 정확히 파악하지 못합니다.<br>';
+  h += '<strong>보다 자세한 상담은 팀 간부 혹은 선임 선생님과 상의를 하신 이후에 판단하세요.</strong>';
+  h += '</div></div></div>';
+
+  // 헤더
+  h += '<div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:16px;padding:22px 26px;margin-bottom:24px;">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
+  h += '<div>'+CASE_LOGO+'<div style="margin-top:12px;">';
+  h += '<div style="font-size:11px;color:#ddd6fe;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;">Withdrawal Prevention Analysis</div>';
+  h += '<div style="font-size:19px;font-weight:900;color:#fff;">'+(r.studentName||'')+'  학생 퇴원 예방 분석</div></div></div>';
+  h += '<div style="flex-shrink:0;background:rgba(255,255,255,0.12);border-radius:10px;padding:8px 14px;text-align:right;">';
+  h += '<div style="font-size:11px;color:#ddd6fe;margin-bottom:2px;">분석일</div>';
+  h += '<div style="font-size:13px;font-weight:700;color:#fff;">'+today+'</div></div></div></div>';
+
+  // 위험도
+  h += '<div style="margin-bottom:22px;">'+sHead('⚠️','퇴원 위험도','#7c3aed');
+  h += '<div style="background:'+riskBg+';border:2px solid '+riskBd+';border-radius:14px;padding:18px 20px;">';
+  h += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">';
+  h += '<div style="font-size:40px;">'+riskEmoji+'</div>';
+  h += '<div><div style="font-size:26px;font-weight:900;color:'+riskColor+';">'+(r.riskLevel||'')+'</div>';
+  h += '<div style="font-size:12px;color:#64748b;">현재 퇴원 위험 수준</div></div></div>';
+  h += '<p style="font-size:13px;color:#374151;line-height:1.85;margin:0;">'+nl2br(r.riskReason||'')+'</p></div></div>';
+
+  // 위험 신호
+  var sigs = r.signalSummary||[];
+  if (sigs.length) {
+    h += '<div style="margin-bottom:22px;">'+sHead('🚨','발견된 위험 신호','#dc2626');
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    for (var i=0;i<sigs.length;i++) {
+      h += '<div style="display:flex;align-items:flex-start;gap:8px;background:#fef2f2;border-radius:10px;padding:10px 12px;border-left:3px solid #dc2626;">';
+      h += '<span style="color:#dc2626;font-weight:800;flex-shrink:0;">!</span>';
+      h += '<span style="font-size:13px;color:#374151;line-height:1.6;">'+sigs[i]+'</span></div>';
+    }
+    h += '</div></div>';
+  }
+
+  // 근본 원인
+  h += '<div style="margin-bottom:22px;">'+sHead('🔍','근본 원인 분석','#0369a1');
+  h += '<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:16px 18px;">';
+  h += '<p style="font-size:13px;color:#374151;line-height:1.85;margin:0;">'+nl2br(r.rootCause||'')+'</p></div></div>';
+
+  // 즉시 행동
+  var acts = r.immediateActions||[];
+  var aColors=['#dc2626','#d97706','#16a34a'];
+  var aBg=['#fef2f2','#fffbeb','#f0fdf4'];
+  h += '<div style="margin-bottom:22px;">'+sHead('⚡','즉시 실행 행동 가이드','#d97706');
+  for (var ai=0;ai<acts.length;ai++) {
+    h += '<div style="display:flex;gap:12px;margin-bottom:10px;background:'+aBg[ai]+';border-radius:12px;padding:14px 16px;border-left:4px solid '+aColors[ai]+';align-items:flex-start;">';
+    h += '<div style="flex-shrink:0;background:'+aColors[ai]+';color:#fff;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;white-space:nowrap;">'+(acts[ai].when||'')+'</div>';
+    h += '<div style="font-size:13px;color:#374151;line-height:1.75;">'+(acts[ai].action||'')+'</div></div>';
+  }
+  h += '</div>';
+
+  // 상담 멘트
+  var scripts = r.parentScript||[];
+  h += '<div style="margin-bottom:22px;">'+sHead('💬','상담 권장 멘트','#6366f1');
+  for (var si=0;si<scripts.length;si++) {
+    h += '<div style="margin-bottom:10px;border-radius:12px;overflow:hidden;border:1.5px solid #e0e7ff;">';
+    h += '<div style="background:#eef2ff;padding:8px 14px;font-size:12px;font-weight:700;color:#4338ca;">'+(scripts[si].situation||'')+'</div>';
+    h += '<div style="background:#fff;padding:12px 14px;font-size:13px;color:#374151;line-height:1.75;"><span style="color:#6366f1;font-weight:700;">" </span>'+(scripts[si].script||'')+'<span style="color:#6366f1;font-weight:700;"> "</span></div></div>';
+  }
+  h += '</div>';
+
+  // 2주 플랜
+  var plan = r.twoWeekPlan||[];
+  var pColors=['#0369a1','#059669'],pBg=['#eff6ff','#f0fdf4'],pBd=['#bfdbfe','#bbf7d0'];
+  h += '<div style="margin-bottom:22px;">'+sHead('📅','2주 집중 관리 플랜','#059669');
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+  for (var pi=0;pi<plan.length;pi++) {
+    h += '<div style="border-radius:12px;overflow:hidden;border:1.5px solid '+pBd[pi]+'">';
+    h += '<div style="background:'+pColors[pi]+';padding:10px 14px;">';
+    h += '<div style="font-size:12px;font-weight:800;color:#fff;">'+(plan[pi].week||'')+'</div>';
+    h += '<div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px;">'+(plan[pi].focus||'')+'</div></div>';
+    h += '<div style="background:'+pBg[pi]+';padding:12px 14px;">';
+    var pa=plan[pi].actions||[];
+    for (var pai=0;pai<pa.length;pai++) {
+      h += '<div style="display:flex;gap:6px;font-size:13px;color:#374151;line-height:1.7;margin-bottom:4px;"><span style="color:'+pColors[pi]+';font-weight:700;">•</span>'+pa[pai]+'</div>';
+    }
+    h += '</div></div>';
+  }
+  h += '</div></div>';
+
+  // 응원 메시지
+  h += '<div style="margin-bottom:8px;">'+sHead('💌','담임 강사에게','#7c3aed');
+  h += '<div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:14px;padding:20px 22px;">';
+  h += '<p style="font-size:13.5px;line-height:2;color:#ede9fe;margin:0;">'+nl2br(r.encouragement||'')+'</p></div></div>';
+
+  // 하단
+  h += '<div style="margin-top:28px;padding-top:14px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">';
+  h += CASE_LOGO+'<div style="font-size:11px;color:#94a3b8;text-align:right;">본 분석은 케이스수학과학학원 내부 관리용입니다.<br>AI 분석은 참고용이며 최종 판단은 담임 강사가 합니다.</div></div>';
+  h += '</div>';
+  return h;
+}
+
+var lastPvReport = null; // 마지막 분석 결과 저장
+
+function copyPvOutput() {
+  if (!lastPvReport) {
+    navigator.clipboard.writeText(document.getElementById('pvOutputContent').innerText);
+    return;
+  }
+  var r = lastPvReport;
+  var riskEmoji = r.riskLevel==='높음' ? '🔴' : r.riskLevel==='보통' ? '🟡' : '🟢';
+  var today = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+
+  var lines = [];
+  lines.push('🛡️ 케이스수학과학학원 퇴원 예방 분석');
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  lines.push('👤 학생: ' + (r.studentName||''));
+  lines.push('📅 분석일: ' + today);
+  lines.push('');
+
+  lines.push(riskEmoji + ' 퇴원 위험도: ' + (r.riskLevel||''));
+  lines.push('');
+  lines.push((r.riskReason||'').replace(/\\n|\n/g, '\n'));
+  lines.push('');
+
+  if ((r.signalSummary||[]).length) {
+    lines.push('🚨 위험 신호');
+    (r.signalSummary||[]).forEach(function(s){ lines.push('  • ' + s); });
+    lines.push('');
+  }
+
+  lines.push('🔍 근본 원인');
+  lines.push((r.rootCause||'').replace(/\\n|\n/g, '\n'));
+  lines.push('');
+
+  lines.push('⚡ 즉시 실행 행동');
+  (r.immediateActions||[]).forEach(function(a){
+    lines.push('  [' + (a.when||'') + '] ' + (a.action||''));
+  });
+  lines.push('');
+
+  lines.push('💬 상담 권장 멘트');
+  (r.parentScript||[]).forEach(function(s){
+    lines.push('  ▶ ' + (s.situation||''));
+    lines.push('  " ' + (s.script||'') + ' "');
+  });
+  lines.push('');
+
+  lines.push('📅 2주 집중 관리 플랜');
+  (r.twoWeekPlan||[]).forEach(function(p){
+    lines.push('  [' + (p.week||'') + '] ' + (p.focus||''));
+    (p.actions||[]).forEach(function(a){ lines.push('    • ' + a); });
+  });
+  lines.push('');
+
+  lines.push('💌 담임 강사에게');
+  lines.push((r.encouragement||'').replace(/\\n|\n/g, '\n'));
+  lines.push('');
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  lines.push('케이스수학과학학원 퇴원예방 솔루션');
+
+  var text = lines.join('\n');
+  navigator.clipboard.writeText(text).then(function(){
+    var btns = document.querySelectorAll('#pvOutputBox .btn-copy');
+    btns.forEach(function(b){
+      if (b.textContent.includes('복사')) {
+        b.textContent = '✅ 복사됨';
+        setTimeout(function(){ b.textContent = '📋 복사'; }, 2000);
+      }
+    });
+  });
+}
+
+function downloadPvReport() {
+  var content = document.getElementById('pvOutputContent');
+  var name = pvVal('pv_name') || '학생';
+  triggerDownload(name+'_퇴원예방분석.html', makeDownloadHtml(name+' 퇴원예방분석', content.innerHTML));
+}
+
+async function copyPvAsImage() {
+  var btn = document.getElementById('btnImgCopy');
+  var target = document.getElementById('pvOutputContent');
+  if (!target) return;
+
+  btn.textContent = '⏳ 변환 중...';
+  btn.disabled = true;
+
+  try {
+    var canvas = await html2canvas(target, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      logging: false
+    });
+
+    canvas.toBlob(async function(blob) {
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+        btn.textContent = '✅ 이미지 복사됨!';
+        btn.style.background = '#dcfce7';
+        setTimeout(function(){
+          btn.textContent = '🖼️ 이미지 복사';
+          btn.style.background = '#f0fdf4';
+          btn.disabled = false;
+        }, 2500);
+      } catch(e) {
+        // 클립보드 이미지 미지원 시 다운로드로 대체
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = (pvVal('pv_name')||'학생') + '_퇴원예방분석.png';
+        a.click();
+        URL.revokeObjectURL(url);
+        btn.textContent = '⬇️ 이미지 저장됨';
+        setTimeout(function(){
+          btn.textContent = '🖼️ 이미지 복사';
+          btn.disabled = false;
+        }, 2500);
+      }
+    }, 'image/png');
+  } catch(e) {
+    alert('이미지 변환 중 오류가 발생했습니다: ' + e.message);
+    btn.textContent = '🖼️ 이미지 복사';
+    btn.disabled = false;
+  }
+}
+
+// ──────────────────────────────────────────────────────
+
+let currentOutputText = "";
+
+function saveCurrentReport() {
+  if (!currentOutputText) return;
+  const reports = getSavedReports();
+  const record = {
+    id: Date.now(),
+    type: reportType,
+    typeLabel: reportType === "detail" ? "퇴원 상세 보고서" : "강사 연수 자료",
+    studentName: val("name") || "미입력",
+    grade: val("grade"),
+    ban: val("ban"),
+    bigCategory: val("bigCategory"),
+    savedAt: new Date().toLocaleString("ko-KR"),
+    content: currentOutputText,
+  };
+  reports.unshift(record);
+  localStorage.setItem("withdrawal_reports", JSON.stringify(reports));
+  const btn = document.getElementById("btnSave");
+  btn.textContent = "✅ 저장됨";
+  btn.style.color = "#16a34a";
+  btn.style.borderColor = "#86efac";
+  setTimeout(() => { btn.textContent = "💾 저장"; btn.style.color = ""; btn.style.borderColor = ""; }, 2500);
+}
+
+function getSavedReports() {
+  try { return JSON.parse(localStorage.getItem("withdrawal_reports") || "[]"); }
+  catch { return []; }
+}
+
+function renderSavedList() {
+  const list = document.getElementById("savedList");
+  const reports = getSavedReports();
+  if (!reports.length) {
+    list.innerHTML = `
+      <div style="text-align:center;padding:60px 20px;color:#94a3b8;">
+        <div style="font-size:48px;margin-bottom:12px;">📂</div>
+        <div style="font-size:15px;font-weight:600;color:#64748b;">저장된 보고서가 없습니다</div>
+        <div style="font-size:13px;margin-top:6px;">AI 보고서 탭에서 생성 후 저장해 주세요.</div>
+      </div>`;
+    return;
+  }
+  const typeColors = { detail:"#3b82f6", training:"#10b981" };
+  const typeBg    = { detail:"#eff6ff", training:"#f0fdf4" };
+  list.innerHTML = reports.map(r => `
+    <div style="background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:12px;
+      box-shadow:0 1px 4px rgba(0,0,0,0.07);border-left:4px solid ${typeColors[r.type]||'#6366f1'};">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;
+              background:${typeBg[r.type]};color:${typeColors[r.type]||'#6366f1'};">
+              ${r.typeLabel}
+            </span>
+            <span style="font-size:12px;color:#64748b;">${r.savedAt}</span>
+          </div>
+          <div style="font-size:15px;font-weight:700;color:#1e293b;">${r.studentName}</div>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">
+            ${r.grade||''}${r.ban?' · '+r.ban+'반':''}${r.bigCategory?' · '+r.bigCategory:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button onclick="viewReport(${r.id})"
+            style="padding:6px 13px;border:none;border-radius:8px;
+            background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;
+            font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">열기</button>
+          <button onclick="deleteReport(${r.id})"
+            style="padding:6px 10px;border:1px solid #fca5a5;border-radius:8px;
+            background:#fff;color:#dc2626;font-size:12px;cursor:pointer;font-family:inherit;">삭제</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function viewReport(id) {
+  const r = getSavedReports().find(x => x.id === id);
+  if (!r) return;
+  document.getElementById("modalTitle").textContent = (r.type==="detail"?"📄 ":"🎓 ") + r.typeLabel;
+  document.getElementById("modalMeta").innerHTML =
+    `<strong>${r.studentName}</strong> &nbsp;·&nbsp; ${r.grade||''}${r.ban?' '+r.ban+'반':''} &nbsp;·&nbsp; ${r.bigCategory||''} &nbsp;·&nbsp; 저장일: ${r.savedAt}`;
+
+  if (r.type === "detail") {
+    try {
+      const clean = r.content.replace(/^```json\s*/,"").replace(/```\s*$/,"").trim();
+      const parsed = JSON.parse(clean);
+      document.getElementById("modalContent").innerHTML = renderDetailReport(parsed);
+    } catch(e) {
+      document.getElementById("modalContent").innerHTML = renderMarkdown(r.content);
+    }
+  } else {
+    try {
+      const clean = r.content.replace(/^```json\s*/,"").replace(/```\s*$/,"").trim();
+      const parsed = JSON.parse(clean);
+      document.getElementById("modalContent").innerHTML = renderTrainingReport(parsed);
+    } catch(e) {
+      document.getElementById("modalContent").innerHTML = renderMarkdown(r.content);
+    }
+  }
+
+  document.getElementById("reportModal")._rawText = r.content;
+  document.getElementById("reportModal").style.display = "block";
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal() {
+  document.getElementById("reportModal").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+function copyModalContent() {
+  const text = document.getElementById("reportModal")._rawText || "";
+  navigator.clipboard.writeText(text).then(() => {
+    const btns = document.querySelectorAll("#reportModal button");
+    btns.forEach(b => { if(b.textContent.includes("복사")) { b.textContent="✅ 복사됨"; setTimeout(()=>{b.textContent="📋 복사";},2000); } });
+  });
+}
+
+function deleteReport(id) {
+  if (!confirm("이 보고서를 삭제할까요?")) return;
+  localStorage.setItem("withdrawal_reports", JSON.stringify(getSavedReports().filter(r => r.id !== id)));
+  renderSavedList();
+}
+
+function clearAllReports() {
+  if (!confirm("저장된 보고서를 모두 삭제할까요?")) return;
+  localStorage.removeItem("withdrawal_reports");
+  renderSavedList();
+}
+
+// ────────────────────────────────────────────────────────
+
+// Init
+checkLogin();
+buildNav();
+loadApiKey();
+// Add 3 default consultation slots
+addConsult(); addConsult(); addConsult();
+
+// 재원기간 자동 구분
+function calcDurationCategory() {
+  const s = document.getElementById("startDate").value;
+  const e = document.getElementById("endDate").value;
+  if (!s || !e) return;
+  const start = new Date(s);
+  const end = new Date(e);
+  if (end <= start) return;
+  const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth())
+    + (end.getDate() >= start.getDate() ? 0 : -1);
+  let cat = "";
+  if (months < 1)       cat = "초단기";
+  else if (months < 3)  cat = "단기";
+  else if (months < 12) cat = "중기";
+  else                  cat = "장기";
+  document.getElementById("payType").value = cat;
+}
+document.getElementById("startDate").addEventListener("change", calcDurationCategory);
+document.getElementById("endDate").addEventListener("change", calcDurationCategory);
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</body>
+</html>

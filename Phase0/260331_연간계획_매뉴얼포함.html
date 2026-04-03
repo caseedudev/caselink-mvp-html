@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>케이스 수학·과학학원 2026 연간계획</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#f1f5f9}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#94a3b8}
+input:focus,textarea:focus{border-color:#6366f1 !important;box-shadow:0 0 0 2px rgba(99,102,241,0.1)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const h = React.createElement;
+const {useState,useCallback,useMemo} = React;
+
+const DEPTS=[
+  {id:'philosophy',label:'학원철학',icon:'🏛️',color:'#6366f1'},
+  {id:'elementary',label:'초등부',icon:'📘',color:'#2563eb'},
+  {id:'middle',label:'중등부',icon:'📗',color:'#059669'},
+  {id:'high',label:'고등부',icon:'📕',color:'#dc2626'},
+  {id:'gifted',label:'영재원',icon:'📙',color:'#d97706'},
+  {id:'science',label:'과학',icon:'🔬',color:'#7c3aed'},
+  {id:'admissions',label:'입시센터',icon:'🎯',color:'#db2777'},
+  {id:'planning',label:'기획',icon:'📋',color:'#0891b2'},
+];
+
+const DATA={
+  philosophy:{name:'학원철학',goals:[],categories:[],mp:{u:[],l:[],r:''},isPh:true},
+  elementary:{
+    name:'초등부',
+    goals:['수학 공부를 잘하는 학습 루틴 형성','올바른 수학 커리큘럼 운영','동기부여를 기반으로 한 자기주도적인 능력 배양','중1 내신 정밀하게 관리','부모님과의 소통'],
+    categories:[
+      {cat:'풀이노트/오답노트/서술형 노트 관리',items:[
+        {name:'풀이노트/오답노트 컨테스트',cycle:'년 2회',timing:'4월, 10월',manager:'초등부 담당 선생님',purpose:'노트 관리 습관 정착 및 동기부여',details:'우수 노트 선정 및 시상, 전시',imp:''},
+        {name:'분기별 반별 노트 점검',cycle:'분기별 1회',timing:'1, 4, 7, 10월',manager:'이유진, 안지현',purpose:'노트 관리 품질 유지',details:'반별 노트 점검 및 피드백',imp:''},
+      ]},
+      {cat:'교재 및 과제 관리',items:[
+        {name:'교재 검사 (신입 선생님 적응)',cycle:'월간 1회',timing:'3주째',manager:'이유진, 안지현',purpose:'신입 강사 교재 관리 체크',details:'교재 체크리스트 기반 검사',imp:''},
+        {name:'과제 수행이 낮은 학생 점검 및 상담',cycle:'월간',timing:'3주째',manager:'초등부선생님',purpose:'과제 수행률 향상',details:'학생별 과제 수행률 점검 및 개별 상담',imp:''},
+      ]},
+      {cat:'개념-응용-심화 4.5개월 커리큘럼 운영',items:[
+        {name:'연간 반별 수업 커리큘럼',cycle:'년 1회',timing:'10월',manager:'황교일, 이유진, 안지현',purpose:'연간 수업 계획 수립',details:'반별 연간 커리큘럼 설계',imp:''},
+        {name:'분기별 수업 커리큘럼',cycle:'분기별',timing:'1, 4, 7, 10월',manager:'황교일, 이유진, 안지현',purpose:'분기별 세부 커리큘럼 확정',details:'분기별 수업 내용 및 진도 확정',imp:''},
+        {name:'분기별 시간표 설정',cycle:'분기별',timing:'1, 4, 7, 10월',manager:'황교일, 이유진, 안지현',purpose:'시간표 최적화',details:'강사 배정 및 시간표 조정',imp:''},
+        {name:'분기별 반 교재 선정 및 제작',cycle:'분기별',timing:'1, 4, 7, 10월',manager:'황교일, 이유진, 강진선, 안지현',purpose:'교재 품질 관리',details:'교재 선정 및 제작 진행',imp:''},
+        {name:'방학 및 상설 특강 구성',cycle:'방학특강(년 2회)',timing:'5, 10월',manager:'이유진, 강진선, 정혜민',purpose:'방학 프로그램 기획',details:'방학 특강 커리큘럼 설계 및 운영',imp:''},
+      ]},
+      {cat:'반레벨업 및 분기별 반 생성',items:[
+        {name:'반 레벨업 대상 선정',cycle:'분기 단위',timing:'2, 5, 8, 11월',manager:'초등부선생님(총괄:이유진)',purpose:'학생 수준별 반 배치',details:'테스트 및 수업 참여도 기반 레벨업 대상 선정',imp:''},
+        {name:'분기별 반 생성',cycle:'분기 단위',timing:'2, 5, 8, 11월',manager:'이유진, 안지현',purpose:'적정 반 편성',details:'학생 수, 수준 기반 반 편성',imp:''},
+      ]},
+      {cat:'TEST 중심의 피드백 관리',items:[
+        {name:'주간테스트 관리',cycle:'주간',timing:'',manager:'초등부 선생님',purpose:'주간 학습 확인',details:'매주 진행하는 단원별 테스트',imp:''},
+        {name:'월간테스트 출제',cycle:'월간',timing:'',manager:'초등부 선생님(총괄: 강진선)',purpose:'월간 학습 성취도 측정',details:'월간 테스트 출제 및 관리',imp:''},
+        {name:'월간테스트 게시판 공지',cycle:'월간',timing:'',manager:'초등부 행정실',purpose:'테스트 결과 공유',details:'게시판을 통한 테스트 결과 공지',imp:''},
+        {name:'분기테스트 출제 및 관리',cycle:'분기별',timing:'2, 5, 8, 11월',manager:'초등부 선생님(총괄: 정혜민)',purpose:'분기별 종합 평가',details:'분기 테스트 출제 및 성적 관리',imp:''},
+      ]},
+      {cat:'외부 경시대회',items:[
+        {name:'HME 공지 및 테스트 관리',cycle:'년 2회',timing:'6, 11월',manager:'초등부 담당선생님, 초등부 행정실',purpose:'경시대회 참여 독려',details:'HME 접수, 공지, 시험 관리',imp:''},
+      ]},
+      {cat:'내신대비 Flow 관리',items:[
+        {name:'내신대비 교재 제작관련',cycle:'시험 진행 시',timing:'시험 6주전',manager:'황교일, 이유진, 강진선, 정혜민',purpose:'내신 대비 교재 품질 확보',details:'학교별 내신대비 교재 제작',imp:''},
+        {name:'내신대비 계획서 작성',cycle:'시험 진행 시',timing:'시험 6주전',manager:'초등부선생님(확인: 이유진)',purpose:'체계적 내신대비 계획',details:'내신대비 일정 및 학습 계획서 작성',imp:''},
+        {name:'내신대비 과정 진행 체크',cycle:'시험 진행 시',timing:'시험 관리 중',manager:'초등부선생님',purpose:'내신대비 진행 상황 모니터링',details:'진행 체크리스트 관리',imp:''},
+        {name:'시험 기출문제 분석',cycle:'시험 진행 시',timing:'시험 이후',manager:'황교일, 초등부선생님',purpose:'기출 분석을 통한 내신 전략 수립',details:'기출 문제 패턴 분석 및 공유',imp:''},
+        {name:'성적우수학생 시상',cycle:'시험 진행 시',timing:'성적표 확인 이후',manager:'초등부선생님',purpose:'성적 향상 동기부여',details:'내신 성적 우수 학생 시상',imp:''},
+      ]},
+      {cat:'친구소개',items:[{name:'내친구 케이스 소개하기',cycle:'',timing:'',manager:'초등부선생님',purpose:'재원생 통한 신규생 유입',details:'친구 소개 이벤트 운영',imp:''}]},
+      {cat:'칭찬을 통한 동기부여',items:[
+        {name:'달란트데이',cycle:'년 2회',timing:'1월, 7월',manager:'초등부선생님, 초등부행정실(총괄: 정혜민)',purpose:'학생 동기부여 및 보상',details:'달란트 포인트 적립 및 보상 이벤트',imp:''},
+        {name:'월간평가 우수학생 시상',cycle:'월 단위',timing:'',manager:'초등부 담당선생님',purpose:'월간 성적 우수자 격려',details:'월간 테스트 우수 학생 시상',imp:''},
+      ]},
+      {cat:'월간 리포트 및 Daily 수업 리포트',items:[
+        {name:'Daily 수업 리포트 발송',cycle:'매일',timing:'',manager:'초등부선생님',purpose:'학부모 일일 소통',details:'매일 수업 내용 및 학생 상태 리포트 발송',imp:''},
+        {name:'월간 리포트 발송',cycle:'월간',timing:'매월 첫주',manager:'초등부선생님',purpose:'월간 학습 현황 공유',details:'월간 종합 리포트 발송',imp:''},
+      ]},
+    ],
+    mp:{
+      u:[
+        {m:'1월',c:'2분기 수업 커리큘럼 작성\n2분기 시간표 작성\n2분기 교재 선정 및 제작\n달란트 데이'},
+        {m:'2월',c:'1분기 분기고사 실시\n분기고사 회의 및 시간표 확정\n새분기 안내 상담'},
+        {m:'3월',c:'2분기 시작\n신입생상담 및 담임인사'},
+        {m:'4월',c:'3분기 수업 커리큘럼 작성\n3분기 시간표 작성\n3분기 교재 선정 및 제작\n오답,풀이노트 대회'},
+        {m:'5월',c:'2분기 분기고사 실시\n분기고사 회의 및 시간표 확정\n새분기 안내 상담\n여름방학 특강 계획'},
+        {m:'6월',c:'3분기 시작\n신입생상담 및 담임인사\nHME 경시대회'},
+      ],
+      l:[
+        {m:'7월',c:'4분기 수업 커리큘럼 작성\n4분기 시간표 작성\n4분기 교재 선정 및 제작\n달란트 데이'},
+        {m:'8월',c:'3분기 분기고사 실시\n분기고사 회의 및 시간표 확정\n새분기 안내 상담'},
+        {m:'9월',c:'중 1 중간고사 대비\n중1 중간고사 시험지 분석'},
+        {m:'10월',c:'1분기 수업 커리큘럼 작성\n1분기 시간표 작성\n1분기 교재 선정 및 제작\n오답,풀이노트 대회\n겨울방학 특강 계획\n중1 기말고사 교재 제작\n예비중2 분기고사'},
+        {m:'11월',c:'4분기 분기고사 실시\n분기고사 회의 및 시간표 확정\nHME 경시대회\n중1 기말고사 대비'},
+        {m:'12월',c:'4분기 시작\n신입생상담 및 담임인사\n중1 기말고사 시험지 분석'},
+      ],
+      r:'신입 선생님 반 대상 교재 검사\n과제수행 낮은 학생 반별 선정 및 집중 상담\n월간평가 출제 및 관리\n월간리포트 발송\n월간평가 게시판\n월간 우수학생 시상'
+    }
+  },
+  middle:{
+    name:'중등부',goals:['중등 내신성적 극대화','고등 선행 및 심화 능력 극대화','동기부여를 기반으로 한 밀착 마인드 관리','학생 및 부모님과의 소통'],
+    categories:[
+      {cat:'오답노트/풀이노트 관리',items:[{name:'팀 회의 및 강사연수 시 지속적인 공지',cycle:'월간',timing:'',manager:'황교일, 홍주연',purpose:'노트 관리 습관 정착',details:'팀 회의에서 노트 관리 현황 점검 및 독려',imp:''}]},
+      {cat:'교재의 완전학습 및 과제검사의 정밀함',items:[
+        {name:'비정기적 교재 체크',cycle:'필요 시',timing:'',manager:'홍주연, 중등 팀 내의 신입 선생님',purpose:'교재 관리 품질 확보',details:'신입 강사 교재 관리 점검',imp:''},
+        {name:'과제 수행이 낮은 경우 학생 개별 상담',cycle:'월간',timing:'',manager:'담임선생님',purpose:'학생별 과제 수행률 향상',details:'개별 상담을 통한 과제 수행 독려',imp:''},
+      ]},
+      {cat:'내신과 선행의 균형잡힌 커리큘럼',items:[
+        {name:'연간 반별 수업 커리큘럼',cycle:'년 1회',timing:'',manager:'황교일, 홍주연, 안지현',purpose:'연간 수업 로드맵 수립',details:'반별 연간 커리큘럼 설계',imp:''},
+        {name:'분기별 수업 커리큘럼',cycle:'분기별',timing:'',manager:'황교일, 홍주연, 안지현',purpose:'분기별 세부 계획',details:'분기별 커리큘럼 확정',imp:''},
+        {name:'분기별 시간표 설정',cycle:'분기별',timing:'',manager:'황교일, 홍주연, 안지현',purpose:'시간표 최적화',details:'강사 배정 및 시간표 조정',imp:''},
+        {name:'분기별 반 교재 선정 및 제작',cycle:'분기별',timing:'',manager:'황교일, 홍주연, 안지현',purpose:'교재 품질 관리',details:'교재 선정 회의 및 제작',imp:''},
+        {name:'분기 수업 계획서 구성',cycle:'분기별',timing:'',manager:'중등부선생님',purpose:'수업 계획 체계화',details:'분기별 수업 계획서 작성',imp:''},
+        {name:'방학 및 상설 특강 구성',cycle:'방학특강(년 2회)',timing:'',manager:'중등부 팀내 회의를 통해 결정',purpose:'방학 프로그램 기획',details:'방학 특강 편성 및 운영',imp:''},
+      ]},
+      {cat:'반레벨업 및 분기별 반 생성',items:[
+        {name:'반 레벨업 대상 선정',cycle:'분기 단위',timing:'',manager:'중등 선생님 회의를 통해',purpose:'학생 수준별 반 배치',details:'분기별 레벨업 대상 선정 회의',imp:''},
+        {name:'분기별 반 생성',cycle:'분기 단위',timing:'',manager:'홍주연, 안지현',purpose:'적정 반 편성',details:'반 편성 및 학생 배치',imp:''},
+      ]},
+      {cat:'TEST의 개별관리',items:[
+        {name:'주간테스트 관리',cycle:'주간',timing:'매주 금요일',manager:'중등부선생님(검수:팀장과주임)',purpose:'주간 학습 확인',details:'매주 금요일 주간테스트 실시',imp:''},
+        {name:'분기테스트 출제 및 관리',cycle:'분기',timing:'분기시험 한달전부터',manager:'중등부선생님(검수:팀장)',purpose:'분기별 종합 평가',details:'분기 테스트 출제, 검수, 실시',imp:''},
+      ]},
+      {cat:'내신대비 Flow 관리',items:[
+        {name:'내신대비 교재 제작',cycle:'1학기-2번/2학기-1번',timing:'내신대비 2달전부터',manager:'중등부내 팀 제작(검수:팀장과 주임)',purpose:'학교별 맞춤 내신 교재 제작',details:'기출 분석 기반 교재 제작',imp:''},
+        {name:'내신대비 계획서 작성',cycle:'',timing:'내신대비 4주전 제출',manager:'중등부 선생님 → 홍주연 보고',purpose:'체계적 내신대비 진행',details:'내신대비 일정 및 학습 계획',imp:''},
+        {name:'내신대비 과정 진행 체크',cycle:'',timing:'내신기간 꾸준히',manager:'각 회의 시간에 함께 체크',purpose:'내신대비 진행 상황 모니터링',details:'회의 시 진행 체크',imp:''},
+        {name:'시험 기출문제 분석',cycle:'',timing:'',manager:'',purpose:'기출 분석 통한 전략 수립',details:'기출 문제 분석 및 공유',imp:''},
+        {name:'성적우수학생 시상',cycle:'',timing:'시험후 1달안에',manager:'매년 담당 선생님 지정',purpose:'성적 향상 동기부여',details:'내신 우수 학생 시상',imp:''},
+      ]},
+      {cat:'친구소개하기',items:[{name:'내 친구 케이스 소개하기',cycle:'',timing:'1,2월 / 7,8월',manager:'중등부선생님',purpose:'재원생 통한 신규생 유입',details:'친구 소개 이벤트',imp:''}]},
+    ],
+    mp:{u:[{m:'1월',c:''},{m:'2월',c:''},{m:'3월',c:''},{m:'4월',c:''},{m:'5월',c:''},{m:'6월',c:''}],l:[{m:'7월',c:''},{m:'8월',c:''},{m:'9월',c:''},{m:'10월',c:''},{m:'11월',c:''},{m:'12월',c:''}],r:''}
+  },
+  high:{
+    name:'고등부',goals:['고등 내신성적 극대화를 위한 관리','수능 성적 극대화를 위한 관리','동기부여를 기반으로 한 밀착 마인드 관리','학생 및 부모님과의 소통'],
+    categories:[
+      {cat:'내신 관리 Flow',items:[
+        {name:'내신대비 교재',cycle:'연 4회',timing:'3월,5월,8월,10월',manager:'',purpose:'내신대비 교재 제작 및 배포',details:'학교별 내신대비 교재',imp:''},
+        {name:'내신 추진 진행',cycle:'연 4회',timing:'4월,6월,9월,11월',manager:'',purpose:'내신 대비 전반 관리',details:'내신 진행 체크 및 관리',imp:''},
+        {name:'내신대비 계획서',cycle:'연 4회',timing:'5월,7월,9월,12월',manager:'',purpose:'내신대비 계획 수립',details:'내신대비 일정 및 학습 계획서',imp:''},
+        {name:'내신 지표 종합',cycle:'연 4회',timing:'5월,7월,9월,12월',manager:'',purpose:'내신 성과 분석',details:'내신 성적 지표 종합 분석',imp:''},
+        {name:'내신 서류 종합',cycle:'연 4회',timing:'5월,7월,9월,12월',manager:'',purpose:'내신 관련 서류 관리',details:'내신 관련 문서 종합',imp:''},
+        {name:'성적 우수자 시상',cycle:'년 2회',timing:'6월,1월',manager:'',purpose:'내신 우수 학생 격려',details:'성적 우수자 선정 및 시상',imp:''},
+      ]},
+      {cat:'TEST 관리',items:[
+        {name:'주간테스트 관리',cycle:'주1회',timing:'주중',manager:'',purpose:'주간 학습 확인',details:'매주 주간테스트 실시',imp:''},
+        {name:'월간테스트 관리',cycle:'월1회',timing:'월말',manager:'',purpose:'월간 성취도 점검',details:'월간 테스트 실시 및 분석',imp:''},
+      ]},
+      {cat:'반별 수업 계획',items:[
+        {name:'반편성 수업 커리큘럼',cycle:'연5회',timing:'12월,3월,7월',manager:'',purpose:'반 편성 및 커리큘럼 구성',details:'반 편성 후 수업 커리큘럼 확정',imp:''},
+        {name:'학기별 세부 수업 커리큘럼 및 교재',cycle:'연5회',timing:'12월,3월,7월',manager:'',purpose:'학기별 수업 계획 수립',details:'세부 수업 계획 및 교재 선정',imp:''},
+        {name:'내신대비 시간표 구성',cycle:'연4회',timing:'4월,6월,9월,11월',manager:'',purpose:'내신 기간 시간표 조정',details:'내신 기간 맞춤 시간표',imp:''},
+        {name:'방학 및 집중 수업 구성',cycle:'연2회',timing:'7월,12월',manager:'',purpose:'방학 특강 기획',details:'방학 집중 수업 편성',imp:''},
+      ]},
+      {cat:'수능준비',items:[
+        {name:'고3 연간 수업 계획',cycle:'연1회',timing:'12월',manager:'',purpose:'고3 수능 대비 연간 로드맵',details:'고3 연간 수업 계획 수립',imp:''},
+        {name:'고3 수능 Final 수업 계획',cycle:'연1회',timing:'7월',manager:'',purpose:'수능 직전 Final 수업 기획',details:'고3 수능 Final 수업 편성',imp:''},
+      ]},
+      {cat:'친구소개 / 수능응원 / 대입실적',items:[
+        {name:'내 친구 케이스 소개하기',cycle:'',timing:'',manager:'',purpose:'재원생 통한 신규생 유입',details:'친구 소개 이벤트',imp:''},
+        {name:'고3 종강 및 수능 응원',cycle:'연 1회',timing:'',manager:'',purpose:'고3 학생 격려',details:'수능 전 종강 및 응원 이벤트',imp:''},
+        {name:'대입 실적 조사',cycle:'',timing:'',manager:'',purpose:'대입 실적 데이터 축적',details:'졸업생 대입 실적 조사 및 기록',imp:''},
+      ]},
+    ],
+    mp:{
+      u:[
+        {m:'1월',c:'내신점수 & 모의고사 우수 시상\n2026학년도 벤치마킹\n레벨1,2,3 월말평가\n레벨고1 교육인 발표 & 취합'},
+        {m:'2월',c:'2026학년도 내신반조사 취합\n반/타 통합\n레벨1,2,3 월말평가'},
+        {m:'3월',c:'고2,3 단과과목 개점\n고1,2,3 한국연합모의고사\n고1,2,3 월말평가'},
+        {m:'4월',c:'내신대비'},
+        {m:'5월',c:'6/6 현충일 휴무\n수능(6월) 모의고사 대비\n고1,2,3 월말평가\n고3 한국연합모의고사'},
+        {m:'6월',c:'고1,2,3 한국연합모의고사\n편성 및 정규수업\n내신대비'},
+      ],
+      l:[
+        {m:'7월',c:'7/16 개강\n고3 수시종강\n고3 정시반 가을학기\n고2,3 월말평가'},
+        {m:'8월',c:'출석우수 & 모의고사 시상\n내신대비\n여름방학\n고1,2,3 월말평가'},
+        {m:'9월',c:'선택대비\n고1,2,3 한국연합모의고사'},
+        {m:'10월',c:'10/3, 10/6 휴무\n고3 연합모의고사\n고1,2,3 월말평가'},
+        {m:'11월',c:'고3 종강\n고3 수능 응원\n고1,2 수능 이후 관리\n수능\n레벨고1 인계준비'},
+        {m:'12월',c:'고3 대비 고1 개강\n레벨고2,3 개강\n정원학생 검토\n12/31 종무'},
+      ],
+      r:'케이스 디스커션(고1내신, 고2&내신시험, 고3수능)\n주간 기출풀이 진행\n주간 반성일지\n등급전 내신 재편성\n수급별 보강 편성\n교과별 발전건의'
+    }
+  },
+  gifted:{
+    name:'영재원',goals:['수학 공부를 잘하는 학습 루틴 형성','올바른 수학 커리큘럼 운영','동기부여를 기반으로 한 자기주도적인 능력 배양','중1,2,3 내신 정밀하게 관리','부모님과의 소통'],
+    categories:[
+      {cat:'개념-응용-심화 4.5개월 커리큘럼 운영',items:[
+        {name:'연간 반별 수업 커리큘럼',cycle:'년 1회',timing:'10월',manager:'장부열, 박은지',purpose:'연간 커리큘럼 수립',details:'영재원 반별 연간 수업 계획',imp:''},
+        {name:'방학 및 상설 특강 구성',cycle:'방학특강(년 2회)',timing:'',manager:'장부열, 박은지',purpose:'방학 프로그램 기획',details:'방학 특강 편성',imp:''},
+      ]},
+      {cat:'분기별 반 생성',items:[{name:'분기별 반 생성',cycle:'분기 단위',timing:'2, 5, 8, 11월',manager:'장부열, 박은지, 안지현',purpose:'적정 반 편성',details:'분기별 반 편성',imp:''}]},
+      {cat:'TEST 중심의 피드백 관리',items:[
+        {name:'주간테스트 출제',cycle:'주간',timing:'',manager:'영재원 선생님',purpose:'주간 학습 확인',details:'매주 테스트 출제 및 실시',imp:''},
+        {name:'분기테스트 출제 및 관리',cycle:'분기별',timing:'2, 5, 8, 11월',manager:'영재원 선생님(총괄: 박은지)',purpose:'분기별 종합 평가',details:'분기 테스트 출제 및 관리',imp:''},
+      ]},
+      {cat:'외부 경시대회',items:[
+        {name:'HME 공지 및 테스트 관리',cycle:'년 2회',timing:'6, 11월',manager:'영재원 담당선생님, 초등부 행정실',purpose:'경시대회 참여 독려',details:'HME 접수, 공지, 시험 관리',imp:''},
+        {name:'성대경시대회',cycle:'년 2회',timing:'4, 10월',manager:'영재원 담당선생님',purpose:'경시대회 참여 관리',details:'성대 경시대회 접수 및 관리',imp:''},
+      ]},
+      {cat:'내신대비 Flow 관리',items:[
+        {name:'내신대비 교재 제작관련',cycle:'시험 진행 시',timing:'시험 6주전',manager:'영재원 담당선생님',purpose:'내신대비 교재 품질 확보',details:'학교별 내신대비 교재 제작',imp:''},
+        {name:'시험 기출문제 타이핑 및 검수',cycle:'시험 진행 시',timing:'시험 이후',manager:'영재원 조교, 영재원 선생님',purpose:'기출 문제 DB 구축',details:'기출문제 타이핑 및 검수',imp:''},
+        {name:'성적우수학생 시상',cycle:'시험 진행 시',timing:'성적표 확인 이후',manager:'영재원 선생님',purpose:'성적 향상 동기부여',details:'내신 우수 학생 시상',imp:''},
+      ]},
+      {cat:'칭찬을 통한 동기부여',items:[{name:'분기고사 우수학생 시상',cycle:'년 2차',timing:'2, 8월',manager:'영재원 선생님',purpose:'분기고사 우수 학생 격려',details:'분기고사 성적 우수자 시상',imp:''}]},
+    ],
+    mp:{
+      u:[
+        {m:'1월',c:'상설특강 진행\n겨울방학 특강: 자기주도학습'},
+        {m:'2월',c:'1분기 분기고사 실시 및 성적 시상\n분기고사 회의\n새분기 안내 상담\n겨울방학 특강: 자기주도 학습\n학부모 간담회'},
+        {m:'3월',c:'2분기 시작\n신입생상담 및 담임인사'},
+        {m:'4월',c:'1학기 중간고사 대비\n성대경시대회'},
+        {m:'5월',c:'2분기 분기고사 실시\n분기고사 회의\n1학기 중간고사 시험지 타이핑\n여름방학 특강 계획'},
+        {m:'6월',c:'3분기 시작\n1학기 기말고사 대비\nHME 경시대회'},
+      ],
+      l:[
+        {m:'7월',c:'1학기 기말고사 시험지 타이핑\n1학기 기말고사 성적 시상\n여름방학특강: 자기주도 학습'},
+        {m:'8월',c:'3분기 분기고사 실시 및 성적 시상\n과학고 1차서류\nKJMO 경시대회'},
+        {m:'9월',c:'2학기 중간고사 대비\n예비고1 설명회'},
+        {m:'10월',c:'2026년 커리큘럼 작성\n1분기 시간표 작성\n겨울방학 특강 계획\n2학기 중간고사 시험지 타이핑\n중3 기말고사 대비\n성대경시대회'},
+        {m:'11월',c:'4분기 분기고사 실시\n겨울학기 설명회\n영재원 신입생 선발고사\nHME 경시대회\n중1,2 기말고사 대비\n중3 수업 종강'},
+        {m:'12월',c:'1분기 개강\n2학기 기말고사대비 및 시험지 타이핑\n특목고/자사고 입학 사정관 실전 면접'},
+      ],
+      r:'상설특강\n학부모 상담 및 신규생 상담'
+    }
+  },
+  science:{name:'과학',goals:['과학 교육 프로그램 운영 (추후 업데이트 예정)'],categories:[],mp:{u:[],l:[],r:''}},
+  admissions:{
+    name:'입시센터',goals:['전문화된 입시 프로그램(고입, 대입)으로 재원생 진학 목표 달성','입시 교육을 통한 학생, 학부모, 임직원의 진로 및 진학 이해도 향상','케이스 입시 데이터 구축으로 지역 정보 축적하여 컨설팅 신뢰도 확보'],
+    categories:[
+      {cat:'고입 프로그램',items:[
+        {name:'(중1,2)(그룹) 특자진학 준비',cycle:'1~2월, 5회차*2시간',timing:'1~2월',manager:'',purpose:'5가지 키워드로 탐구활동, 자소서 소재 만들기',details:'그룹 수업으로 특목/자사 진학 기초 준비',imp:''},
+        {name:'(중3)(그룹) 자소서 문항이해',cycle:'1월, 1회차*3시간',timing:'1월',manager:'',purpose:'자기소개서 문항 심층 워크숍',details:'자소서 문항 분석 및 작성법',imp:''},
+        {name:'(중3)(개별) 특자실전 자소서',cycle:'개인별, 5회차*1시간',timing:'2월',manager:'',purpose:'자기소개서 완성 개별 상담',details:'1:1 자소서 첨삭 및 완성',imp:''},
+        {name:'(중3)(개별) 면접 대비',cycle:'개인별, 1회차*1시간',timing:'',manager:'',purpose:'특목 자사고 실전 면접 대비',details:'모의 면접 및 피드백',imp:''},
+        {name:'(중3)(개별) 개인 상담',cycle:'개인별, 1회차*1시간',timing:'',manager:'',purpose:'고교선택, 입시궁금증 해결',details:'진학 상담',imp:''},
+        {name:'(고1)(그룹) 입시 윈터',cycle:'1~2월, 5회차*1시간',timing:'1~2월',manager:'',purpose:'윈터 프로그램 연계 입시 강좌',details:'고1 대상 입시 윈터 프로그램',imp:''},
+        {name:'(고1)(그룹) 동행G',cycle:'월2회*80분',timing:'3~12월',manager:'',purpose:'그룹형 입시관리 프로그램',details:'월 2회 그룹 입시 관리',imp:''},
+      ]},
+      {cat:'대입 프로그램',items:[
+        {name:'(고2,3)(개별) 동행',cycle:'월1회*90분',timing:'',manager:'',purpose:'개인별 입시관리 프로그램',details:'월 1회 개인별 입시 관리',imp:''},
+        {name:'(고3)(개별) 수시 상담',cycle:'1회차*1시간',timing:'8월',manager:'',purpose:'수시 6장 지원 전략 상담',details:'수시 지원 전략 수립',imp:''},
+        {name:'(고3)(개별) 면접 대비',cycle:'1회차*1시간',timing:'',manager:'',purpose:'대입 실전 면접 대비',details:'모의 면접 및 피드백',imp:''},
+        {name:'(고3)(개별) 정시 상담',cycle:'1회차*1시간',timing:'12월',manager:'',purpose:'정시 3장 지원 전략 상담',details:'정시 배치 및 지원 전략',imp:''},
+        {name:'(고1,2,3)(개별) 개인 상담',cycle:'1회차*1시간',timing:'학기말',manager:'',purpose:'대입 준비 점검 시기별 상담',details:'시기별 진학 상담',imp:''},
+      ]},
+      {cat:'시즌 설명회',items:[
+        {name:'(공통) 입시뉴스 블로그',cycle:'월 1회',timing:'매월',manager:'',purpose:'블로그 콘텐츠 발행',details:'월 1회 블로그 콘텐츠',imp:''},
+        {name:'(공통) 학교생활기록부',cycle:'온라인 설명회',timing:'2월',manager:'',purpose:'학생부 항목별 분석',details:'학생부 항목 분석 설명회',imp:''},
+        {name:'(중) 과학고 진학',cycle:'오프라인 설명회',timing:'5월',manager:'',purpose:'경기지역 과학고 전형 안내',details:'과학고 입시 설명회',imp:''},
+        {name:'(중) 외국 국제고 자사고',cycle:'오프라인 설명회',timing:'5월',manager:'',purpose:'외고 국제고 자사고 전형 안내',details:'자사고/외고 입시 설명회',imp:''},
+        {name:'(고) 고교별 선택과목',cycle:'온라인 설명회',timing:'5월',manager:'',purpose:'고교별 교과목 선택 안내',details:'선택과목 안내',imp:''},
+        {name:'(중) 예비 중1',cycle:'오프라인 설명회',timing:'7월',manager:'',purpose:'고입과 대입, 지역 중고교 이해',details:'예비 중1 학부모 설명회',imp:''},
+        {name:'(고) 수시지원',cycle:'온라인 설명회',timing:'7월',manager:'',purpose:'수시 지원 전략',details:'수시 지원 전략 설명회',imp:''},
+        {name:'(고) 예비 고1',cycle:'오프라인 설명회',timing:'10월',manager:'',purpose:'고교선택과 대입',details:'예비 고1 설명회',imp:''},
+        {name:'(공통) 겨울학기',cycle:'오프라인 설명회',timing:'11월',manager:'',purpose:'대입의 이해',details:'겨울학기 설명회',imp:''},
+        {name:'(고) 2028 대입 설명회',cycle:'',timing:'5월',manager:'',purpose:'대입 전형 안내',details:'2028 대입 설명회',imp:''},
+      ]},
+      {cat:'케이스 입시 데이터',items:[
+        {name:'(고1) 고교지망과 배정',cycle:'재원생 설문조사',timing:'1월',manager:'',purpose:'고1 1~9지망 설문조사',details:'재원생 고교 배정 데이터 수집',imp:''},
+        {name:'(고1) 3월 모의고사 비교',cycle:'성적표 취합',timing:'4월',manager:'',purpose:'고교별 모의고사 vs 내신환경',details:'3월 모의고사 분석',imp:''},
+        {name:'(고2) 고교별 선택과목 인원',cycle:'내신성적표 취합',timing:'6월',manager:'',purpose:'고교별 2학년 선택과목 인원',details:'선택과목 데이터 수집',imp:''},
+        {name:'(공통) 학교알리미 지역 정보',cycle:'6, 10, 12월',timing:'6, 10, 12월',manager:'',purpose:'학년별 학생수/학업성취/진로현황',details:'학교알리미 데이터 수집 및 분석',imp:''},
+        {name:'(공통) 대학알리미 정보',cycle:'대학알리미',timing:'6월',manager:'',purpose:'전형별 신입생 출신 고교',details:'대학알리미 데이터 분석',imp:''},
+      ]},
+    ],
+    mp:{
+      u:[
+        {m:'1월',c:'고입: (중1,2) 특자진학 준비 / (중3) 자소서 문항이해\n대입: (고1) 입시 윈터 / (고2,3) 개인 상담\n설명회: 입시뉴스 블로그\n데이터: 고교지망과 배정'},
+        {m:'2월',c:'고입: (중3) 특자실전 자소서\n대입: (고1) 입시 윈터 / (고2,3) 개인 상담\n설명회: 학교생활기록부'},
+        {m:'3월',c:'대입: (고1) 동행G / (고2,3) 동행'},
+        {m:'4월',c:'설명회: 외국 국제고 자사고 / 고교별 선택과목\n데이터: 3월 모의고사 비교'},
+        {m:'5월',c:'설명회: 과학고 진학 / 2028 대입 설명회'},
+        {m:'6월',c:'데이터: 지역 학년별 학생수 / 선택과목 인원'},
+      ],
+      l:[
+        {m:'7월',c:'고입: (중3) 자소서 / 과학고 자소서\n설명회: 예비 중1 / 수시지원'},
+        {m:'8월',c:'고입: 과학고 면접\n대입: (고3) 수시 상담'},
+        {m:'9월',c:''},
+        {m:'10월',c:'설명회: 예비 고1\n데이터: 지역 교과별 학업성취'},
+        {m:'11월',c:'대입: (고3) 면접 대비\n설명회: 겨울학기'},
+        {m:'12월',c:'고입: (중3) 면접 대비\n대입: (고3) 정시 상담\n데이터: 졸업생 진로현황'},
+      ],
+      r:'입시센터 _ 구글 업무일지 작성'
+    }
+  },
+  planning:{name:'기획',goals:['학원 전체 운영 기획 및 조율 (추후 업데이트 예정)'],categories:[],mp:{u:[],l:[],r:''}},
+};
+
+// ─── App Component ───
+function App(){
+  const [active,setActive]=useState('philosophy');
+  const [data,setData]=useState(DATA);
+  const [exp,setExp]=useState(null);
+  const [editMP,setEditMP]=useState(null);
+
+  const dept=DEPTS.find(d=>d.id===active);
+  const dd=data[active];
+
+  function upd(ci,ii,f,v){
+    setData(function(p){
+      var n=JSON.parse(JSON.stringify(p));
+      n[active].categories[ci].items[ii][f]=v;
+      return n;
+    });
+  }
+
+  function updMP(half,idx,val){
+    setData(function(p){
+      var n=JSON.parse(JSON.stringify(p));
+      n[active].mp[half][idx].c=val;
+      return n;
+    });
+  }
+
+  function updMPR(val){
+    setData(function(p){
+      var n=JSON.parse(JSON.stringify(p));
+      n[active].mp.r=val;
+      return n;
+    });
+  }
+
+  var total=0;
+  dd.categories.forEach(function(c){total+=c.items.length;});
+
+  // ── Header ──
+  var header=h('header',{style:{background:'#fff',borderBottom:'1px solid #e2e8f0',padding:'18px 28px',boxShadow:'0 1px 3px rgba(0,0,0,0.04)'}},
+    h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',maxWidth:1400,margin:'0 auto'}},
+      h('div',{style:{display:'flex',alignItems:'center',gap:14}},
+        h('div',{style:{width:42,height:42,borderRadius:10,background:'linear-gradient(135deg,#2563eb,#6366f1)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,fontWeight:800,color:'#fff'}},'C'),
+        h('div',null,
+          h('h1',{style:{fontSize:18,fontWeight:800,color:'#0f172a',margin:0}},'케이스 수학·과학학원'),
+          h('p',{style:{fontSize:12,color:'#94a3b8',margin:'2px 0 0'}},'연간계획 관리 시스템')
+        )
+      ),
+      h('div',{style:{padding:'7px 18px',borderRadius:8,background:'linear-gradient(135deg,#2563eb,#4f46e5)',color:'#fff',fontWeight:700,fontSize:14}},'2026년')
+    )
+  );
+
+  // ── Tabs ──
+  var tabs=h('nav',{style:{background:'#fff',borderBottom:'1px solid #e2e8f0',padding:'0 28px',overflowX:'auto'}},
+    h('div',{style:{display:'flex',gap:2,maxWidth:1400,margin:'0 auto',padding:'10px 0'}},
+      DEPTS.map(function(d){
+        var a=active===d.id;
+        return h('button',{key:d.id,onClick:function(){setActive(d.id);setExp(null);setEditMP(null);},
+          style:{padding:'9px 18px',borderRadius:8,border:'none',cursor:'pointer',display:'flex',alignItems:'center',gap:7,fontSize:13.5,fontWeight:a?700:500,transition:'all 0.15s',whiteSpace:'nowrap',background:a?d.color+'12':'transparent',color:a?d.color:'#64748b',boxShadow:a?'inset 0 -2px 0 '+d.color:'none'}},
+          h('span',{style:{fontSize:16}},d.icon),d.label
+        );
+      })
+    )
+  );
+
+  // ── Philosophy ──
+  function renderPhilosophy(){
+    var steps=[
+      {s:'STEP 1',t:'올바른 과제 검사 (준비/출발점)',d:'수업 전 과제의 완료도·성실성·이해도를 점검하며 학습 출발선을 조절합니다.'},
+      {s:'STEP 2',t:'개념 및 활용 능력 수업 (핵심 학습)',d:'단순한 문제풀이가 아닌 개념의 구조와 흐름 방향을 깊이 있게 다룹니다.'},
+      {s:'STEP 3',t:'과제 제시 (내면화)',d:'배운 개념을 자기 언어로 정리하고, 응용 문제를 구체화합니다.'},
+      {s:'STEP 4',t:'테스트 및 피드백 (이해 검증)',d:'배운 내용을 테스트로 확인하고, 결과를 피드백하여 학습의 완성도를 높입니다.'},
+      {s:'STEP 5',t:'부족한 부분 보완 (학습 정밀화)',d:'오답·유형별로 분석하여 약점을 보완 학습을 진행합니다.'},
+      {s:'STEP 6',t:'부모님과의 소통 (성장 공유)',d:'학습 결과와 태도, 향후 계획을 공유하며 가정과의 교육 연대를 강화합니다.'},
+    ];
+    var stages=[
+      {sg:'1단계',t:'개념의 반복과 이해',co:'#2563eb',bg:'#dbeafe',d:'개념을 완전히 자기 언어로 이해할 수 있도록 학습. 개념 학습과 적용 연습.'},
+      {sg:'2단계',t:'응용을 통한 확장',co:'#059669',bg:'#d1fae5',d:'배운 개념을 다양한 문제 상황에 적용하여 사고의 유연성을 기름. 유형 연결 학습, 변형문제 적용.'},
+      {sg:'3단계',t:'복합 응용과 도전',co:'#dc2626',bg:'#fee2e2',d:'여러 개념을 통합하여 복잡한 문제를 해결하는 능력 배양. 설명형 문제 풀이, 자기주도형 탐구학습.'},
+    ];
+    var conds=['체계적 관리 프로그램: 정확한 진도, 개념이해, 과제수행, 오답 및 풀이노트 관리','동기부여 시스템: "할 수 있다"는 자기효능감 형성을 위한 정확한 피드백과 칭찬','친절한 교수학습 문화: 학생의 사고과정을 존중하며, 친절하고 정밀한 질문으로 사고를 유도'];
+
+    return h('div',null,
+      h('div',{style:{display:'flex',alignItems:'center',gap:10,marginBottom:20}},
+        h('div',{style:{width:4,height:24,borderRadius:2,background:dept.color}}),
+        h('h2',{style:{fontSize:18,fontWeight:800,color:'#0f172a',margin:0}},'🏛️ 케이스 학원철학')
+      ),
+      h('div',{style:{background:'#fff',borderRadius:14,border:'1px solid #e2e8f0',padding:32,marginBottom:20,boxShadow:'0 1px 3px rgba(0,0,0,0.04)'}},
+        h('div',{style:{textAlign:'center',marginBottom:28}},
+          h('div',{style:{fontSize:14,fontWeight:700,color:'#6366f1',marginBottom:8,letterSpacing:'0.05em'}},'케이스 수학학원의 철학'),
+          h('h3',{style:{fontSize:22,fontWeight:800,color:'#0f172a',margin:0,lineHeight:1.5},dangerouslySetInnerHTML:{__html:'"반복과 심화를 통한 주도적인 인재양성,<br/>이를 위한 친절한 교육"'}})
+        ),
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginTop:24}},
+          // Left: Steps
+          h('div',{style:{background:'#f8fafc',borderRadius:12,padding:24,border:'1px solid #e2e8f0'}},
+            h('h4',{style:{fontSize:14,fontWeight:700,color:'#6366f1',margin:'0 0 16px'}},'케이스의 수업 구조: "배움-확인-성장"의 선순환'),
+            steps.map(function(st,i){
+              return h('div',{key:i,style:{display:'flex',gap:12,marginBottom:14}},
+                h('div',{style:{minWidth:60,height:24,borderRadius:6,background:'#6366f1',color:'#fff',fontSize:11,fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'}},st.s),
+                h('div',null,
+                  h('div',{style:{fontSize:13,fontWeight:700,color:'#1e293b'}},st.t),
+                  h('div',{style:{fontSize:12,color:'#64748b',marginTop:2,lineHeight:1.5}},st.d)
+                )
+              );
+            })
+          ),
+          // Right: Deep Learning
+          h('div',null,
+            h('div',{style:{background:'#f8fafc',borderRadius:12,padding:24,border:'1px solid #e2e8f0',marginBottom:16}},
+              h('h4',{style:{fontSize:14,fontWeight:700,color:'#6366f1',margin:'0 0 12px'}},'케이스가 생각하는 심화학습'),
+              h('div',{style:{background:'#ede9fe',borderRadius:8,padding:14,marginBottom:16}},
+                h('div',{style:{fontSize:12,fontWeight:600,color:'#6366f1',marginBottom:4}},'심화학습 정의 (Definition)'),
+                h('div',{style:{fontSize:12.5,color:'#3730a3',lineHeight:1.6},dangerouslySetInnerHTML:{__html:"심화학습은 단순히 '어려운 문제를 푸는 것'이 아니라, <strong>'깊이 있게 사고하고 스스로 해결하는 힘'</strong>을 기르는 과정입니다. 케이스는 학생이 충분한 집중력과 사고력을 바탕으로 스스로 문제를 해결할 수 있는 능력을 심화 능력이라고 정의합니다."}})
+              ),
+              h('h5',{style:{fontSize:13,fontWeight:700,color:'#1e293b',margin:'0 0 10px'}},'⭐ 심화학습의 핵심 조건 3가지'),
+              conds.map(function(t,i){
+                return h('div',{key:i,style:{fontSize:12.5,color:'#475569',lineHeight:1.7,marginBottom:6,paddingLeft:8,borderLeft:'2px solid #c4b5fd'}},
+                  h('strong',null,(i+1)+'. '),t
+                );
+              })
+            ),
+            h('div',{style:{background:'#f8fafc',borderRadius:12,padding:24,border:'1px solid #e2e8f0'}},
+              h('h5',{style:{fontSize:13,fontWeight:700,color:'#1e293b',margin:'0 0 12px'}},'🎯 심화학습의 3단계 구조'),
+              stages.map(function(st,i){
+                return h('div',{key:i,style:{background:st.bg,borderRadius:10,padding:16,marginBottom:i<2?10:0,borderLeft:'4px solid '+st.co}},
+                  h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:6}},
+                    h('span',{style:{fontSize:11,fontWeight:700,color:st.co,background:'#fff',padding:'2px 8px',borderRadius:4}},st.sg),
+                    h('span',{style:{fontSize:13,fontWeight:700,color:st.co}},st.t)
+                  ),
+                  h('div',{style:{fontSize:12,color:'#475569',lineHeight:1.5}},st.d)
+                );
+              })
+            )
+          )
+        )
+      ),
+      h('div',{style:{background:'#fff',borderRadius:14,border:'1px dashed #cbd5e1',padding:'40px 20px',textAlign:'center',color:'#94a3b8'}},
+        h('div',{style:{fontSize:36,marginBottom:12}},'📄'),
+        h('div',{style:{fontSize:15,fontWeight:600,color:'#64748b',marginBottom:6}},'추가 학원철학 콘텐츠 업로드 대기'),
+        h('div',{style:{fontSize:13}},'원장님이 업로드하시면 이 영역에 반영하겠습니다.')
+      )
+    );
+  }
+
+  // ── Goals ──
+  function renderGoals(){
+    return h('section',{style:{marginBottom:24}},
+      h('div',{style:{display:'flex',alignItems:'center',gap:10,marginBottom:14}},
+        h('div',{style:{width:4,height:22,borderRadius:2,background:dept.color}}),
+        h('h2',{style:{fontSize:17,fontWeight:700,color:'#0f172a',margin:0}},dept.icon+' '+dd.name+' 핵심목표')
+      ),
+      h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:8}},
+        dd.goals.map(function(g,i){
+          return h('div',{key:i,style:{padding:'13px 16px',borderRadius:10,background:'#fff',border:'1px solid #e2e8f0',fontSize:13.5,display:'flex',gap:10,alignItems:'flex-start',boxShadow:'0 1px 2px rgba(0,0,0,0.03)'}},
+            h('span',{style:{color:dept.color,fontWeight:800,fontSize:13,minWidth:22}},(i+1)+'.'),
+            h('span',{style:{color:'#334155'}},g)
+          );
+        })
+      )
+    );
+  }
+
+  // ── Categories ──
+  function renderCats(){
+    if(!dd.categories.length) return null;
+    return h('section',{style:{marginBottom:24}},
+      h('div',{style:{display:'flex',alignItems:'center',gap:10,marginBottom:14}},
+        h('div',{style:{width:4,height:22,borderRadius:2,background:dept.color}}),
+        h('h2',{style:{fontSize:17,fontWeight:700,color:'#0f172a',margin:0}},'교수학습 사항별 관리'),
+        h('span',{style:{fontSize:12,color:'#94a3b8',marginLeft:4}},'총 '+total+'개 항목')
+      ),
+      dd.categories.map(function(cat,ci){
+        return h('div',{key:ci,style:{marginBottom:14}},
+          h('div',{style:{padding:'9px 14px',borderRadius:8,background:dept.color+'0a',borderLeft:'3px solid '+dept.color,marginBottom:6}},
+            h('h3',{style:{fontSize:13.5,fontWeight:700,color:dept.color,margin:0}},cat.cat)
+          ),
+          h('div',{style:{display:'flex',flexDirection:'column',gap:3,paddingLeft:6}},
+            cat.items.map(function(item,ii){
+              var k=ci+'-'+ii, isE=exp===k;
+              return h('div',{key:ii},
+                h('div',{onClick:function(){setExp(isE?null:k);},style:{padding:'11px 14px',borderRadius:8,cursor:'pointer',background:'#fff',border:'1px solid '+(isE?dept.color+'50':'#e2e8f0'),boxShadow:isE?'0 0 0 2px '+dept.color+'18':'0 1px 2px rgba(0,0,0,0.02)',transition:'all 0.15s',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+                  h('span',{style:{fontSize:13,fontWeight:600,color:'#1e293b'}},item.name),
+                  h('div',{style:{display:'flex',alignItems:'center',gap:8,flexShrink:0}},
+                    item.cycle?h('span',{style:{fontSize:10.5,padding:'2px 7px',borderRadius:4,background:'#f1f5f9',color:'#64748b',border:'1px solid #e2e8f0',fontWeight:500}},item.cycle):null,
+                    item.timing?h('span',{style:{fontSize:10.5,padding:'2px 7px',borderRadius:4,background:dept.color+'10',color:dept.color,fontWeight:600}},item.timing):null,
+                    h('span',{style:{fontSize:14,color:'#94a3b8',transition:'transform 0.2s',transform:isE?'rotate(180deg)':'rotate(0deg)'}},'▾')
+                  )
+                ),
+                isE?h('div',{style:{margin:'3px 0 6px',padding:18,borderRadius:10,background:'#f8fafc',border:'1px solid '+dept.color+'20'}},
+                  h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}},
+                    [{l:'📅 시기',f:'timing'},{l:'🔄 주기',f:'cycle'},{l:'👤 담당자',f:'manager'},{l:'🎯 목적',f:'purpose'}].map(function(x){
+                      return h('div',{key:x.f},
+                        h('label',{style:{fontSize:11,fontWeight:700,color:'#94a3b8',marginBottom:5,display:'block'}},x.l),
+                        h('input',{value:item[x.f],onChange:function(e){upd(ci,ii,x.f,e.target.value);},style:{width:'100%',padding:'9px 11px',borderRadius:7,border:'1px solid #e2e8f0',background:'#fff',color:'#1e293b',fontSize:13,outline:'none',fontFamily:'inherit'}})
+                      );
+                    }),
+                    [{l:'📝 세부사항',f:'details'},{l:'💡 개선사항',f:'imp'}].map(function(x){
+                      return h('div',{key:x.f,style:{gridColumn:'1/-1'}},
+                        h('label',{style:{fontSize:11,fontWeight:700,color:'#94a3b8',marginBottom:5,display:'block'}},x.l),
+                        h('textarea',{value:item[x.f],onChange:function(e){upd(ci,ii,x.f,e.target.value);},rows:3,placeholder:x.f==='imp'?'개선사항을 입력하세요...':'',style:{width:'100%',padding:'9px 11px',borderRadius:7,border:'1px solid #e2e8f0',background:'#fff',color:'#1e293b',fontSize:13,outline:'none',resize:'vertical',fontFamily:'inherit'}})
+                      );
+                    })
+                  )
+                ):null
+              );
+            })
+          )
+        );
+      })
+    );
+  }
+
+  // ── Monthly Plan ──
+  function renderMP(){
+    var mp=dd.mp;
+    if(!mp||(!mp.u.length&&!mp.l.length)) return null;
+    return h('section',{style:{marginBottom:24}},
+      h('div',{style:{display:'flex',alignItems:'center',gap:10,marginBottom:14}},
+        h('div',{style:{width:4,height:22,borderRadius:2,background:dept.color}}),
+        h('h2',{style:{fontSize:17,fontWeight:700,color:'#0f172a',margin:0}},'2026 연간 액션 플랜'),
+        h('span',{style:{fontSize:11,color:'#94a3b8',marginLeft:6,fontWeight:400}},'카드를 클릭하면 수정할 수 있습니다')
+      ),
+      ['u','l'].map(function(half){
+        var items=mp[half]; if(!items.length) return null;
+        return h('div',{key:half},
+          h('h3',{style:{fontSize:12.5,fontWeight:700,color:'#94a3b8',marginBottom:8,paddingLeft:4}},half==='u'?'상반기 (1~6월)':'하반기 (7~12월)'),
+          h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:8,marginBottom:18}},
+            items.map(function(mi,i){
+              var ek=half+'-'+i;
+              var isEdit=editMP===ek;
+              return h('div',{key:i,
+                onClick:function(e){if(!isEdit){setEditMP(ek);}},
+                style:{padding:'13px 15px',borderRadius:10,background:'#fff',border:'1px solid '+(isEdit?dept.color+'60':'#e2e8f0'),minHeight:110,boxShadow:isEdit?'0 0 0 2px '+dept.color+'18':'0 1px 2px rgba(0,0,0,0.03)',cursor:isEdit?'default':'pointer',transition:'all 0.15s'}},
+                h('div',{style:{fontSize:13,fontWeight:700,color:dept.color,marginBottom:7,paddingBottom:5,borderBottom:'1px solid #f1f5f9',display:'flex',justifyContent:'space-between',alignItems:'center'}},
+                  h('span',null,mi.m),
+                  isEdit?h('button',{onClick:function(e){e.stopPropagation();setEditMP(null);},style:{fontSize:11,padding:'2px 8px',borderRadius:4,border:'1px solid #e2e8f0',background:'#f8fafc',color:'#64748b',cursor:'pointer',fontFamily:'inherit'}},'완료'):h('span',{style:{fontSize:11,color:'#cbd5e1'}},'✏️')
+                ),
+                isEdit?
+                  h('textarea',{
+                    autoFocus:true,
+                    value:mi.c,
+                    onChange:function(e){updMP(half,i,e.target.value);},
+                    onKeyDown:function(e){if(e.key==='Escape'){setEditMP(null);}},
+                    style:{width:'100%',minHeight:80,padding:'8px 0',border:'none',background:'transparent',color:'#1e293b',fontSize:12,lineHeight:1.7,outline:'none',resize:'vertical',fontFamily:'inherit'},
+                    placeholder:'내용을 입력하세요...'
+                  }):
+                  h('div',{style:{fontSize:12,color:'#64748b',lineHeight:1.7,whiteSpace:'pre-line'}},mi.c||h('span',{style:{color:'#cbd5e1',fontStyle:'italic'}},'클릭하여 입력'))
+              );
+            })
+          )
+        );
+      }),
+      mp.r!==undefined?h('div',{style:{padding:'14px 18px',borderRadius:10,background:dept.color+'06',border:'1px solid '+dept.color+'18'}},
+        h('div',{style:{fontSize:12,fontWeight:700,color:dept.color,marginBottom:6,display:'flex',justifyContent:'space-between',alignItems:'center'}},
+          h('span',null,'📌 매월 진행 사항'),
+          editMP==='recurring'?
+            h('button',{onClick:function(){setEditMP(null);},style:{fontSize:11,padding:'2px 8px',borderRadius:4,border:'1px solid #e2e8f0',background:'#fff',color:'#64748b',cursor:'pointer',fontFamily:'inherit'}},'완료'):
+            h('span',{onClick:function(){setEditMP('recurring');},style:{fontSize:11,color:'#94a3b8',cursor:'pointer'}},'✏️ 수정')
+        ),
+        editMP==='recurring'?
+          h('textarea',{
+            autoFocus:true,
+            value:mp.r,
+            onChange:function(e){updMPR(e.target.value);},
+            onKeyDown:function(e){if(e.key==='Escape'){setEditMP(null);}},
+            rows:5,
+            style:{width:'100%',padding:'8px 10px',borderRadius:7,border:'1px solid #e2e8f0',background:'#fff',color:'#1e293b',fontSize:12.5,lineHeight:1.8,outline:'none',resize:'vertical',fontFamily:'inherit'},
+          }):
+          h('div',{onClick:function(){setEditMP('recurring');},style:{fontSize:12.5,color:'#64748b',lineHeight:1.8,whiteSpace:'pre-line',cursor:'pointer'}},mp.r||'클릭하여 입력')
+      ):null
+    );
+  }
+
+  // ── Empty ──
+  function renderEmpty(){
+    if(dd.categories.length) return null;
+    return h('div',{style:{textAlign:'center',padding:'60px 20px',color:'#94a3b8'}},
+      h('div',{style:{fontSize:48,marginBottom:16}},'🚧'),
+      h('div',{style:{fontSize:16,fontWeight:600,color:'#64748b',marginBottom:8}},'준비 중입니다'),
+      h('div',{style:{fontSize:13}},'해당 부서의 연간계획이 업데이트되면 내용이 표시됩니다.')
+    );
+  }
+
+  var footer=h('footer',{style:{padding:'14px 28px',borderTop:'1px solid #e2e8f0',background:'#fff',textAlign:'center'}},
+    h('p',{style:{fontSize:11.5,color:'#94a3b8',margin:0}},'© 2026 케이스수학과학학원 · 연간계획 관리 시스템 v1.0')
+  );
+
+  return h('div',{style:{minHeight:'100vh',display:'flex',flexDirection:'column',background:'#f8fafc',color:'#1e293b',fontFamily:"'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif"}},
+    header,
+    tabs,
+    h('main',{style:{flex:1,padding:'24px 28px',maxWidth:1400,margin:'0 auto',width:'100%'}},
+      dd.isPh?renderPhilosophy():[renderGoals(),renderCats(),renderMP(),renderEmpty()]
+    ),
+    footer
+  );
+}
+
+ReactDOM.render(h(App),document.getElementById('root'));
+</script>
+</body>
+</html>

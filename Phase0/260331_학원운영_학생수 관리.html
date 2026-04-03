@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학원 운영 대시보드</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/static/pretendard.min.css" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0F1117; font-family: 'Pretendard', -apple-system, sans-serif; }
+</style>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+<script src="https://unpkg.com/prop-types@15/prop-types.min.js"></script>
+<script src="https://unpkg.com/recharts@2.5.0/umd/Recharts.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script>
+window.storage = {
+  get: function(key) {
+    return new Promise(function(resolve) {
+      try {
+        var val = localStorage.getItem(key);
+        resolve(val !== null ? { value: val } : null);
+      } catch(e) { resolve(null); }
+    });
+  },
+  set: function(key, value) {
+    return new Promise(function(resolve) {
+      try {
+        var str = typeof value === 'string' ? value : JSON.stringify(value);
+        localStorage.setItem(key, str);
+        resolve({ key: key, value: str });
+      } catch(e) { resolve(null); }
+    });
+  }
+};
+</script>
+<script type="text/babel">
+var { useState, useEffect, useMemo, useCallback } = React;
+var {
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer, ComposedChart, Area,
+  PieChart, Pie, Cell
+} = Recharts;
+
+/* ── Constants ── */
+const DEPTS = ["초등부","중등부","고등부","영재원","과학과"];
+const MATH = ["초등부","중등부","고등부","영재원"];
+const MO = [1,2,3,4,5,6,7,8,9,10,11,12];
+const ML = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+const CLR = {초등부:"#3B82F6",중등부:"#10B981",고등부:"#F59E0B",영재원:"#8B5CF6",과학과:"#EF4444"};
+const FILTER_OPTS = ["전체","수학합계","과학과","초등부","중등부","고등부","영재원"];
+
+/* ── Initial Data ── */
+const D0 = [
+{y:2022,m:6,d:"초등부",n:0,l:11,s:388,e:386},{y:2022,m:6,d:"중등부",n:14,l:12,s:325,e:313},{y:2022,m:6,d:"고등부",n:0,l:12,s:314,e:304},{y:2022,m:6,d:"영재원",n:0,l:2,s:54,e:55},
+{y:2022,m:7,d:"초등부",n:0,l:11,s:390,e:385},{y:2022,m:7,d:"중등부",n:0,l:23,s:351,e:360},{y:2022,m:7,d:"고등부",n:0,l:37,s:304,e:285},{y:2022,m:7,d:"영재원",n:0,l:3,s:55,e:52},
+{y:2022,m:8,d:"초등부",n:0,l:14,s:382,e:369},{y:2022,m:8,d:"중등부",n:0,l:24,s:367,e:343},{y:2022,m:8,d:"고등부",n:0,l:0,s:286,e:286},{y:2022,m:8,d:"영재원",n:0,l:0,s:53,e:54},
+{y:2022,m:9,d:"초등부",n:0,l:9,s:434,e:436},{y:2022,m:9,d:"중등부",n:5,l:13,s:353,e:344},{y:2022,m:9,d:"고등부",n:0,l:5,s:285,e:285},{y:2022,m:9,d:"영재원",n:1,l:1,s:57,e:57},
+{y:2022,m:10,d:"초등부",n:0,l:13,s:422,e:409},{y:2022,m:10,d:"중등부",n:12,l:13,s:344,e:338},{y:2022,m:10,d:"고등부",n:0,l:47,s:285,e:275},{y:2022,m:10,d:"영재원",n:0,l:0,s:75,e:75},
+{y:2022,m:11,d:"초등부",n:0,l:21,s:428,e:407},{y:2022,m:11,d:"중등부",n:7,l:13,s:337,e:330},{y:2022,m:11,d:"고등부",n:0,l:42,s:250,e:211},{y:2022,m:11,d:"영재원",n:0,l:0,s:75,e:74},
+{y:2022,m:12,d:"초등부",n:0,l:9,s:311,e:308},{y:2022,m:12,d:"중등부",n:61,l:27,s:325,e:410},{y:2022,m:12,d:"고등부",n:0,l:52,s:391,e:351},{y:2022,m:12,d:"영재원",n:6,l:6,s:73,e:68},
+{y:2023,m:1,d:"초등부",n:0,l:11,s:356,e:348},{y:2023,m:1,d:"중등부",n:6,l:7,s:410,e:409},{y:2023,m:1,d:"고등부",n:0,l:9,s:351,e:339},{y:2023,m:1,d:"영재원",n:0,l:1,s:66,e:65},
+{y:2023,m:2,d:"초등부",n:0,l:10,s:352,e:337},{y:2023,m:2,d:"중등부",n:2,l:20,s:410,e:390},{y:2023,m:2,d:"고등부",n:0,l:27,s:341,e:326},{y:2023,m:2,d:"영재원",n:5,l:1,s:64,e:64},
+{y:2023,m:3,d:"초등부",n:0,l:10,s:389,e:388},{y:2023,m:3,d:"중등부",n:34,l:16,s:416,e:413},{y:2023,m:3,d:"고등부",n:0,l:18,s:330,e:319},{y:2023,m:3,d:"영재원",n:5,l:1,s:71,e:71},{y:2023,m:3,d:"과학과",n:13,l:8,s:195,e:201},
+{y:2023,m:4,d:"초등부",n:0,l:14,s:436,e:424},{y:2023,m:4,d:"중등부",n:10,l:12,s:413,e:411},{y:2023,m:4,d:"고등부",n:0,l:15,s:320,e:316},{y:2023,m:4,d:"영재원",n:3,l:3,s:73,e:74},{y:2023,m:4,d:"과학과",n:3,l:8,s:200,e:192},
+{y:2023,m:5,d:"초등부",n:0,l:23,s:426,e:404},{y:2023,m:5,d:"중등부",n:13,l:11,s:408,e:410},{y:2023,m:5,d:"고등부",n:0,l:30,s:318,e:307},{y:2023,m:5,d:"영재원",n:3,l:1,s:74,e:75},{y:2023,m:5,d:"과학과",n:19,l:7,s:188,e:204},
+{y:2023,m:6,d:"초등부",n:0,l:15,s:438,e:426},{y:2023,m:6,d:"중등부",n:1,l:8,s:410,e:402},{y:2023,m:6,d:"고등부",n:0,l:6,s:306,e:297},{y:2023,m:6,d:"영재원",n:0,l:0,s:80,e:80},{y:2023,m:6,d:"과학과",n:11,l:9,s:202,e:193},
+{y:2023,m:7,d:"초등부",n:0,l:16,s:427,e:401},{y:2023,m:7,d:"중등부",n:34,l:22,s:402,e:416},{y:2023,m:7,d:"고등부",n:0,l:35,s:290,e:291},{y:2023,m:7,d:"영재원",n:0,l:2,s:80,e:75},{y:2023,m:7,d:"과학과",n:18,l:15,s:181,e:193},
+{y:2023,m:8,d:"초등부",n:0,l:22,s:418,e:396},{y:2023,m:8,d:"중등부",n:6,l:9,s:416,e:425},{y:2023,m:8,d:"고등부",n:0,l:27,s:282,e:279},{y:2023,m:8,d:"영재원",n:0,l:6,s:77,e:75},{y:2023,m:8,d:"과학과",n:8,l:7,s:195,e:193},
+{y:2023,m:9,d:"초등부",n:0,l:6,s:420,e:442},{y:2023,m:9,d:"중등부",n:10,l:12,s:421,e:416},{y:2023,m:9,d:"고등부",n:0,l:10,s:277,e:268},{y:2023,m:9,d:"영재원",n:5,l:0,s:76,e:76},{y:2023,m:9,d:"과학과",n:3,l:11,s:192,e:183},
+{y:2023,m:10,d:"초등부",n:0,l:22,s:438,e:418},{y:2023,m:10,d:"중등부",n:2,l:38,s:413,e:403},{y:2023,m:10,d:"고등부",n:0,l:38,s:277,e:241},{y:2023,m:10,d:"영재원",n:0,l:5,s:70,e:69},{y:2023,m:10,d:"과학과",n:5,l:3,s:179,e:156},
+{y:2023,m:11,d:"초등부",n:0,l:13,s:448,e:436},{y:2023,m:11,d:"중등부",n:7,l:17,s:403,e:367},{y:2023,m:11,d:"고등부",n:0,l:36,s:227,e:207},{y:2023,m:11,d:"영재원",n:1,l:3,s:75,e:74},{y:2023,m:11,d:"과학과",n:8,l:8,s:179,e:183},
+{y:2023,m:12,d:"초등부",n:15,l:12,s:319,e:320},{y:2023,m:12,d:"중등부",n:0,l:17,s:410,e:385},{y:2023,m:12,d:"고등부",n:37,l:61,s:374,e:350},{y:2023,m:12,d:"영재원",n:14,l:4,s:66,e:65},
+{y:2024,m:1,d:"초등부",n:15,l:10,s:339,e:347},{y:2024,m:1,d:"중등부",n:26,l:9,s:394,e:393},{y:2024,m:1,d:"고등부",n:14,l:24,s:348,e:337},{y:2024,m:1,d:"영재원",n:1,l:4,s:69,e:65},
+{y:2024,m:2,d:"초등부",n:1,l:17,s:348,e:331},{y:2024,m:2,d:"중등부",n:1,l:15,s:393,e:374},{y:2024,m:2,d:"고등부",n:28,l:35,s:337,e:323},{y:2024,m:2,d:"영재원",n:0,l:0,s:65,e:65},{y:2024,m:2,d:"과학과",n:24,l:13,s:206,e:214},
+{y:2024,m:3,d:"초등부",n:78,l:18,s:393,e:391},{y:2024,m:3,d:"중등부",n:10,l:8,s:402,e:404},{y:2024,m:3,d:"고등부",n:13,l:16,s:323,e:316},{y:2024,m:3,d:"영재원",n:2,l:1,s:69,e:69},{y:2024,m:3,d:"과학과",n:4,l:12,s:215,e:207},
+{y:2024,m:4,d:"초등부",n:5,l:13,s:392,e:384},{y:2024,m:4,d:"중등부",n:10,l:8,s:401,e:403},{y:2024,m:4,d:"고등부",n:10,l:42,s:316,e:283},{y:2024,m:4,d:"영재원",n:1,l:5,s:67,e:63},{y:2024,m:4,d:"과학과",n:6,l:13,s:207,e:192},
+{y:2024,m:5,d:"초등부",n:2,l:13,s:384,e:373},{y:2024,m:5,d:"중등부",n:18,l:17,s:403,e:404},{y:2024,m:5,d:"고등부",n:9,l:16,s:282,e:277},{y:2024,m:5,d:"영재원",n:0,l:0,s:63,e:63},{y:2024,m:5,d:"과학과",n:8,l:6,s:190,e:192},
+{y:2024,m:6,d:"초등부",n:9,l:8,s:420,e:422},{y:2024,m:6,d:"중등부",n:5,l:25,s:404,e:380},{y:2024,m:6,d:"고등부",n:5,l:11,s:277,e:242},{y:2024,m:6,d:"영재원",n:2,l:0,s:64,e:64},{y:2024,m:6,d:"과학과",n:3,l:12,s:192,e:179},
+{y:2024,m:7,d:"초등부",n:3,l:11,s:423,e:416},{y:2024,m:7,d:"중등부",n:24,l:10,s:376,e:390},{y:2024,m:7,d:"고등부",n:14,l:7,s:242,e:253},{y:2024,m:7,d:"영재원",n:1,l:1,s:64,e:62},{y:2024,m:7,d:"과학과",n:32,l:13,s:179,e:192},
+{y:2024,m:8,d:"초등부",n:0,l:17,s:409,e:393},{y:2024,m:8,d:"중등부",n:12,l:20,s:390,e:417},{y:2024,m:8,d:"고등부",n:11,l:6,s:253,e:241},{y:2024,m:8,d:"영재원",n:0,l:1,s:62,e:61},{y:2024,m:8,d:"과학과",n:10,l:8,s:192,e:193},
+{y:2024,m:9,d:"초등부",n:7,l:11,s:430,e:425},{y:2024,m:9,d:"중등부",n:17,l:10,s:379,e:392},{y:2024,m:9,d:"고등부",n:7,l:11,s:241,e:226},{y:2024,m:9,d:"영재원",n:0,l:0,s:56,e:53},{y:2024,m:9,d:"과학과",n:2,l:7,s:193,e:188},
+{y:2024,m:10,d:"초등부",n:10,l:10,s:407,e:418},{y:2024,m:10,d:"중등부",n:9,l:18,s:387,e:383},{y:2024,m:10,d:"고등부",n:5,l:17,s:226,e:177},{y:2024,m:10,d:"영재원",n:0,l:1,s:53,e:53},{y:2024,m:10,d:"과학과",n:3,l:9,s:188,e:173},
+{y:2024,m:12,d:"초등부",n:16,l:8,s:308,e:317},{y:2024,m:12,d:"중등부",n:25,l:18,s:300,e:338},{y:2024,m:12,d:"고등부",n:22,l:42,s:366,e:340},{y:2024,m:12,d:"영재원",n:0,l:0,s:49,e:49},{y:2024,m:12,d:"과학과",n:0,l:0,s:211,e:245},
+{y:2025,m:1,d:"초등부",n:20,l:10,s:338,e:345},{y:2025,m:1,d:"중등부",n:8,l:8,s:343,e:343},{y:2025,m:1,d:"고등부",n:16,l:3,s:340,e:344},{y:2025,m:1,d:"영재원",n:2,l:0,s:49,e:51},
+{y:2025,m:2,d:"초등부",n:3,l:15,s:347,e:334},{y:2025,m:2,d:"중등부",n:15,l:15,s:351,e:352},{y:2025,m:2,d:"고등부",n:15,l:17,s:343,e:338},{y:2025,m:2,d:"영재원",n:1,l:3,s:51,e:51},{y:2025,m:2,d:"과학과",n:28,l:4,s:252,e:266},
+{y:2025,m:3,d:"초등부",n:88,l:14,s:403,e:399},{y:2025,m:3,d:"중등부",n:40,l:21,s:351,e:356},{y:2025,m:3,d:"고등부",n:13,l:9,s:340,e:344},{y:2025,m:3,d:"영재원",n:1,l:3,s:51,e:51},{y:2025,m:3,d:"과학과",n:6,l:3,s:266,e:269},
+{y:2025,m:4,d:"초등부",n:3,l:14,s:410,e:399},{y:2025,m:4,d:"중등부",n:16,l:9,s:356,e:367},{y:2025,m:4,d:"고등부",n:13,l:9,s:337,e:339},{y:2025,m:4,d:"영재원",n:0,l:0,s:54,e:54},{y:2025,m:4,d:"과학과",n:12,l:19,s:270,e:263},
+{y:2025,m:5,d:"초등부",n:1,l:9,s:405,e:397},{y:2025,m:5,d:"중등부",n:10,l:10,s:369,e:376},{y:2025,m:5,d:"고등부",n:11,l:8,s:339,e:340},{y:2025,m:5,d:"영재원",n:1,l:1,s:54,e:54},{y:2025,m:5,d:"과학과",n:5,l:4,s:263,e:263},
+{y:2025,m:6,d:"초등부",n:5,l:22,s:421,e:405},{y:2025,m:6,d:"중등부",n:5,l:16,s:376,e:365},{y:2025,m:6,d:"고등부",n:6,l:23,s:340,e:317},{y:2025,m:6,d:"영재원",n:1,l:1,s:56,e:55},{y:2025,m:6,d:"과학과",n:26,l:23,s:263,e:249},
+{y:2025,m:7,d:"초등부",n:12,l:20,s:406,e:401},{y:2025,m:7,d:"중등부",n:8,l:17,s:393,e:384},{y:2025,m:7,d:"고등부",n:14,l:12,s:317,e:314},{y:2025,m:7,d:"영재원",n:1,l:0,s:54,e:55},{y:2025,m:7,d:"과학과",n:14,l:8,s:249,e:255},
+{y:2025,m:8,d:"초등부",n:4,l:16,s:401,e:389},{y:2025,m:8,d:"중등부",n:4,l:30,s:383,e:353},{y:2025,m:8,d:"고등부",n:5,l:9,s:314,e:304},{y:2025,m:8,d:"영재원",n:1,l:2,s:55,e:54},{y:2025,m:8,d:"과학과",n:2,l:11,s:255,e:244},
+{y:2025,m:9,d:"초등부",n:12,l:11,s:425,e:426},{y:2025,m:9,d:"중등부",n:11,l:15,s:379,e:404},{y:2025,m:9,d:"고등부",n:4,l:13,s:304,e:294},{y:2025,m:9,d:"영재원",n:2,l:1,s:54,e:55},{y:2025,m:9,d:"과학과",n:2,l:8,s:244,e:238},
+{y:2025,m:10,d:"초등부",n:4,l:10,s:427,e:420},{y:2025,m:10,d:"중등부",n:9,l:20,s:398,e:386},{y:2025,m:10,d:"고등부",n:9,l:13,s:294,e:267},{y:2025,m:10,d:"영재원",n:0,l:3,s:55,e:53},{y:2025,m:10,d:"과학과",n:12,l:11,s:238,e:239},
+{y:2025,m:11,d:"초등부",n:1,l:24,s:420,e:391},{y:2025,m:11,d:"중등부",n:8,l:33,s:399,e:373},{y:2025,m:11,d:"고등부",n:2,l:5,s:287,e:251},{y:2025,m:11,d:"영재원",n:1,l:1,s:54,e:52},{y:2025,m:11,d:"과학과",n:0,l:7,s:240,e:233},
+{y:2025,m:12,d:"초등부",n:10,l:12,s:307,e:297},{y:2025,m:12,d:"중등부",n:0,l:0,s:323,e:334},{y:2025,m:12,d:"고등부",n:55,l:27,s:437,e:436},{y:2025,m:12,d:"영재원",n:0,l:0,s:69,e:57},{y:2025,m:12,d:"과학과",n:0,l:14,s:237,e:364},
+{y:2026,m:1,d:"초등부",n:34,l:18,s:307,e:323},{y:2026,m:1,d:"중등부",n:18,l:10,s:334,e:340},{y:2026,m:1,d:"고등부",n:12,l:18,s:435,e:421},{y:2026,m:1,d:"영재원",n:3,l:0,s:58,e:60},{y:2026,m:1,d:"과학과",n:12,l:10,s:364,e:365},
+{y:2026,m:2,d:"초등부",n:1,l:9,s:324,e:316},{y:2026,m:2,d:"중등부",n:2,l:14,s:340,e:324},{y:2026,m:2,d:"고등부",n:26,l:21,s:424,e:416},{y:2026,m:2,d:"영재원",n:6,l:7,s:60,e:63},{y:2026,m:2,d:"과학과",n:36,l:16,s:365,e:376},
+];
+
+const SKEY = "acad-v4";
+const rd = (v) => Math.round(v * 100) / 100;
+const pct = (num, den) => (den > 0 ? rd(num / den * 100) : 0);
+const pm = (v) => (v >= 0 ? "+" + v : String(v));
+
+function sumGroup(arr, filter) {
+  let items = arr;
+  if (filter === "수학합계") items = arr.filter((x) => MATH.includes(x.d));
+  else if (filter === "과학과") items = arr.filter((x) => x.d === "과학과");
+  else if (filter !== "전체") items = arr.filter((x) => x.d === filter);
+  return {
+    newS: items.reduce((a, b) => a + (b.n || 0), 0),
+    leftS: items.reduce((a, b) => a + (b.l || 0), 0),
+    startT: items.reduce((a, b) => a + (b.s || 0), 0),
+    endT: items.reduce((a, b) => a + (b.e || 0), 0),
+  };
+}
+
+/* ── Styles ── */
+const BG = "#0F1117";
+const CARD = "#1A1D27";
+const INP = "#14161E";
+const BDR = "#2A2D3A";
+const T1 = "#E8EAF0";
+const T2 = "#8B8FA3";
+const T3 = "#5C5F73";
+const AC = "#3B82F6";
+const GN = "#10B981";
+const RD = "#EF4444";
+const YW = "#F59E0B";
+
+const sSelect = { padding: "7px 12px", borderRadius: 8, border: "1px solid " + BDR, background: INP, color: T1, fontSize: 13, fontWeight: 600, outline: "none", cursor: "pointer" };
+const sInput = { padding: "9px 12px", borderRadius: 8, border: "1px solid " + BDR, background: INP, color: T1, fontSize: 14, outline: "none", boxSizing: "border-box" };
+const sLabel = { display: "block", fontSize: 12, fontWeight: 600, color: T2, marginBottom: 4 };
+const sTh = { padding: "8px 10px", textAlign: "left", fontWeight: 700, color: T2, borderBottom: "1px solid " + BDR, fontSize: 11 };
+const sTd = { padding: "7px 10px", borderBottom: "1px solid " + BDR, color: T1 };
+
+/* ── Sub-components ── */
+function KPICard({ label, value, sub, color }) {
+  return (
+    <div style={{ padding: "14px 16px", borderRadius: 12, background: CARD, border: "1px solid " + BDR, display: "flex", flexDirection: "column", gap: 4 }}>
+      <div style={{ fontSize: 11, color: T2, fontWeight: 600, letterSpacing: 0.5 }}>{label}</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: color, letterSpacing: -0.5 }}>{value}</div>
+      <div style={{ fontSize: 11, color: T3 }}>{sub}</div>
+    </div>
+  );
+}
+
+function Card({ title, subtitle, children }) {
+  return (
+    <div style={{ padding: "16px 18px", borderRadius: 14, background: CARD, border: "1px solid " + BDR }}>
+      <div style={{ marginBottom: 14 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: T1 }}>{title}</h3>
+        {subtitle && <p style={{ fontSize: 12, color: T2, margin: "2px 0 0" }}>{subtitle}</p>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function MiniStat({ label, value, color }) {
+  return (
+    <div style={{ padding: "8px 10px", borderRadius: 8, background: INP }}>
+      <div style={{ fontSize: 11, color: T2, marginBottom: 2 }}>{label}</div>
+      <div style={{ fontSize: 16, fontWeight: 800, color: color || T1 }}>{value}</div>
+    </div>
+  );
+}
+
+function ChartTip({ active, payload, label }) {
+  if (!active || !payload || payload.length === 0) return null;
+  return (
+    <div style={{ background: CARD, border: "1px solid " + BDR, borderRadius: 8, padding: "10px 14px", fontSize: 13 }}>
+      <div style={{ fontWeight: 700, marginBottom: 4, color: T1 }}>{label}</div>
+      {payload.map((p, i) => (
+        <div key={i} style={{ color: p.color, marginBottom: 2 }}>
+          {p.name}: <strong>{typeof p.value === "number" ? p.value.toLocaleString() : p.value}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Main App ── */
+function App() {
+  const [data, setData] = useState(D0);
+  const [tab, setTab] = useState("overview");
+  const [selYear, setSelYear] = useState(2025);
+  const [selDept, setSelDept] = useState("전체");
+  const [cmpYear, setCmpYear] = useState(2024);
+  const [entYear, setEntYear] = useState(2026);
+  const [entMonth, setEntMonth] = useState(3);
+  const [entDept, setEntDept] = useState("초등부");
+  const [entForm, setEntForm] = useState({ n: 0, l: 0, s: 0, e: 0 });
+  const [saveMsg, setSaveMsg] = useState("");
+  const [anaScope, setAnaScope] = useState("전체");
+  const [cmpMetric, setCmpMetric] = useState("total");
+
+  // Load storage
+  useEffect(() => {
+    (async () => {
+      try {
+        let result = null;
+        for (const key of [SKEY, "academy-dash-v3", "academy-dashboard-data-v2", "academy-dashboard-data"]) {
+          try {
+            result = await window.storage.get(key);
+            if (result && result.value) break;
+          } catch (err) { /* try next */ }
+        }
+        if (result && result.value) {
+          const parsed = JSON.parse(result.value);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            // Migrate old format
+            const migrated = parsed.map((row) => {
+              if ("newStudents" in row) {
+                return { y: row.year, m: row.month, d: row.dept, n: row.newStudents || 0, l: row.leftStudents || 0, s: row.startTotal || 0, e: row.endTotal || 0 };
+              }
+              if ("ns" in row) {
+                return { y: row.year, m: row.month, d: row.dept, n: row.ns || 0, l: row.ls || 0, s: row.st || 0, e: row.et || 0 };
+              }
+              return row;
+            });
+            setData(migrated);
+            await window.storage.set(SKEY, JSON.stringify(migrated));
+          }
+        }
+      } catch (err) { /* use defaults */ }
+    })();
+  }, []);
+
+  const saveData = useCallback(async (nd) => {
+    setData(nd);
+    try { await window.storage.set(SKEY, JSON.stringify(nd)); } catch (err) { /* ok */ }
+  }, []);
+
+  const years = useMemo(() => [...new Set(data.map((x) => x.y))].sort(), [data]);
+
+  /* ── Monthly trend ── */
+  const monthly = useMemo(() => {
+    return MO.map((mo) => {
+      const cur = sumGroup(data.filter((x) => x.y === selYear && x.m === mo), selDept);
+      const prev = sumGroup(data.filter((x) => x.y === cmpYear && x.m === mo), selDept);
+      return {
+        month: ML[mo - 1],
+        newS: cur.newS, leftS: cur.leftS, startT: cur.startT, endT: cur.endT,
+        leftRate: pct(cur.leftS, cur.startT),
+        newRate: pct(cur.newS, cur.startT),
+        prevEndT: prev.endT,
+        prevNewS: prev.newS,
+        prevLeftS: prev.leftS,
+        prevLeftRate: pct(prev.leftS, prev.startT),
+        prevNewRate: pct(prev.newS, prev.startT),
+      };
+    });
+  }, [data, selYear, cmpYear, selDept]);
+
+  /* ── Dept breakdown ── */
+  const deptBD = useMemo(() => {
+    return DEPTS.map((dept) => {
+      const items = data.filter((x) => x.y === selYear && x.d === dept);
+      const totalLeft = items.reduce((a, b) => a + (b.l || 0), 0);
+      const totalNew = items.reduce((a, b) => a + (b.n || 0), 0);
+      const latest = [...items].sort((a, b) => b.m - a.m)[0];
+      const avgLR = items.length > 0 ? rd(items.reduce((a, b) => a + pct(b.l, b.s), 0) / items.length) : 0;
+      return { dept, totalLeft, totalNew, latestEnd: latest ? latest.e : 0, avgLR, count: items.length };
+    });
+  }, [data, selYear]);
+
+  /* ── YoY compare (common months only) ── */
+  const yoyCommon = useMemo(() => {
+    // Find common months across all depts for the two years
+    const curMonths = [...new Set(data.filter((x) => x.y === selYear).map((x) => x.m))];
+    const prvMonths = [...new Set(data.filter((x) => x.y === cmpYear).map((x) => x.m))];
+    const common = curMonths.filter((m) => prvMonths.includes(m)).sort((a, b) => a - b);
+    return { common };
+  }, [data, selYear, cmpYear]);
+
+  const yoyList = useMemo(() => {
+    const common = yoyCommon.common;
+    return DEPTS.map((dept) => {
+      const curI = data.filter((x) => x.y === selYear && x.d === dept && common.includes(x.m));
+      const prvI = data.filter((x) => x.y === cmpYear && x.d === dept && common.includes(x.m));
+      const curAvg = curI.length > 0 ? Math.round(curI.reduce((a, b) => a + b.e, 0) / curI.length) : 0;
+      const prvAvg = prvI.length > 0 ? Math.round(prvI.reduce((a, b) => a + b.e, 0) / prvI.length) : 0;
+      const curLR = curI.length > 0 ? rd(curI.reduce((a, b) => a + pct(b.l, b.s), 0) / curI.length) : 0;
+      const prvLR = prvI.length > 0 ? rd(prvI.reduce((a, b) => a + pct(b.l, b.s), 0) / prvI.length) : 0;
+      const curNR = curI.length > 0 ? rd(curI.reduce((a, b) => a + pct(b.n, b.s), 0) / curI.length) : 0;
+      const prvNR = prvI.length > 0 ? rd(prvI.reduce((a, b) => a + pct(b.n, b.s), 0) / prvI.length) : 0;
+      const curTotalN = curI.reduce((a, b) => a + (b.n || 0), 0);
+      const prvTotalN = prvI.reduce((a, b) => a + (b.n || 0), 0);
+      const curTotalL = curI.reduce((a, b) => a + (b.l || 0), 0);
+      const prvTotalL = prvI.reduce((a, b) => a + (b.l || 0), 0);
+      return {
+        dept, curAvg, prvAvg, diff: curAvg - prvAvg, diffPct: prvAvg > 0 ? rd((curAvg - prvAvg) / prvAvg * 100) : 0,
+        curLR, prvLR, lrDiff: rd(curLR - prvLR),
+        curNR, prvNR, nrDiff: rd(curNR - prvNR),
+        curTotalN, prvTotalN, curTotalL, prvTotalL,
+      };
+    });
+  }, [data, selYear, cmpYear, yoyCommon]);
+
+  /* ── KPIs ── */
+  const kpis = useMemo(() => {
+    const curData = data.filter((x) => x.y === selYear);
+    if (curData.length === 0) return { total: 0, latMo: "-", sumNew: 0, sumLeft: 0, avgLR: 0, net: 0 };
+    const latMo = Math.max(...curData.map((x) => x.m));
+    const filt = selDept === "수학합계" ? (x) => MATH.includes(x.d) : selDept === "과학과" ? (x) => x.d === "과학과" : selDept === "전체" ? () => true : (x) => x.d === selDept;
+    const latItems = curData.filter((x) => x.m === latMo).filter(filt);
+    const allItems = curData.filter(filt);
+    const total = latItems.reduce((a, b) => a + (b.e || 0), 0);
+    const sumNew = allItems.reduce((a, b) => a + (b.n || 0), 0);
+    const sumLeft = allItems.reduce((a, b) => a + (b.l || 0), 0);
+    const avgLR = allItems.length > 0 ? rd(allItems.reduce((a, b) => a + pct(b.l, b.s), 0) / allItems.length) : 0;
+    return { total, latMo: ML[latMo - 1], sumNew, sumLeft, avgLR, net: sumNew - sumLeft };
+  }, [data, selYear, selDept]);
+
+  const pieData = useMemo(() => deptBD.filter((x) => x.latestEnd > 0).map((x) => ({ name: x.dept, value: x.latestEnd, fill: CLR[x.dept] })), [deptBD]);
+
+  /* ── Analysis ── */
+  const analysis = useMemo(() => {
+    const scopeFn = anaScope === "전체" ? () => true : anaScope === "수학합계" ? (x) => MATH.includes(x.d) : anaScope === "과학과" ? (x) => x.d === "과학과" : (x) => x.d === anaScope;
+    const scopeData = data.filter(scopeFn);
+    const availYears = [...new Set(scopeData.map((x) => x.y))].sort();
+    if (availYears.length === 0) return { yearSums: [], alerts: [], season: [], deptAna: null };
+
+    const yearSums = availYears.map((yr) => {
+      const yd = scopeData.filter((x) => x.y === yr);
+      const months = [...new Set(yd.map((x) => x.m))].sort((a, b) => a - b);
+      const moAgg = months.map((mo) => {
+        const md = yd.filter((x) => x.m === mo);
+        return { mo, n: md.reduce((a, b) => a + (b.n || 0), 0), l: md.reduce((a, b) => a + (b.l || 0), 0), s: md.reduce((a, b) => a + (b.s || 0), 0), e: md.reduce((a, b) => a + (b.e || 0), 0) };
+      });
+      const totalN = moAgg.reduce((a, b) => a + b.n, 0);
+      const totalL = moAgg.reduce((a, b) => a + b.l, 0);
+      const avgLR = moAgg.length > 0 ? rd(moAgg.reduce((a, b) => a + pct(b.l, b.s), 0) / moAgg.length) : 0;
+      const lastE = moAgg.length > 0 ? moAgg[moAgg.length - 1].e : 0;
+      const worstMo = moAgg.reduce((best, cur) => pct(cur.l, cur.s) > (best ? pct(best.l, best.s) : 0) ? cur : best, null);
+      return { year: yr, months, moAgg, totalN, totalL, avgLR, lastE, net: totalN - totalL, worstMo, moCnt: months.length };
+    });
+
+    // Alerts
+    const alerts = [];
+    const last2 = yearSums.slice(-2);
+    if (last2.length === 2) {
+      const [prev, cur] = last2;
+      const common = cur.months.filter((mo) => prev.months.includes(mo));
+      if (common.length > 0) {
+        const curCommon = cur.moAgg.filter((x) => common.includes(x.mo));
+        const prevCommon = prev.moAgg.filter((x) => common.includes(x.mo));
+        const curAvgE = Math.round(curCommon.reduce((a, b) => a + b.e, 0) / curCommon.length);
+        const prevAvgE = Math.round(prevCommon.reduce((a, b) => a + b.e, 0) / prevCommon.length);
+        const diffE = curAvgE - prevAvgE;
+        const diffPctE = prevAvgE > 0 ? rd(diffE / prevAvgE * 100) : 0;
+        if (Math.abs(diffPctE) >= 3) {
+          alerts.push({ type: diffE > 0 ? "pos" : "neg", title: "전년 동기 대비 총원 변화", text: cur.year + "년 동기간(" + common.map((x) => x + "월").join(",") + ") 평균 총원 " + curAvgE + "명, 전년 " + prevAvgE + "명 대비 " + pm(diffE) + "명(" + pm(diffPctE) + "%)" });
+        }
+        const curAvgLR = rd(curCommon.reduce((a, b) => a + pct(b.l, b.s), 0) / curCommon.length);
+        const prevAvgLR = rd(prevCommon.reduce((a, b) => a + pct(b.l, b.s), 0) / prevCommon.length);
+        const lrDiff = rd(curAvgLR - prevAvgLR);
+        if (Math.abs(lrDiff) >= 0.5) {
+          alerts.push({ type: lrDiff < 0 ? "pos" : "neg", title: "전년 동기 대비 퇴원율 변화", text: cur.year + "년 동기간 평균 퇴원율 " + curAvgLR + "%, 전년 " + prevAvgLR + "% 대비 " + (lrDiff > 0 ? "+" : "") + lrDiff + "%p" });
+        }
+      }
+      if (cur.worstMo) {
+        const wRate = pct(cur.worstMo.l, cur.worstMo.s);
+        if (wRate >= 5) alerts.push({ type: "warn", title: cur.year + "년 최고 퇴원율 경고", text: cur.worstMo.mo + "월 퇴원율 " + wRate + "% (퇴원 " + cur.worstMo.l + "명 / 월초 " + cur.worstMo.s + "명)" });
+      }
+    }
+    const lastYS = yearSums[yearSums.length - 1];
+    if (lastYS) {
+      if (lastYS.net < 0) alerts.push({ type: "neg", title: "순감소 주의", text: lastYS.year + "년 신입 " + lastYS.totalN + "명 vs 퇴원 " + lastYS.totalL + "명 → 순감소 " + Math.abs(lastYS.net) + "명" });
+      else if (lastYS.net > 0) alerts.push({ type: "pos", title: "순증가", text: lastYS.year + "년 신입 " + lastYS.totalN + "명 vs 퇴원 " + lastYS.totalL + "명 → 순증가 " + lastYS.net + "명" });
+    }
+
+    // Seasonality
+    const season = MO.map((mo) => {
+      const vals = availYears.map((yr) => {
+        const md = scopeData.filter((x) => x.y === yr && x.m === mo);
+        const st = md.reduce((a, b) => a + (b.s || 0), 0);
+        const lt = md.reduce((a, b) => a + (b.l || 0), 0);
+        return st > 0 ? pct(lt, st) : null;
+      }).filter((v) => v !== null);
+      return { month: ML[mo - 1], avgLR: vals.length > 0 ? rd(vals.reduce((a, b) => a + b, 0) / vals.length) : 0, cnt: vals.length };
+    });
+
+    // Department breakdown for 전체/수학합계
+    let deptAna = null;
+    if (anaScope === "전체" || anaScope === "수학합계") {
+      const dList = anaScope === "전체" ? DEPTS : MATH;
+      deptAna = dList.map((dept) => {
+        const di = data.filter((x) => x.d === dept);
+        const ly = Math.max(...di.map((x) => x.y));
+        const lyI = di.filter((x) => x.y === ly);
+        const tl = lyI.reduce((a, b) => a + (b.l || 0), 0);
+        const tn = lyI.reduce((a, b) => a + (b.n || 0), 0);
+        const alr = lyI.length > 0 ? rd(lyI.reduce((a, b) => a + pct(b.l, b.s), 0) / lyI.length) : 0;
+        const latM = [...lyI].sort((a, b) => b.m - a.m)[0];
+        const pyI = di.filter((x) => x.y === ly - 1);
+        const pyAvg = pyI.length > 0 ? Math.round(pyI.reduce((a, b) => a + b.e, 0) / pyI.length) : 0;
+        const cyAvg = lyI.length > 0 ? Math.round(lyI.reduce((a, b) => a + b.e, 0) / lyI.length) : 0;
+        return { dept, year: ly, tl, tn, alr, latEnd: latM ? latM.e : 0, yoyDiff: cyAvg - pyAvg, yoyPct: pyAvg > 0 ? rd((cyAvg - pyAvg) / pyAvg * 100) : 0 };
+      });
+    }
+
+    return { yearSums, alerts, season, deptAna };
+  }, [data, anaScope]);
+
+  /* ── Entry handlers ── */
+  const handleSave = async () => {
+    const entry = { y: entYear, m: entMonth, d: entDept, n: Number(entForm.n), l: Number(entForm.l), s: Number(entForm.s), e: Number(entForm.e) };
+    const idx = data.findIndex((x) => x.y === entry.y && x.m === entry.m && x.d === entry.d);
+    const nd = idx >= 0 ? data.map((x, i) => i === idx ? entry : x) : [...data, entry];
+    await saveData(nd);
+    setSaveMsg("저장 완료!");
+    setTimeout(() => setSaveMsg(""), 2000);
+  };
+
+  useEffect(() => {
+    const ex = data.find((x) => x.y === entYear && x.m === entMonth && x.d === entDept);
+    if (ex) { setEntForm({ n: ex.n, l: ex.l, s: ex.s, e: ex.e }); }
+    else {
+      const pmo = entMonth === 1 ? 12 : entMonth - 1;
+      const pyr = entMonth === 1 ? entYear - 1 : entYear;
+      const prev = data.find((x) => x.y === pyr && x.m === pmo && x.d === entDept);
+      setEntForm({ n: 0, l: 0, s: prev ? prev.e : 0, e: 0 });
+    }
+  }, [entYear, entMonth, entDept, data]);
+
+  /* ── Render ── */
+
+  function renderDeptDetail(analysis) {
+    var latest = analysis.yearSums[analysis.yearSums.length - 1];
+    var prev = analysis.yearSums.length > 1 ? analysis.yearSums[analysis.yearSums.length - 2] : null;
+    return (
+      <Card title={anaScope + " 상세 분석"} subtitle={latest.year + "년"}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 16 }}>
+          <MiniStat label="최종 총원" value={latest.lastE} />
+          <MiniStat label="누적 신입" value={latest.totalN} color={GN} />
+          <MiniStat label="누적 퇴원" value={latest.totalL} color={RD} />
+          <MiniStat label="순증감" value={pm(latest.net)} color={latest.net >= 0 ? GN : RD} />
+          <MiniStat label="평균 퇴원율" value={latest.avgLR + "%"} color={latest.avgLR > 5 ? RD : latest.avgLR > 3 ? YW : GN} />
+          <MiniStat label="최고 퇴원월" value={latest.worstMo ? latest.worstMo.mo + "월" : "-"} />
+        </div>
+        <ResponsiveContainer width="100%" height={220}>
+          <ComposedChart data={latest.moAgg.map(function(x) { return Object.assign({}, x, { month: ML[x.mo - 1], leftRate: pct(x.l, x.s) }); })}>
+            <CartesianGrid strokeDasharray="3 3" stroke={BDR} />
+            <XAxis dataKey="month" tick={{ fill: T2, fontSize: 12 }} />
+            <YAxis yAxisId="left" tick={{ fill: T2, fontSize: 11 }} />
+            <YAxis yAxisId="right" orientation="right" tick={{ fill: T2, fontSize: 11 }} unit="%" />
+            <Tooltip content={<ChartTip />} />
+            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <Bar yAxisId="left" dataKey="e" name="총원" fill={AC} radius={[3, 3, 0, 0]} barSize={20} />
+            <Line yAxisId="right" type="monotone" dataKey="leftRate" name="퇴원율" stroke={RD} strokeWidth={2} dot={{ r: 3 }} />
+          </ComposedChart>
+        </ResponsiveContainer>
+        {prev && (
+          <div style={{ marginTop: 14, padding: "12px 14px", borderRadius: 8, background: INP, fontSize: 13, lineHeight: 1.7, color: T2 }}>
+            <strong style={{ color: T1 }}>전년({prev.year}) 대비:</strong>{" "}
+            최종 총원 {prev.lastE} → {latest.lastE} ({pm(latest.lastE - prev.lastE)}) · 
+            평균 퇴원율 {prev.avgLR}% → {latest.avgLR}% ({rd(latest.avgLR - prev.avgLR) > 0 ? "+" : ""}{rd(latest.avgLR - prev.avgLR)}%p) · 
+            순증감 {pm(prev.net)} → {pm(latest.net)}
+          </div>
+        )}
+      </Card>
+    );
+  }
+
+  const tabList = [
+    { id: "overview", label: "종합 현황" },
+    { id: "trend", label: "추이 분석" },
+    { id: "compare", label: "전년 비교" },
+    { id: "analysis", label: "분석" },
+    { id: "entry", label: "데이터 입력" },
+  ];
+
+  return (
+    <div style={{ fontFamily: "'Pretendard','Apple SD Gothic Neo',-apple-system,sans-serif", background: BG, color: T1, minHeight: "100vh" }}>
+
+
+      {/* Header */}
+      <div style={{ padding: "20px 24px", borderBottom: "1px solid " + BDR, background: "linear-gradient(135deg,#1A1D27,#0F1117)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0, background: "linear-gradient(135deg,#60A5FA,#8B5CF6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>학원 운영 대시보드</h1>
+            <p style={{ fontSize: 13, color: T2, margin: "4px 0 0" }}>학생 현황 · 퇴원 분석 · 부서별 추이</p>
+          </div>
+          {tab !== "analysis" && (
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <select value={selYear} onChange={(ev) => setSelYear(Number(ev.target.value))} style={sSelect}>
+                {years.map((yr) => <option key={yr} value={yr}>{yr}년</option>)}
+              </select>
+              <select value={selDept} onChange={(ev) => setSelDept(ev.target.value)} style={sSelect}>
+                {FILTER_OPTS.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+          )}
+        </div>
+        <div style={{ display: "flex", gap: 2, marginTop: 16, background: INP, borderRadius: 10, padding: 3 }}>
+          {tabList.map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: "8px 12px", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all .2s", background: tab === t.id ? AC : "transparent", color: tab === t.id ? "#fff" : T2 }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: "16px 20px", maxWidth: 1200, margin: "0 auto" }}>
+
+        {/* KPIs */}
+        {tab !== "entry" && tab !== "analysis" && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10, marginBottom: 20 }}>
+            <KPICard label="현재 총원" value={kpis.total.toLocaleString()} sub={kpis.latMo + " 기준"} color={AC} />
+            <KPICard label="누적 신입" value={kpis.sumNew.toLocaleString()} sub={selYear + "년"} color={GN} />
+            <KPICard label="누적 퇴원" value={kpis.sumLeft.toLocaleString()} sub={selYear + "년"} color={RD} />
+            <KPICard label="평균 퇴원율" value={kpis.avgLR + "%"} sub="월평균" color={YW} />
+            <KPICard label="순증감" value={pm(kpis.net)} sub="신입-퇴원" color={kpis.net >= 0 ? GN : RD} />
+          </div>
+        )}
+
+        {/* ═══ OVERVIEW ═══ */}
+        {tab === "overview" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <Card title={selYear + "년 월별 총원 추이"} subtitle={selDept}>
+              <ResponsiveContainer width="100%" height={280}>
+                <ComposedChart data={monthly.filter((x) => x.endT > 0)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={BDR} />
+                  <XAxis dataKey="month" tick={{ fill: T2, fontSize: 12 }} />
+                  <YAxis tick={{ fill: T2, fontSize: 11 }} />
+                  <Tooltip content={<ChartTip />} />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Area type="monotone" dataKey="endT" name="월말총원" fill={AC} fillOpacity={0.15} stroke={AC} strokeWidth={2} />
+                  <Bar dataKey="newS" name="신입생" fill={GN} radius={[3, 3, 0, 0]} barSize={16} />
+                  <Bar dataKey="leftS" name="퇴원생" fill={RD} radius={[3, 3, 0, 0]} barSize={16} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </Card>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <Card title="부서별 현황" subtitle={selYear + "년"}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {deptBD.filter((x) => x.latestEnd > 0 || x.totalLeft > 0).map((x) => (
+                    <div key={x.dept} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 8, background: INP }}>
+                      <div style={{ width: 4, height: 32, borderRadius: 2, background: CLR[x.dept] }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700 }}>{x.dept}</div>
+                        <div style={{ fontSize: 11, color: T2 }}>퇴원율 {x.avgLR}% · 신입 {x.totalNew} · 퇴원 {x.totalLeft}</div>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <div style={{ fontSize: 16, fontWeight: 800 }}>{x.latestEnd}</div>
+                        <div style={{ fontSize: 11, color: T3 }}>현재</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+              <Card title="부서별 비중" subtitle="최근 월말 기준">
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={3} dataKey="value" label={({ name, percent }) => name + " " + (percent * 100).toFixed(0) + "%"} labelLine={{ stroke: T3 }}>
+                      {pieData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+                    </Pie>
+                    <Tooltip content={<ChartTip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ TREND ═══ */}
+        {tab === "trend" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <Card title={selYear + "년 퇴원율 추이"} subtitle={selDept}>
+              <ResponsiveContainer width="100%" height={280}>
+                <LineChart data={monthly.filter((x) => x.startT > 0)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={BDR} />
+                  <XAxis dataKey="month" tick={{ fill: T2, fontSize: 12 }} />
+                  <YAxis tick={{ fill: T2, fontSize: 11 }} unit="%" />
+                  <Tooltip content={<ChartTip />} />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Line type="monotone" dataKey="leftRate" name={selYear + "년"} stroke={RD} strokeWidth={2.5} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="prevLeftRate" name={cmpYear + "년"} stroke={T3} strokeWidth={1.5} strokeDasharray="5 5" dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </Card>
+            {(selDept === "전체" || selDept === "수학합계") && (
+              <Card title="부서별 월말 총원 추이" subtitle={selYear + "년"}>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={MO.map((mo) => {
+                    const row = { month: ML[mo - 1] };
+                    (selDept === "수학합계" ? MATH : DEPTS).forEach((dept) => {
+                      const it = data.find((x) => x.y === selYear && x.m === mo && x.d === dept);
+                      row[dept] = it ? it.e : null;
+                    });
+                    return row;
+                  }).filter((r) => Object.values(r).some((v) => v !== null && typeof v === "number"))}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={BDR} />
+                    <XAxis dataKey="month" tick={{ fill: T2, fontSize: 12 }} />
+                    <YAxis tick={{ fill: T2, fontSize: 11 }} />
+                    <Tooltip content={<ChartTip />} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    {(selDept === "수학합계" ? MATH : DEPTS).map((dept) => (
+                      <Line key={dept} type="monotone" dataKey={dept} stroke={CLR[dept]} strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </Card>
+            )}
+            <Card title="월별 퇴원율 히트맵" subtitle={selYear + "년"}>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead><tr><th style={sTh}>부서</th>{MO.map((mo) => <th key={mo} style={sTh}>{mo}월</th>)}</tr></thead>
+                  <tbody>
+                    {DEPTS.map((dept) => (
+                      <tr key={dept}>
+                        <td style={{ ...sTd, fontWeight: 700, color: CLR[dept] }}>{dept}</td>
+                        {MO.map((mo) => {
+                          const it = data.find((x) => x.y === selYear && x.m === mo && x.d === dept);
+                          const rate = it && it.s > 0 ? rd(it.l / it.s * 100) : null;
+                          const bg = rate === null ? "transparent" : rate > 10 ? "rgba(239,68,68,0.35)" : rate > 5 ? "rgba(239,68,68,0.2)" : rate > 3 ? "rgba(245,158,11,0.2)" : "rgba(16,185,129,0.15)";
+                          return <td key={mo} style={{ ...sTd, background: bg, textAlign: "center" }}>{rate !== null ? rate + "%" : "-"}</td>;
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* ═══ COMPARE ═══ */}
+        {tab === "compare" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={{ fontSize: 13, color: T2 }}>비교 연도:</span>
+              <select value={cmpYear} onChange={(ev) => setCmpYear(Number(ev.target.value))} style={sSelect}>
+                {years.filter((yr) => yr !== selYear).map((yr) => <option key={yr} value={yr}>{yr}년</option>)}
+              </select>
+              <span style={{ fontSize: 13, color: T2, marginLeft: 8 }}>지표:</span>
+              {[{id:"total",label:"학생수"},{id:"leftRate",label:"퇴원율"},{id:"newRate",label:"신입률"}].map((opt) => (
+                <button key={opt.id} onClick={() => setCmpMetric(opt.id)} style={{ padding: "6px 14px", border: "1px solid " + (cmpMetric === opt.id ? AC : BDR), borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: "pointer", background: cmpMetric === opt.id ? AC : "transparent", color: cmpMetric === opt.id ? "#fff" : T2, transition: "all .2s" }}>
+                  {opt.label}
+                </button>
+              ))}
+              {yoyCommon.common.length > 0 && (
+                <span style={{ fontSize: 11, color: T3, marginLeft: 8, padding: "4px 10px", background: INP, borderRadius: 12 }}>
+                  비교 기간: {yoyCommon.common.map((m) => m + "월").join(", ")}
+                </span>
+              )}
+            </div>
+
+            {/* 학생수 비교 */}
+            {cmpMetric === "total" && (
+              <Card title={selYear + " vs " + cmpYear + " 총원 비교"} subtitle={selDept}>
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={monthly.filter((x) => x.endT > 0 || x.prevEndT > 0)}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={BDR} />
+                    <XAxis dataKey="month" tick={{ fill: T2, fontSize: 12 }} />
+                    <YAxis tick={{ fill: T2, fontSize: 11 }} />
+                    <Tooltip content={<ChartTip />} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Bar dataKey="prevEndT" name={cmpYear + "년"} fill={T3} radius={[3, 3, 0, 0]} barSize={20} />
+                    <Bar dataKey="endT" name={selYear + "년"} fill={AC} radius={[3, 3, 0, 0]} barSize={20} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Card>
+            )}
+
+            {/* 퇴원율 비교 */}
+            {cmpMetric === "leftRate" && (
+              <Card title={selYear + " vs " + cmpYear + " 퇴원율 비교"} subtitle={selDept}>
+                <ResponsiveContainer width="100%" height={280}>
+                  <LineChart data={monthly.filter((x) => x.leftRate > 0 || x.prevLeftRate > 0)}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={BDR} />
+                    <XAxis dataKey="month" tick={{ fill: T2, fontSize: 12 }} />
+                    <YAxis tick={{ fill: T2, fontSize: 11 }} unit="%" />
+                    <Tooltip content={<ChartTip />} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Line type="monotone" dataKey="prevLeftRate" name={cmpYear + "년"} stroke={T3} strokeWidth={1.5} strokeDasharray="5 5" dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="leftRate" name={selYear + "년"} stroke={RD} strokeWidth={2.5} dot={{ r: 4 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Card>
+            )}
+
+            {/* 신입률 비교 */}
+            {cmpMetric === "newRate" && (
+              <Card title={selYear + " vs " + cmpYear + " 신입률 비교"} subtitle={selDept}>
+                <ResponsiveContainer width="100%" height={280}>
+                  <LineChart data={monthly.filter((x) => x.newRate > 0 || x.prevNewRate > 0)}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={BDR} />
+                    <XAxis dataKey="month" tick={{ fill: T2, fontSize: 12 }} />
+                    <YAxis tick={{ fill: T2, fontSize: 11 }} unit="%" />
+                    <Tooltip content={<ChartTip />} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Line type="monotone" dataKey="prevNewRate" name={cmpYear + "년"} stroke={T3} strokeWidth={1.5} strokeDasharray="5 5" dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="newRate" name={selYear + "년"} stroke={GN} strokeWidth={2.5} dot={{ r: 4 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Card>
+            )}
+
+            {/* 신입 학생수 비교 (학생수 모드에서만) */}
+            {cmpMetric === "total" && (
+              <Card title={selYear + " vs " + cmpYear + " 신입 학생수 비교"} subtitle={selDept}>
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={monthly.filter((x) => x.newS > 0 || x.prevNewS > 0)}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={BDR} />
+                    <XAxis dataKey="month" tick={{ fill: T2, fontSize: 12 }} />
+                    <YAxis tick={{ fill: T2, fontSize: 11 }} />
+                    <Tooltip content={<ChartTip />} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Bar dataKey="prevNewS" name={cmpYear + "년"} fill={T3} radius={[3, 3, 0, 0]} barSize={20} />
+                    <Bar dataKey="newS" name={selYear + "년"} fill={GN} radius={[3, 3, 0, 0]} barSize={20} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Card>
+            )}
+
+            {/* 퇴원 학생수 비교 (학생수 모드에서만) */}
+            {cmpMetric === "total" && (
+              <Card title={selYear + " vs " + cmpYear + " 퇴원 학생수 비교"} subtitle={selDept}>
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={monthly.filter((x) => x.leftS > 0 || x.prevLeftS > 0)}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={BDR} />
+                    <XAxis dataKey="month" tick={{ fill: T2, fontSize: 12 }} />
+                    <YAxis tick={{ fill: T2, fontSize: 11 }} />
+                    <Tooltip content={<ChartTip />} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Bar dataKey="prevLeftS" name={cmpYear + "년"} fill={T3} radius={[3, 3, 0, 0]} barSize={20} />
+                    <Bar dataKey="leftS" name={selYear + "년"} fill={RD} radius={[3, 3, 0, 0]} barSize={20} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Card>
+            )}
+
+            <Card title={"부서별 " + (cmpMetric === "total" ? "평균 총원" : cmpMetric === "leftRate" ? "평균 퇴원율" : "평균 신입률") + " 비교"} subtitle={selYear + " vs " + cmpYear + " · 동일 기간(" + yoyCommon.common.map((m) => m + "월").join(", ") + ") 기준"}>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead>
+                    <tr>
+                      <th style={sTh}>부서</th>
+                      <th style={sTh}>{cmpYear}년</th>
+                      <th style={sTh}>{selYear}년</th>
+                      <th style={sTh}>변화</th>
+                      {cmpMetric === "total" && <th style={sTh}>{selYear} 신입</th>}
+                      {cmpMetric === "total" && <th style={sTh}>{selYear} 퇴원</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {yoyList.filter((x) => x.curAvg > 0 || x.prvAvg > 0).map((x) => {
+                      const curVal = cmpMetric === "total" ? x.curAvg : cmpMetric === "leftRate" ? x.curLR : x.curNR;
+                      const prvVal = cmpMetric === "total" ? x.prvAvg : cmpMetric === "leftRate" ? x.prvLR : x.prvNR;
+                      const diffVal = cmpMetric === "total" ? x.diff : cmpMetric === "leftRate" ? x.lrDiff : x.nrDiff;
+                      const unit = cmpMetric === "total" ? "" : "%";
+                      const diffColor = cmpMetric === "leftRate" ? (diffVal <= 0 ? GN : RD) : (diffVal >= 0 ? GN : RD);
+                      return (
+                        <tr key={x.dept}>
+                          <td style={{ ...sTd, fontWeight: 700, color: CLR[x.dept] }}>{x.dept}</td>
+                          <td style={{ ...sTd, color: T3 }}>{prvVal}{unit}</td>
+                          <td style={{ ...sTd, fontWeight: 700 }}>{curVal}{unit}</td>
+                          <td style={{ ...sTd, fontWeight: 700, color: diffColor }}>{diffVal > 0 ? "+" : ""}{diffVal}{cmpMetric === "total" ? " (" + pm(x.diffPct) + "%)" : "%p"}</td>
+                          {cmpMetric === "total" && <td style={{ ...sTd, color: GN }}>{x.curTotalN}</td>}
+                          {cmpMetric === "total" && <td style={{ ...sTd, color: RD }}>{x.curTotalL}</td>}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              {/* Visual bar comparison */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
+                {yoyList.filter((x) => x.curAvg > 0 || x.prvAvg > 0).map((x) => {
+                  const curVal = cmpMetric === "total" ? x.curAvg : cmpMetric === "leftRate" ? x.curLR : x.curNR;
+                  const prvVal = cmpMetric === "total" ? x.prvAvg : cmpMetric === "leftRate" ? x.prvLR : x.prvNR;
+                  const maxVal = Math.max(curVal, prvVal, 1);
+                  return (
+                    <div key={x.dept} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 10px", borderRadius: 8, background: INP }}>
+                      <div style={{ width: 4, height: 28, borderRadius: 2, background: CLR[x.dept] }} />
+                      <div style={{ width: 52, fontWeight: 700, fontSize: 12 }}>{x.dept}</div>
+                      <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ fontSize: 11, color: T3, width: 42, textAlign: "right" }}>{prvVal}{cmpMetric !== "total" ? "%" : ""}</span>
+                        <div style={{ flex: 1, height: 6, background: BDR, borderRadius: 3, overflow: "hidden", position: "relative" }}>
+                          <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: Math.min(100, prvVal / maxVal * 100) + "%", background: T3, borderRadius: 3 }} />
+                        </div>
+                        <span style={{ fontSize: 11, color: T3 }}>→</span>
+                        <div style={{ flex: 1, height: 6, background: BDR, borderRadius: 3, overflow: "hidden", position: "relative" }}>
+                          <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: Math.min(100, curVal / maxVal * 100) + "%", background: CLR[x.dept], borderRadius: 3 }} />
+                        </div>
+                        <span style={{ fontSize: 11, fontWeight: 700, width: 42 }}>{curVal}{cmpMetric !== "total" ? "%" : ""}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* ═══ ANALYSIS ═══ */}
+        {tab === "analysis" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* Scope selector */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {FILTER_OPTS.map((s) => (
+                <button key={s} onClick={() => setAnaScope(s)} style={{ padding: "7px 16px", border: "1px solid " + (anaScope === s ? AC : BDR), borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: "pointer", background: anaScope === s ? AC : "transparent", color: anaScope === s ? "#fff" : T2 }}>
+                  {s}
+                </button>
+              ))}
+            </div>
+
+            {/* Alerts */}
+            {analysis.alerts.length > 0 && (
+              <Card title="핵심 인사이트" subtitle={anaScope}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {analysis.alerts.map((a, i) => {
+                    const color = a.type === "pos" ? GN : a.type === "neg" ? RD : YW;
+                    const icon = a.type === "pos" ? "▲" : a.type === "neg" ? "▼" : "⚠";
+                    const bgColor = a.type === "pos" ? "rgba(16,185,129,0.1)" : a.type === "neg" ? "rgba(239,68,68,0.1)" : "rgba(245,158,11,0.1)";
+                    return (
+                      <div key={i} style={{ padding: "12px 14px", borderRadius: 10, background: bgColor, borderLeft: "4px solid " + color }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4, color: color }}>{icon} {a.title}</div>
+                        <div style={{ fontSize: 13, color: T1, lineHeight: 1.5 }}>{a.text}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+
+            {/* Year summary table */}
+            <Card title="연도별 요약" subtitle={anaScope}>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead>
+                    <tr>
+                      <th style={sTh}>연도</th><th style={sTh}>월수</th><th style={sTh}>누적신입</th><th style={sTh}>누적퇴원</th><th style={sTh}>순증감</th><th style={sTh}>평균퇴원율</th><th style={sTh}>최고퇴원월</th><th style={sTh}>최종총원</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {analysis.yearSums.map((ys) => (
+                      <tr key={ys.year}>
+                        <td style={{ ...sTd, fontWeight: 700 }}>{ys.year}</td>
+                        <td style={sTd}>{ys.moCnt}개월</td>
+                        <td style={{ ...sTd, color: GN }}>{ys.totalN}</td>
+                        <td style={{ ...sTd, color: RD }}>{ys.totalL}</td>
+                        <td style={{ ...sTd, fontWeight: 700, color: ys.net >= 0 ? GN : RD }}>{pm(ys.net)}</td>
+                        <td style={sTd}>{ys.avgLR}%</td>
+                        <td style={sTd}>{ys.worstMo ? ys.worstMo.mo + "월 (" + pct(ys.worstMo.l, ys.worstMo.s) + "%)" : "-"}</td>
+                        <td style={{ ...sTd, fontWeight: 700 }}>{ys.lastE.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+
+            {/* Seasonality */}
+            <Card title="월별 퇴원율 계절성 (전체 연도 평균)" subtitle={anaScope}>
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={analysis.season.filter((x) => x.cnt > 0)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={BDR} />
+                  <XAxis dataKey="month" tick={{ fill: T2, fontSize: 12 }} />
+                  <YAxis tick={{ fill: T2, fontSize: 11 }} unit="%" />
+                  <Tooltip content={<ChartTip />} />
+                  <Bar dataKey="avgLR" name="평균 퇴원율" radius={[4, 4, 0, 0]} barSize={28}>
+                    {analysis.season.filter((x) => x.cnt > 0).map((x, i) => (
+                      <Cell key={i} fill={x.avgLR > 6 ? RD : x.avgLR > 4 ? YW : GN} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+
+            {/* Dept cards (for 전체/수학합계) */}
+            {analysis.deptAna && (
+              <Card title="부서별 종합 분석" subtitle={"최신 연도 기준 · " + anaScope}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {analysis.deptAna.map((da) => {
+                    const health = da.alr <= 3 ? "양호" : da.alr <= 5 ? "주의" : "경고";
+                    const hColor = health === "양호" ? GN : health === "주의" ? YW : RD;
+                    return (
+                      <div key={da.dept} style={{ padding: "14px 16px", borderRadius: 10, background: INP, borderLeft: "4px solid " + CLR[da.dept] }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                          <div style={{ fontSize: 15, fontWeight: 800, color: CLR[da.dept] }}>{da.dept}</div>
+                          <span style={{ padding: "3px 10px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: hColor + "22", color: hColor }}>{health}</span>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 8, fontSize: 13 }}>
+                          <div><span style={{ color: T2 }}>현재 총원</span><div style={{ fontWeight: 700, fontSize: 16 }}>{da.latEnd}</div></div>
+                          <div><span style={{ color: T2 }}>평균 퇴원율</span><div style={{ fontWeight: 700, fontSize: 16, color: hColor }}>{da.alr}%</div></div>
+                          <div><span style={{ color: T2 }}>신입/퇴원</span><div style={{ fontWeight: 700 }}><span style={{ color: GN }}>{da.tn}</span> / <span style={{ color: RD }}>{da.tl}</span></div></div>
+                          <div><span style={{ color: T2 }}>전년비</span><div style={{ fontWeight: 700, color: da.yoyDiff >= 0 ? GN : RD }}>{pm(da.yoyDiff)} ({pm(da.yoyPct)}%)</div></div>
+                        </div>
+                        <div style={{ marginTop: 10, fontSize: 12, color: T2, lineHeight: 1.6 }}>
+                          {da.alr > 5 ? "⚠ 퇴원율 " + da.alr + "%로 높은 수준. 퇴원 원인 분석 필요." : da.alr > 3 ? "△ 퇴원율 " + da.alr + "% 관리 가능 수준, 추이 모니터링 필요." : "○ 퇴원율 " + da.alr + "%로 안정적."}
+                          {da.yoyDiff < -20 ? " 전년 대비 " + Math.abs(da.yoyDiff) + "명 감소, 모집 강화 필요." : da.yoyDiff >= 20 ? " 전년 대비 " + da.yoyDiff + "명 증가, 성장세." : ""}
+                          {da.tn < da.tl ? " 신입(" + da.tn + ") < 퇴원(" + da.tl + ") 순감소 상태." : ""}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+
+            {/* Single dept detail */}
+            {anaScope !== "전체" && anaScope !== "수학합계" && analysis.yearSums.length > 0 && renderDeptDetail(analysis)}
+
+
+          </div>
+        )}
+
+        {/* ═══ DATA ENTRY ═══ */}
+        {tab === "entry" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <Card title="월별 데이터 입력" subtitle="신규 추가 또는 기존 수정">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+                <div>
+                  <label style={sLabel}>연도</label>
+                  <select value={entYear} onChange={(ev) => setEntYear(Number(ev.target.value))} style={{ ...sInput, width: "100%" }}>
+                    {[2022, 2023, 2024, 2025, 2026, 2027].map((yr) => <option key={yr} value={yr}>{yr}년</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={sLabel}>월</label>
+                  <select value={entMonth} onChange={(ev) => setEntMonth(Number(ev.target.value))} style={{ ...sInput, width: "100%" }}>
+                    {MO.map((mo) => <option key={mo} value={mo}>{mo}월</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={sLabel}>부서</label>
+                  <select value={entDept} onChange={(ev) => setEntDept(ev.target.value)} style={{ ...sInput, width: "100%" }}>
+                    {DEPTS.map((d) => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+                <div><label style={sLabel}>신입생 수</label><input type="number" value={entForm.n} onChange={(ev) => setEntForm({ ...entForm, n: ev.target.value })} style={{ ...sInput, width: "100%" }} /></div>
+                <div><label style={sLabel}>퇴원생 수</label><input type="number" value={entForm.l} onChange={(ev) => setEntForm({ ...entForm, l: ev.target.value })} style={{ ...sInput, width: "100%" }} /></div>
+                <div><label style={sLabel}>월초 총원</label><input type="number" value={entForm.s} onChange={(ev) => setEntForm({ ...entForm, s: ev.target.value })} style={{ ...sInput, width: "100%" }} /></div>
+                <div><label style={sLabel}>월말 총원</label><input type="number" value={entForm.e} onChange={(ev) => setEntForm({ ...entForm, e: ev.target.value })} style={{ ...sInput, width: "100%" }} /></div>
+              </div>
+              <div style={{ padding: "10px 14px", background: BG, borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
+                <span style={{ color: T2 }}>자동 계산: </span>
+                <span style={{ color: GN, marginRight: 16 }}>신입률 {entForm.s > 0 ? (entForm.n / entForm.s * 100).toFixed(2) : 0}%</span>
+                <span style={{ color: RD }}>퇴원율 {entForm.s > 0 ? (entForm.l / entForm.s * 100).toFixed(2) : 0}%</span>
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <button onClick={handleSave} style={{ padding: "10px 28px", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, background: AC, color: "#fff", cursor: "pointer" }}>
+                  {data.find((x) => x.y === entYear && x.m === entMonth && x.d === entDept) ? "수정 저장" : "추가 저장"}
+                </button>
+                {saveMsg && <span style={{ fontSize: 13, color: GN, fontWeight: 600 }}>{saveMsg}</span>}
+              </div>
+            </Card>
+            <Card title="입력된 데이터 조회" subtitle={entYear + "년"}>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead><tr><th style={sTh}>월</th><th style={sTh}>부서</th><th style={sTh}>신입</th><th style={sTh}>퇴원</th><th style={sTh}>퇴원율</th><th style={sTh}>월초</th><th style={sTh}>월말</th></tr></thead>
+                  <tbody>
+                    {data.filter((x) => x.y === entYear).sort((a, b) => a.m - b.m || DEPTS.indexOf(a.d) - DEPTS.indexOf(b.d)).map((row, i) => (
+                      <tr key={i} style={{ cursor: "pointer" }} onClick={() => { setEntMonth(row.m); setEntDept(row.d); }}>
+                        <td style={sTd}>{row.m}월</td>
+                        <td style={{ ...sTd, color: CLR[row.d], fontWeight: 600 }}>{row.d}</td>
+                        <td style={{ ...sTd, color: GN }}>{row.n}</td>
+                        <td style={{ ...sTd, color: RD }}>{row.l}</td>
+                        <td style={sTd}>{row.s > 0 ? (row.l / row.s * 100).toFixed(1) : 0}%</td>
+                        <td style={sTd}>{row.s}</td>
+                        <td style={sTd}>{row.e}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+var root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App));
+</script>
+</body>
+</html>
