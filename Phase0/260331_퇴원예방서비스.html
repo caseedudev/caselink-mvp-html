@@ -1591,7 +1591,7 @@ async function callLLM(provider, apiKey, prompt, model) {
     if (data.error) throw new Error(data.error.message);
     return (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
   } else if (provider === 'zai') {
-    res = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+    res = await fetch('https://api.z.ai/api/coding/paas/v4/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
       body: JSON.stringify({ model: model, max_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
