@@ -487,6 +487,7 @@ body{display:flex;min-height:100vh;background:var(--g50);overflow:hidden}
 </div>
 <div class="save-toast" id="saveToast">설정이 저장되었습니다</div>
 
+<script src="shared/llm.js"></script>
 <script>
 // ============================================================
 // PAGE REGISTRY - Add new pages here
@@ -730,29 +731,8 @@ window.addEventListener('message', function(e) {
 });
 
 // ============================================================
-// LLM Provider Config
+// LLM Provider Config — 공통 함수는 shared/llm.js 에서 로드
 // ============================================================
-// LLM_PROVIDERS is loaded from config.json at init
-let LLM_PROVIDERS = {};
-
-// ── Cookie helpers ──
-function setCookie(name, value, days) {
-  var d = new Date();
-  d.setTime(d.getTime() + (days || 365) * 24 * 60 * 60 * 1000);
-  document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
-}
-function getCookie(name) {
-  var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-  return m ? decodeURIComponent(m[1]) : '';
-}
-function getLLMConfig() {
-  var raw = getCookie('caselink_llm');
-  if (!raw) return {};
-  try { return JSON.parse(raw); } catch(e) { return {}; }
-}
-function saveLLMConfig(cfg) {
-  setCookie('caselink_llm', JSON.stringify(cfg), 365);
-}
 
 // ── Settings UI ──
 function onSelectProvider(key) {
@@ -921,14 +901,7 @@ function closeHelpGuide() {
 // Init — load config.json then render
 // ============================================================
 (async function init() {
-  try {
-    var res = await fetch('config.json');
-    var cfg = await res.json();
-    LLM_PROVIDERS = cfg.providers || {};
-    window._configDefaultProvider = cfg.defaultProvider || 'gemini';
-  } catch(e) {
-    console.warn('config.json load failed, using empty config:', e);
-  }
+  await loadLLMProviders('config.json');
   loadFromHash();
 })();
 </script>

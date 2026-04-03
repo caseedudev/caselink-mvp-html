@@ -1479,60 +1479,9 @@ body{background:var(--g50);min-height:100vh;display:flex}
 
 <div class="toast" id="toast"></div>
 
+<script src="../shared/llm.js"></script>
 <script>
-// ── LLM 공통 (쿠키 기반) ──
-function getCookie(name){var m=document.cookie.match(new RegExp('(?:^|; )'+name+'=([^;]*)'));return m?decodeURIComponent(m[1]):'';}
-function getLLMConfig(){var r=getCookie('caselink_llm');if(!r)return{};try{return JSON.parse(r);}catch(e){return{};}}
-function getActiveLLM(){var c=getLLMConfig();var a=c._activeProvider||'gemini';if(c[a]&&c[a].apiKey)return{provider:a,apiKey:c[a].apiKey,model:c[a].model,options:c[a].options||{}};return null;}
-async function callLLM(provider,apiKey,prompt,model,systemPrompt,opts){
-  var o=opts||{};var res,data;
-  if(provider==='anthropic'){
-    var body={model:model,max_tokens:o.max_tokens||800,messages:[{role:'user',content:prompt}]};
-    if(systemPrompt)body.system=systemPrompt;
-    if(o.temperature!==undefined)body.temperature=o.temperature;
-    if(o.top_p!==undefined)body.top_p=o.top_p;
-    if(o.top_k)body.top_k=o.top_k;
-    res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify(body)});
-    data=await res.json();if(data.error)throw new Error(data.error.message);
-    return(data.content||[]).map(function(b){return b.text||'';}).join('\n');
-  }else if(provider==='gemini'){
-    var gc={maxOutputTokens:o.maxOutputTokens||800};
-    if(o.temperature!==undefined)gc.temperature=o.temperature;
-    if(o.topP!==undefined)gc.topP=o.topP;
-    if(o.topK!==undefined)gc.topK=o.topK;
-    var contents=[{parts:[{text:(systemPrompt?systemPrompt+'\n\n':'')+prompt}]}];
-    res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(apiKey),{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:contents,generationConfig:gc})});
-    data=await res.json();if(data.error)throw new Error(data.error.message);
-    return(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts||[]).map(function(p){return p.text||'';}).join('\n');
-  }else if(provider==='openai'){
-    var m2=[];if(systemPrompt)m2.push({role:'system',content:systemPrompt});m2.push({role:'user',content:prompt});
-    var ob={model:model,max_completion_tokens:o.max_completion_tokens||800,messages:m2};
-    if(o.temperature!==undefined)ob.temperature=o.temperature;
-    if(o.top_p!==undefined)ob.top_p=o.top_p;
-    if(o.frequency_penalty!==undefined)ob.frequency_penalty=o.frequency_penalty;
-    if(o.presence_penalty!==undefined)ob.presence_penalty=o.presence_penalty;
-    res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-      body:JSON.stringify(ob)});
-    data=await res.json();if(data.error)throw new Error(data.error.message);
-    return(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'';
-  }else if(provider==='zai'){
-    var m3=[];if(systemPrompt)m3.push({role:'system',content:systemPrompt});m3.push({role:'user',content:prompt});
-    var zb={model:model,max_tokens:o.max_tokens||800,messages:m3};
-    if(o.temperature!==undefined)zb.temperature=o.temperature;
-    if(o.top_p!==undefined)zb.top_p=o.top_p;
-    res=await fetch('https://api.z.ai/api/coding/paas/v4/chat/completions',{method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-      body:JSON.stringify(zb)});
-    data=await res.json();if(data.error)throw new Error(data.error.message);
-    return(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'';
-  }
-  throw new Error('알 수 없는 프로바이더: '+provider);
-}
+// LLM 공통 함수 (getCookie, getLLMConfig, getActiveLLM, callLLM)는 shared/llm.js 에서 로드
 
 // ── NAVIGATION ──
 const pages=['dash','sb','new','withdraw','students','urgent','record','consult','kakao','journal'];
