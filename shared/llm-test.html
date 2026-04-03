@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>shared/llm.js - Integration Test</title>
+<style>
+body { font-family: -apple-system, sans-serif; max-width: 900px; margin: 20px auto; padding: 0 16px; }
+h1 { font-size: 20px; }
+h2 { font-size: 16px; margin-top: 24px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+.test { padding: 6px 10px; margin: 4px 0; border-radius: 6px; font-size: 13px; font-family: monospace; }
+.pass { background: #d4edda; color: #155724; }
+.fail { background: #f8d7da; color: #721c24; }
+.skip { background: #fff3cd; color: #856404; }
+#summary { font-size: 15px; font-weight: bold; margin-top: 16px; padding: 12px; border-radius: 8px; }
+.all-pass { background: #d4edda; color: #155724; }
+.has-fail { background: #f8d7da; color: #721c24; }
+button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; margin: 4px; }
+.btn-run { background: #007bff; color: #fff; }
+.btn-clear { background: #6c757d; color: #fff; }
+</style>
+</head>
+<body>
+<h1>shared/llm.js Integration Test Suite</h1>
+<p>Tests cookie operations, LLM config, provider detection, callLLM dispatch, and config.json loading.</p>
+<div>
+  <button class="btn-run" onclick="runAllTests()">Run All Tests</button>
+  <button class="btn-clear" onclick="clearCookies()">Clear Test Cookies</button>
+</div>
+<div id="summary"></div>
+<div id="results"></div>
+
+<script src="llm.js"></script>
+<script>
+var results = [];
+var $r = document.getElementById('results');
+var $s = document.getElementById('summary');
+
+function log(name, passed, detail) {
+  results.push({ name: name, passed: passed });
+  var cls = passed === null ? 'skip' : (passed ? 'pass' : 'fail');
+  var icon = passed === null ? 'SKIP' : (passed ? 'PASS' : 'FAIL');
+  $r.innerHTML += '<div class="test ' + cls + '">[' + icon + '] ' + name + (detail ? ' -- ' + detail : '') + '</div>';
+}
+
+function showSummary() {
+  var total = results.length;
+  var passed = results.filter(function(r) { return r.passed === true; }).length;
+  var failed = results.filter(function(r) { return r.passed === false; }).length;
+  var skipped = results.filter(function(r) { return r.passed === null; }).length;
+  $s.className = failed > 0 ? 'has-fail' : 'all-pass';
+  $s.textContent = 'Total: ' + total + ' | Passed: ' + passed + ' | Failed: ' + failed + ' | Skipped: ' + skipped;
+}
+
+function clearCookies() {
+  document.cookie = 'caselink_llm=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+  document.cookie = '_test_cookie=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+  alert('Test cookies cleared');
+}
+
+async function runAllTests() {
+  results = [];
+  $r.innerHTML = '';
+  $s.textContent = 'Running...';
+
+  // ═══════════════════════════════════════
+  // TC-1: Global Functions Exposed
+  // ═══════════════════════════════════════
+  $r.innerHTML += '<h2>TC-1: Global Function Availability</h2>';
+
+  log('TC-1.1 setCookie is function', typeof window.setCookie === 'function');
+  log('TC-1.2 getCookie is function', typeof window.getCookie === 'function');
+  log('TC-1.3 getLLMConfig is function', typeof window.getLLMConfig === 'function');
+  log('TC-1.4 saveLLMConfig is function', typeof window.saveLLMConfig === 'function');
+  log('TC-1.5 getActiveLLM is function', typeof window.getActiveLLM === 'function');
+  log('TC-1.6 callLLM is function', typeof window.callLLM === 'function');
+  log('TC-1.7 loadLLMProviders is function', typeof window.loadLLMProviders === 'function');
+  log('TC-1.8 LLM_PROVIDERS is object', typeof window.LLM_PROVIDERS === 'object');
+
+  // ═══════════════════════════════════════
+  // TC-2: Cookie Operations
+  // ═══════════════════════════════════════
+  $r.innerHTML += '<h2>TC-2: Cookie Read/Write</h2>';
+
+  setCookie('_test_cookie', 'hello_world', 1);
+  var val = getCookie('_test_cookie');
+  log('TC-2.1 setCookie + getCookie roundtrip', val === 'hello_world', 'got: "' + val + '"');
+
+  setCookie('_test_cookie', '한국어 테스트', 1);
+  val = getCookie('_test_cookie');
+  log('TC-2.2 Korean text in cookie', val === '한국어 테스트', 'got: "' + val + '"');
+
+  setCookie('_test_cookie', '{"key":"value","num":42}', 1);
+  val = getCookie('_test_cookie');
+  log('TC-2.3 JSON string in cookie', val === '{"key":"value","num":42}', 'got: "' + val + '"');
+
+  val = getCookie('_nonexistent_cookie_xyz');
+  log('TC-2.4 Non-existent cookie returns empty', val === '', 'got: "' + val + '"');
+
+  // cleanup
+  document.cookie = '_test_cookie=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+
+  // ═══════════════════════════════════════
+  // TC-3: LLM Config Save/Load
+  // ═══════════════════════════════════════
+  $r.innerHTML += '<h2>TC-3: LLM Config Save/Load</h2>';
+
+  // Clear first
+  document.cookie = 'caselink_llm=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+
+  var empty = getLLMConfig();
+  log('TC-3.1 Empty config returns {}', JSON.stringify(empty) === '{}', 'got: ' + JSON.stringify(empty));
+
+  var testCfg = {
+    _activeProvider: 'gemini',
+    gemini: { apiKey: 'test-key-123', model: 'gemini-2.5-flash', options: { temperature: 0.7 } }
+  };
+  saveLLMConfig(testCfg);
+  var loaded = getLLMConfig();
+  log('TC-3.2 saveLLMConfig + getLLMConfig roundtrip', loaded._activeProvider === 'gemini', 'activeProvider: ' + loaded._activeProvider);
+  log('TC-3.3 API key preserved', loaded.gemini && loaded.gemini.apiKey === 'test-key-123');
+  log('TC-3.4 Model preserved', loaded.gemini && loaded.gemini.model === 'gemini-2.5-flash');
+  log('TC-3.5 Options preserved', loaded.gemini && loaded.gemini.options && loaded.gemini.options.temperature === 0.7);
+
+  // Multi-provider config
+  var multiCfg = {
+    _activeProvider: 'anthropic',
+    gemini: { apiKey: 'gem-key', model: 'gemini-2.5-flash', options: {} },
+    anthropic: { apiKey: 'ant-key', model: 'claude-sonnet-4-6', options: { temperature: 0.5 } },
+    openai: { apiKey: 'oai-key', model: 'gpt-5.4-mini', options: { max_completion_tokens: 2048 } }
+  };
+  saveLLMConfig(multiCfg);
+  loaded = getLLMConfig();
+  log('TC-3.6 Multi-provider config saved', loaded.gemini && loaded.anthropic && loaded.openai, 'providers: ' + Object.keys(loaded).filter(function(k){return k!=='_activeProvider';}).join(', '));
+  log('TC-3.7 Active provider is anthropic', loaded._activeProvider === 'anthropic');
+
+  // ═══════════════════════════════════════
+  // TC-4: getActiveLLM
+  // ═══════════════════════════════════════
+  $r.innerHTML += '<h2>TC-4: getActiveLLM()</h2>';
+
+  // Using multiCfg from above (active: anthropic)
+  var active = getActiveLLM();
+  log('TC-4.1 Returns active provider', active !== null);
+  log('TC-4.2 Provider is anthropic', active && active.provider === 'anthropic', 'got: ' + (active && active.provider));
+  log('TC-4.3 API key matches', active && active.apiKey === 'ant-key');
+  log('TC-4.4 Model matches', active && active.model === 'claude-sonnet-4-6');
+  log('TC-4.5 Options included', active && active.options && active.options.temperature === 0.5);
+
+  // Switch active to gemini
+  multiCfg._activeProvider = 'gemini';
+  saveLLMConfig(multiCfg);
+  active = getActiveLLM();
+  log('TC-4.6 Switch to gemini works', active && active.provider === 'gemini', 'got: ' + (active && active.provider));
+  log('TC-4.7 Gemini key correct', active && active.apiKey === 'gem-key');
+
+  // Switch to openai
+  multiCfg._activeProvider = 'openai';
+  saveLLMConfig(multiCfg);
+  active = getActiveLLM();
+  log('TC-4.8 Switch to openai works', active && active.provider === 'openai', 'got: ' + (active && active.provider));
+  log('TC-4.9 OpenAI key correct', active && active.apiKey === 'oai-key');
+  log('TC-4.10 OpenAI model correct', active && active.model === 'gpt-5.4-mini');
+
+  // No API key scenario
+  var noKeyCfg = { _activeProvider: 'gemini', gemini: { model: 'gemini-2.5-flash' } };
+  saveLLMConfig(noKeyCfg);
+  active = getActiveLLM();
+  log('TC-4.11 No apiKey returns null', active === null, 'got: ' + JSON.stringify(active));
+
+  // Empty config scenario
+  document.cookie = 'caselink_llm=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+  active = getActiveLLM();
+  log('TC-4.12 Empty config returns null', active === null);
+
+  // ═══════════════════════════════════════
+  // TC-5: callLLM Error Handling
+  // ═══════════════════════════════════════
+  $r.innerHTML += '<h2>TC-5: callLLM Error Handling</h2>';
+
+  try {
+    await callLLM('unknown_provider', 'key', 'test', 'model', null, {});
+    log('TC-5.1 Unknown provider throws', false, 'did not throw');
+  } catch (e) {
+    log('TC-5.1 Unknown provider throws', e.message.indexOf('알 수 없는 프로바이더') >= 0, 'msg: ' + e.message);
+  }
+
+  // Gemini with invalid key (should get API error)
+  try {
+    await callLLM('gemini', 'INVALID_KEY', 'test prompt', 'gemini-2.5-flash', null, {});
+    log('TC-5.2 Gemini invalid key throws', false, 'did not throw');
+  } catch (e) {
+    log('TC-5.2 Gemini invalid key throws', true, 'error: ' + e.message.substring(0, 80));
+  }
+
+  // Anthropic with invalid key
+  try {
+    await callLLM('anthropic', 'INVALID_KEY', 'test', 'claude-sonnet-4-6', null, {});
+    log('TC-5.3 Anthropic invalid key throws', false, 'did not throw');
+  } catch (e) {
+    log('TC-5.3 Anthropic invalid key throws', true, 'error: ' + e.message.substring(0, 80));
+  }
+
+  // OpenAI with invalid key
+  try {
+    await callLLM('openai', 'INVALID_KEY', 'test', 'gpt-5.4-mini', null, {});
+    log('TC-5.4 OpenAI invalid key throws', false, 'did not throw');
+  } catch (e) {
+    log('TC-5.4 OpenAI invalid key throws', true, 'error: ' + e.message.substring(0, 80));
+  }
+
+  // ═══════════════════════════════════════
+  // TC-6: callLLM Options Passthrough
+  // ═══════════════════════════════════════
+  $r.innerHTML += '<h2>TC-6: callLLM Request Body Verification</h2>';
+
+  // Monkey-patch fetch to verify request bodies
+  var origFetch = window.fetch;
+  var capturedBodies = [];
+
+  window.fetch = async function(url, init) {
+    if (init && init.body) {
+      capturedBodies.push({ url: url, body: JSON.parse(init.body), headers: init.headers });
+    }
+    // Return a mock error so we don't actually hit the API
+    return { json: async function() { return { error: { message: 'mock-test' } }; } };
+  };
+
+  // Test Gemini body
+  capturedBodies = [];
+  try { await callLLM('gemini', 'k', 'prompt text', 'gemini-2.5-flash', 'system text', { temperature: 0.3, topP: 0.8, topK: 20, maxOutputTokens: 2048 }); } catch(e) {}
+  var gb = capturedBodies[0];
+  log('TC-6.1 Gemini URL has model', gb && gb.url.indexOf('gemini-2.5-flash') > 0);
+  log('TC-6.2 Gemini URL has apiKey', gb && gb.url.indexOf('key=k') > 0);
+  log('TC-6.3 Gemini systemPrompt in content', gb && gb.body.contents[0].parts[0].text.indexOf('system text') === 0);
+  log('TC-6.4 Gemini temperature', gb && gb.body.generationConfig.temperature === 0.3);
+  log('TC-6.5 Gemini topP', gb && gb.body.generationConfig.topP === 0.8);
+  log('TC-6.6 Gemini topK', gb && gb.body.generationConfig.topK === 20);
+  log('TC-6.7 Gemini maxOutputTokens', gb && gb.body.generationConfig.maxOutputTokens === 2048);
+
+  // Test Anthropic body
+  capturedBodies = [];
+  try { await callLLM('anthropic', 'ant-k', 'hello', 'claude-sonnet-4-6', 'sys prompt', { temperature: 0.5, top_p: 0.9, top_k: 10, max_tokens: 1000 }); } catch(e) {}
+  var ab = capturedBodies[0];
+  log('TC-6.8 Anthropic URL correct', ab && ab.url === 'https://api.anthropic.com/v1/messages');
+  log('TC-6.9 Anthropic model in body', ab && ab.body.model === 'claude-sonnet-4-6');
+  log('TC-6.10 Anthropic system prompt', ab && ab.body.system === 'sys prompt');
+  log('TC-6.11 Anthropic temperature', ab && ab.body.temperature === 0.5);
+  log('TC-6.12 Anthropic top_p', ab && ab.body.top_p === 0.9);
+  log('TC-6.13 Anthropic top_k', ab && ab.body.top_k === 10);
+  log('TC-6.14 Anthropic max_tokens', ab && ab.body.max_tokens === 1000);
+  log('TC-6.15 Anthropic x-api-key header', ab && ab.headers['x-api-key'] === 'ant-k');
+
+  // Test OpenAI body
+  capturedBodies = [];
+  try { await callLLM('openai', 'oai-k', 'hello', 'gpt-5.4-mini', 'sys', { temperature: 1.2, top_p: 0.95, max_completion_tokens: 8192, frequency_penalty: 0.5, presence_penalty: 0.3 }); } catch(e) {}
+  var ob = capturedBodies[0];
+  log('TC-6.16 OpenAI URL correct', ob && ob.url === 'https://api.openai.com/v1/chat/completions');
+  log('TC-6.17 OpenAI system msg first', ob && ob.body.messages[0].role === 'system' && ob.body.messages[0].content === 'sys');
+  log('TC-6.18 OpenAI user msg second', ob && ob.body.messages[1].role === 'user' && ob.body.messages[1].content === 'hello');
+  log('TC-6.19 OpenAI max_completion_tokens', ob && ob.body.max_completion_tokens === 8192);
+  log('TC-6.20 OpenAI frequency_penalty', ob && ob.body.frequency_penalty === 0.5);
+  log('TC-6.21 OpenAI presence_penalty', ob && ob.body.presence_penalty === 0.3);
+  log('TC-6.22 OpenAI auth header', ob && ob.headers['Authorization'] === 'Bearer oai-k');
+
+  // Test Z.ai body
+  capturedBodies = [];
+  try { await callLLM('zai', 'zai-k', 'hello', 'glm-5.1', 'sys', { temperature: 0.7, top_p: 0.7, max_tokens: 2000 }); } catch(e) {}
+  var zb = capturedBodies[0];
+  log('TC-6.23 Z.ai URL has /chat/completions', zb && zb.url.indexOf('/chat/completions') > 0);
+  log('TC-6.24 Z.ai model', zb && zb.body.model === 'glm-5.1');
+  log('TC-6.25 Z.ai system msg', zb && zb.body.messages[0].role === 'system');
+  log('TC-6.26 Z.ai temperature', zb && zb.body.temperature === 0.7);
+  log('TC-6.27 Z.ai max_tokens', zb && zb.body.max_tokens === 2000);
+  log('TC-6.28 Z.ai auth header', zb && zb.headers['Authorization'] === 'Bearer zai-k');
+
+  // Test no systemPrompt
+  capturedBodies = [];
+  try { await callLLM('openai', 'k', 'hello', 'gpt-5.4-mini', null, {}); } catch(e) {}
+  var nb = capturedBodies[0];
+  log('TC-6.29 No systemPrompt = user msg only', nb && nb.body.messages.length === 1 && nb.body.messages[0].role === 'user');
+
+  // Test default max_tokens
+  capturedBodies = [];
+  try { await callLLM('anthropic', 'k', 'hello', 'model', null, {}); } catch(e) {}
+  var db = capturedBodies[0];
+  log('TC-6.30 Anthropic default max_tokens=4096', db && db.body.max_tokens === 4096);
+
+  capturedBodies = [];
+  try { await callLLM('gemini', 'k', 'hello', 'model', null, {}); } catch(e) {}
+  db = capturedBodies[0];
+  log('TC-6.31 Gemini default maxOutputTokens=4096', db && db.body.generationConfig.maxOutputTokens === 4096);
+
+  // Restore original fetch
+  window.fetch = origFetch;
+
+  // ═══════════════════════════════════════
+  // TC-7: loadLLMProviders
+  // ═══════════════════════════════════════
+  $r.innerHTML += '<h2>TC-7: loadLLMProviders (config.json)</h2>';
+
+  // Reset
+  window.LLM_PROVIDERS = {};
+  LLM_PROVIDERS = {};
+  var cfg = await loadLLMProviders('../config.json');
+  log('TC-7.1 config.json loads', cfg && cfg.providers);
+  log('TC-7.2 LLM_PROVIDERS populated', Object.keys(LLM_PROVIDERS).length > 0, 'keys: ' + Object.keys(LLM_PROVIDERS).join(', '));
+  log('TC-7.3 Has gemini provider', LLM_PROVIDERS.gemini && LLM_PROVIDERS.gemini.label);
+  log('TC-7.4 Has anthropic provider', LLM_PROVIDERS.anthropic && LLM_PROVIDERS.anthropic.label);
+  log('TC-7.5 Has openai provider', LLM_PROVIDERS.openai && LLM_PROVIDERS.openai.label);
+  log('TC-7.6 Has zai provider', LLM_PROVIDERS.zai && LLM_PROVIDERS.zai.label);
+  log('TC-7.7 Default provider set', window._configDefaultProvider === 'gemini', 'got: ' + window._configDefaultProvider);
+  log('TC-7.8 Gemini has models', LLM_PROVIDERS.gemini && LLM_PROVIDERS.gemini.models && LLM_PROVIDERS.gemini.models.length > 0, 'count: ' + (LLM_PROVIDERS.gemini && LLM_PROVIDERS.gemini.models && LLM_PROVIDERS.gemini.models.length));
+  log('TC-7.9 Gemini has options', LLM_PROVIDERS.gemini && LLM_PROVIDERS.gemini.options && LLM_PROVIDERS.gemini.options.length > 0);
+
+  // Bad path fallback
+  window.LLM_PROVIDERS = {};
+  LLM_PROVIDERS = {};
+  var bad = await loadLLMProviders('nonexistent.json');
+  log('TC-7.10 Bad path returns {}', JSON.stringify(bad) === '{}');
+
+  // Restore
+  await loadLLMProviders('../config.json');
+
+  // ═══════════════════════════════════════
+  // TC-8: Integration - Full Flow
+  // ═══════════════════════════════════════
+  $r.innerHTML += '<h2>TC-8: Full Integration Flow</h2>';
+
+  // Simulate: user sets up Gemini via settings → sub-page reads it
+  var setupCfg = {
+    _activeProvider: 'gemini',
+    gemini: { apiKey: 'AIza-test-integration', model: 'gemini-2.5-flash', options: { temperature: 0.5, maxOutputTokens: 2048 } }
+  };
+  saveLLMConfig(setupCfg);
+
+  // Sub-page reads config
+  var subActive = getActiveLLM();
+  log('TC-8.1 Sub-page reads correct provider', subActive && subActive.provider === 'gemini');
+  log('TC-8.2 Sub-page reads correct key', subActive && subActive.apiKey === 'AIza-test-integration');
+  log('TC-8.3 Sub-page reads correct model', subActive && subActive.model === 'gemini-2.5-flash');
+  log('TC-8.4 Sub-page reads options', subActive && subActive.options && subActive.options.temperature === 0.5);
+
+  // Switch provider (simulating settings change)
+  setupCfg._activeProvider = 'anthropic';
+  setupCfg.anthropic = { apiKey: 'sk-ant-test', model: 'claude-sonnet-4-6', options: {} };
+  saveLLMConfig(setupCfg);
+  subActive = getActiveLLM();
+  log('TC-8.5 Provider switch reflected', subActive && subActive.provider === 'anthropic');
+  log('TC-8.6 New provider key correct', subActive && subActive.apiKey === 'sk-ant-test');
+
+  // Cleanup
+  document.cookie = 'caselink_llm=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+
+  // ═══════════════════════════════════════
+  showSummary();
+}
+</script>
+</body>
+</html>
