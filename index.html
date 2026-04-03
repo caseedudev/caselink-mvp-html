@@ -677,21 +677,46 @@ function saveLLMConfig(cfg) {
 }
 
 // ── Settings UI ──
+function onSelectProvider(key) {
+  // 선택된 프로바이더만 펼치고, 나머지 접기
+  Object.keys(LLM_PROVIDERS).forEach(function(k) {
+    var body = document.getElementById('cfg_body_' + k);
+    if (body) body.classList.toggle('open', k === key);
+  });
+}
+
 function openSettings() {
   var cfg = getLLMConfig();
+  var activeProvider = cfg._activeProvider || window._configDefaultProvider || 'gemini';
   var body = document.getElementById('settingsBody');
   var html = '';
+
+  // 사용할 AI 선택
+  html += '<div style="margin-bottom:20px">';
+  html += '<label class="setting-label" style="margin-bottom:8px;display:block">사용할 AI 선택</label>';
+  html += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
+  Object.keys(LLM_PROVIDERS).forEach(function(key) {
+    var p = LLM_PROVIDERS[key];
+    var checked = key === activeProvider ? ' checked' : '';
+    html += '<label style="flex:1;min-width:110px;display:flex;align-items:center;gap:6px;padding:10px 12px;border:1.5px solid ' + (key === activeProvider ? 'var(--blue)' : 'var(--g200)') + ';border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;background:' + (key === activeProvider ? 'rgba(30,111,217,.06)' : 'var(--white)') + ';transition:all .15s">';
+    html += '<input type="radio" name="activeProvider" value="' + key + '"' + checked + ' onchange="onSelectProvider(\'' + key + '\')" style="accent-color:var(--blue)">';
+    html += '<strong>' + p.icon + '</strong> ' + p.label.split(' ')[0];
+    html += '</label>';
+  });
+  html += '</div></div>';
+
+  // 각 프로바이더 설정
   Object.keys(LLM_PROVIDERS).forEach(function(key) {
     var p = LLM_PROVIDERS[key];
     var pcfg = cfg[key] || {};
-    var hasKey = !!(pcfg.apiKey);
-    var isOpen = hasKey ? '' : '';
+    var isActive = key === activeProvider;
     html += '<div class="provider-section">';
     html += '<div class="provider-header" onclick="this.nextElementSibling.classList.toggle(\'open\')">';
     html += '<span class="provider-name"><strong>' + p.icon + '</strong> ' + p.label + '</span>';
+    var hasKey = !!(pcfg.apiKey);
     html += '<span class="provider-badge ' + (hasKey ? '' : 'inactive') + '">' + (hasKey ? 'API Key 설정됨' : '미설정') + '</span>';
     html += '</div>';
-    html += '<div class="provider-body' + (hasKey ? '' : ' open') + '">';
+    html += '<div class="provider-body' + (isActive ? ' open' : '') + '" id="cfg_body_' + key + '">';
     html += '<div class="setting-row"><label class="setting-label">API Key</label>';
     html += '<input type="password" class="setting-input" id="cfg_key_' + key + '" value="' + (pcfg.apiKey || '') + '" placeholder="API Key 입력..."></div>';
     html += '<div class="setting-row"><label class="setting-label">모델</label>';
@@ -713,8 +738,10 @@ function closeSettings() {
 
 function saveSettings() {
   var cfg = {};
-  // config.json의 defaultProvider를 쿠키에도 저장
-  if (window._configDefaultProvider) cfg._defaultProvider = window._configDefaultProvider;
+  // 선택된 활성 프로바이더 저장
+  var activeRadio = document.querySelector('input[name="activeProvider"]:checked');
+  cfg._activeProvider = activeRadio ? activeRadio.value : (window._configDefaultProvider || 'gemini');
+  // 각 프로바이더 키/모델 저장
   Object.keys(LLM_PROVIDERS).forEach(function(key) {
     var keyEl = document.getElementById('cfg_key_' + key);
     var modelEl = document.getElementById('cfg_model_' + key);
