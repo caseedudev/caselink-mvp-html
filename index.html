@@ -134,12 +134,27 @@ body{display:flex;min-height:100vh;background:var(--g50);overflow:hidden}
   text-align:center;
 }
 
+/* ── SIDEBAR COLLAPSE ── */
+.sidebar.hidden{transform:translateX(-100%)}
+.btn-collapse{
+  width:100%;padding:10px 20px;
+  border:none;background:rgba(255,255,255,.04);
+  color:var(--g400);font-size:12px;font-weight:500;
+  cursor:pointer;display:flex;align-items:center;gap:8px;
+  transition:all .15s ease;font-family:inherit;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+.btn-collapse:hover{background:rgba(255,255,255,.08);color:var(--g300)}
+.btn-collapse svg{width:16px;height:16px;transition:transform .2s ease}
+
 /* ── MAIN AREA ── */
 .main{
   margin-left:var(--sidebar-w);
   flex:1;display:flex;flex-direction:column;
   min-height:100vh;
+  transition:margin-left .25s ease;
 }
+.main.expanded{margin-left:0}
 
 /* Topbar */
 .topbar{
@@ -151,12 +166,11 @@ body{display:flex;min-height:100vh;background:var(--g50);overflow:hidden}
   flex-shrink:0;
 }
 .btn-menu{
-  display:none;
   width:36px;height:36px;
   border:none;background:none;
   cursor:pointer;color:var(--g600);
   border-radius:8px;
-  align-items:center;justify-content:center;
+  display:flex;align-items:center;justify-content:center;
 }
 .btn-menu:hover{background:var(--g100)}
 .btn-menu svg{width:20px;height:20px}
@@ -233,7 +247,7 @@ body{display:flex;min-height:100vh;background:var(--g50);overflow:hidden}
   .sidebar.open{transform:translateX(0)}
   .sidebar-overlay.open{display:block}
   .main{margin-left:0}
-  .btn-menu{display:flex}
+  .main.expanded{margin-left:0}
 }
 </style>
 </head>
@@ -257,6 +271,10 @@ body{display:flex;min-height:100vh;background:var(--g50);overflow:hidden}
     <!-- JS generates navigation here -->
   </nav>
   <div class="sidebar-footer" id="sidebarFooter"></div>
+  <button class="btn-collapse" onclick="collapseSidebar()" aria-label="Hide sidebar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    사이드바 숨기기
+  </button>
 </aside>
 
 <!-- Main -->
@@ -301,6 +319,7 @@ const PAGES = [
 // State
 // ============================================================
 let currentFile = null;
+let sidebarVisible = true;
 const collapsedPhases = new Set();
 
 // ============================================================
@@ -387,10 +406,15 @@ function togglePhase(phase) {
 // ============================================================
 // Load Page in iframe
 // ============================================================
-function loadPage(file, phaseName, title) {
+function loadPage(file, phaseName, title, skipHash) {
   currentFile = file;
   const content = document.getElementById('content');
   content.innerHTML = `<iframe src="${file}" title="${title}"></iframe>`;
+
+  // Update URL hash
+  if (!skipHash) {
+    history.pushState({ file, phaseName, title }, '', '#page=' + encodeURIComponent(file));
+  }
 
   // Update breadcrumb
   document.getElementById('breadcrumb').innerHTML =
@@ -410,8 +434,9 @@ function loadPage(file, phaseName, title) {
 // ============================================================
 // Welcome Screen
 // ============================================================
-function showWelcome() {
+function showWelcome(skipHash) {
   currentFile = null;
+  if (!skipHash) history.pushState({}, '', location.pathname);
   const content = document.getElementById('content');
   content.innerHTML = `
     <div class="welcome">
@@ -456,11 +481,25 @@ function openInNewTab() {
 }
 
 // ============================================================
-// Mobile Sidebar
+// Sidebar Toggle (all screens)
 // ============================================================
+function collapseSidebar() {
+  sidebarVisible = false;
+  document.getElementById('sidebar').classList.add('hidden');
+  document.querySelector('.main').classList.add('expanded');
+}
+function expandSidebar() {
+  sidebarVisible = true;
+  document.getElementById('sidebar').classList.remove('hidden');
+  document.querySelector('.main').classList.remove('expanded');
+}
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('overlay').classList.toggle('open');
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+  } else {
+    sidebarVisible ? collapseSidebar() : expandSidebar();
+  }
 }
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
@@ -468,9 +507,27 @@ function closeSidebar() {
 }
 
 // ============================================================
+// Hash Routing
+// ============================================================
+function loadFromHash() {
+  const hash = location.hash;
+  if (hash.startsWith('#page=')) {
+    const file = decodeURIComponent(hash.slice(6));
+    const page = PAGES.find(p => p.file === file);
+    if (page) {
+      loadPage(page.file, 'Phase ' + page.phase, page.title, true);
+      return;
+    }
+  }
+  showWelcome(true);
+}
+
+window.addEventListener('popstate', loadFromHash);
+
+// ============================================================
 // Init
 // ============================================================
-showWelcome();
+loadFromHash();
 </script>
 </body>
 </html>
