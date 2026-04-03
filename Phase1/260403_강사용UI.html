@@ -1483,7 +1483,7 @@ body{background:var(--g50);min-height:100vh;display:flex}
 // ── NAVIGATION ──
 const pages=['dash','sb','new','withdraw','students','urgent','record','consult','kakao','journal'];
 const breadcrumbs={dash:'대시보드',sb:'학생부',new:'신입 현황',withdraw:'퇴원 현황',students:'관리학생수',urgent:'긴급업무처리',record:'수업 기록',consult:'상담 관리',kakao:'알림톡 전송',journal:'업무일지'};
-function goPage(id){
+function goPage(id, skipHash){
   pages.forEach(p=>{
     const el=document.getElementById('page-'+p);
     if(el)el.style.display=p===id?'block':'none';
@@ -1493,8 +1493,17 @@ function goPage(id){
   document.getElementById('breadcrumb').innerHTML='홈 &rsaquo; <span>'+breadcrumbs[id]+'</span>';
   if(id==='kakao')initKakao();
   if(id==='sb'){currentSbClass='basic';currentSbStudentId=1;renderSbClassList();renderSbStudentList();renderSbStudent();renderSbData();}
+  if(!skipHash){
+    try{window.parent.postMessage({type:'section-change',section:id},'*');}catch(e){}
+  }
   window.scrollTo(0,0);
 }
+// Restore section from URL query param (?section=xxx)
+(function(){
+  var p=new URLSearchParams(location.search);
+  var s=p.get('section');
+  if(s&&pages.indexOf(s)!==-1)goPage(s,true);
+})();
 
 // ── URGENT TASKS ──
 let completedExtra=0;

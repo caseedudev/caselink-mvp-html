@@ -1039,6 +1039,10 @@ function calcOverall() {
   return {done, total};
 }
 
+function updateHash(id) {
+  try{window.parent.postMessage({type:'section-change',section:id},'*');}catch(e){}
+}
+
 // ── RENDER NAV ──
 function renderNav() {
   const container = document.getElementById('navItems');
@@ -1048,7 +1052,7 @@ function renderNav() {
     const pct = total > 0 ? Math.round(done/total*100) : 0;
     const div = document.createElement('div');
     div.className = 'nav-item' + (sec.id === currentPage ? ' active' : '');
-    div.onclick = () => { currentPage = sec.id; render(); closeSidebar(); };
+    div.onclick = () => { currentPage = sec.id; render(); closeSidebar(); updateHash(sec.id); };
     div.innerHTML = `
       <span class="nav-icon">${sec.icon}</span>
       <span class="nav-label">${sec.label}</span>
@@ -1186,6 +1190,12 @@ function closeSidebar() {
 // ── INIT ──
 setDate();
 render();
+// Restore section from query param
+(function(){
+  var p=new URLSearchParams(location.search);
+  var s=p.get('section');
+  if(s){var found=DATA.find(function(d){return d.id===s;});if(found){currentPage=found.id;render();}}
+})();
 </script>
 </body>
 </html>

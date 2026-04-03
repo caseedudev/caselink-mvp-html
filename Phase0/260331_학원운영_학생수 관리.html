@@ -188,7 +188,13 @@ function ChartTip({ active, payload, label }) {
 /* ── Main App ── */
 function App() {
   const [data, setData] = useState(D0);
-  const [tab, setTab] = useState("overview");
+  function getInitTab(){
+    var p=new URLSearchParams(location.search);
+    var s=p.get('section');
+    if(s&&["overview","trend","compare","analysis","entry"].indexOf(s)!==-1)return s;
+    return "overview";
+  }
+  const [tab, setTab] = useState(getInitTab);
   const [selYear, setSelYear] = useState(2025);
   const [selDept, setSelDept] = useState("전체");
   const [cmpYear, setCmpYear] = useState(2024);
@@ -501,7 +507,7 @@ function App() {
         </div>
         <div style={{ display: "flex", gap: 2, marginTop: 16, background: INP, borderRadius: 10, padding: 3 }}>
           {tabList.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: "8px 12px", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all .2s", background: tab === t.id ? AC : "transparent", color: tab === t.id ? "#fff" : T2 }}>
+            <button key={t.id} onClick={() => {setTab(t.id);try{window.parent.postMessage({type:'section-change',section:t.id},'*');}catch(e){}}} style={{ flex: 1, padding: "8px 12px", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all .2s", background: tab === t.id ? AC : "transparent", color: tab === t.id ? "#fff" : T2 }}>
               {t.label}
             </button>
           ))}

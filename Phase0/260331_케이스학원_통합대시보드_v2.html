@@ -1411,7 +1411,8 @@ function parseUploadedText(text){
 function App(){
   const [instrData,setInstrData]=useState(()=>expandSeed(SEED));
   const [deptScores,setDeptScores]=useState(DEPT_SCORES);
-  const [page,setPage]=useState("dashboard");
+  function getInitPage(){var p=new URLSearchParams(location.search);var s=p.get('section');if(s&&["dashboard","chart","instructor","analysis"].indexOf(s)!==-1)return s;return "dashboard";}
+  const [page,setPage]=useState(getInitPage);
   const [selectedDept,setSelectedDept]=useState(null);
   const [drillName,setDrillName]=useState(null);
   const [showUpload,setShowUpload]=useState(false);
@@ -1482,7 +1483,7 @@ function App(){
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
             <nav style={{display:"flex",gap:2,background:"#f1f5f9",padding:3,borderRadius:10}}>
-              {NAV.map(n=><button key={n.key} onClick={()=>{setPage(n.key);setDrillName(null);}} style={{padding:"6px 12px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,background:page===n.key?"#fff":"transparent",color:page===n.key?"#4f46e5":"#64748b",boxShadow:page===n.key?"0 1px 3px rgba(0,0,0,0.06)":"none",transition:"all .15s"}}>{n.icon} {n.label}</button>)}
+              {NAV.map(n=><button key={n.key} onClick={()=>{setPage(n.key);setDrillName(null);try{window.parent.postMessage({type:'section-change',section:n.key},'*');}catch(e){}}} style={{padding:"6px 12px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,background:page===n.key?"#fff":"transparent",color:page===n.key?"#4f46e5":"#64748b",boxShadow:page===n.key?"0 1px 3px rgba(0,0,0,0.06)":"none",transition:"all .15s"}}>{n.icon} {n.label}</button>)}
             </nav>
             <button onClick={()=>setShowUpload(!showUpload)} className="btn" style={{background:showUpload?"#eef2ff":"#fff",color:"#4f46e5",border:"1px solid #c7d2fe",fontSize:12,padding:"6px 12px"}}>📤 업로드</button>
           </div>

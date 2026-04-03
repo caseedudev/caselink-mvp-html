@@ -299,7 +299,13 @@ const DATA={
 
 // ─── App Component ───
 function App(){
-  const [active,setActive]=useState('philosophy');
+  function getInitSection(){
+    var p=new URLSearchParams(location.search);
+    var s=p.get('section');
+    if(s){var d=DEPTS.find(function(x){return x.id===s;});if(d)return s;}
+    return 'philosophy';
+  }
+  const [active,setActive]=useState(getInitSection);
   const [data,setData]=useState(DATA);
   const [exp,setExp]=useState(null);
   const [editMP,setEditMP]=useState(null);
@@ -353,7 +359,7 @@ function App(){
     h('div',{style:{display:'flex',gap:2,maxWidth:1400,margin:'0 auto',padding:'10px 0'}},
       DEPTS.map(function(d){
         var a=active===d.id;
-        return h('button',{key:d.id,onClick:function(){setActive(d.id);setExp(null);setEditMP(null);},
+        return h('button',{key:d.id,onClick:function(){setActive(d.id);setExp(null);setEditMP(null);try{window.parent.postMessage({type:'section-change',section:d.id},'*');}catch(e){}},
           style:{padding:'9px 18px',borderRadius:8,border:'none',cursor:'pointer',display:'flex',alignItems:'center',gap:7,fontSize:13.5,fontWeight:a?700:500,transition:'all 0.15s',whiteSpace:'nowrap',background:a?d.color+'12':'transparent',color:a?d.color:'#64748b',boxShadow:a?'inset 0 -2px 0 '+d.color:'none'}},
           h('span',{style:{fontSize:16}},d.icon),d.label
         );

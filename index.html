@@ -241,6 +241,95 @@ body{display:flex;min-height:100vh;background:var(--g50);overflow:hidden}
   background:rgba(0,0,0,.4);z-index:99;
 }
 
+/* ── SETTINGS BUTTON ── */
+.btn-settings{
+  width:100%;padding:10px 20px;
+  border:none;background:rgba(30,111,217,.1);
+  color:var(--blue-l);font-size:12px;font-weight:500;
+  cursor:pointer;display:flex;align-items:center;gap:8px;
+  transition:all .15s ease;font-family:inherit;
+}
+.btn-settings:hover{background:rgba(30,111,217,.2);color:var(--white)}
+.btn-settings svg{width:16px;height:16px}
+
+/* ── SETTINGS MODAL ── */
+.settings-overlay{
+  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,.5);z-index:200;
+  align-items:center;justify-content:center;
+}
+.settings-overlay.open{display:flex}
+.settings-modal{
+  background:var(--white);border-radius:16px;
+  width:520px;max-width:95vw;max-height:85vh;
+  overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+.settings-header{
+  padding:20px 24px 16px;border-bottom:1px solid var(--g100);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.settings-header h2{font-size:17px;font-weight:700;color:var(--g800);margin:0}
+.settings-close{
+  width:32px;height:32px;border:none;background:var(--g50);
+  border-radius:8px;cursor:pointer;font-size:18px;color:var(--g500);
+  display:flex;align-items:center;justify-content:center;
+}
+.settings-close:hover{background:var(--g100);color:var(--g800)}
+.settings-body{padding:20px 24px}
+.provider-section{margin-bottom:20px;border:1px solid var(--g200);border-radius:12px;overflow:hidden}
+.provider-header{
+  padding:12px 16px;background:var(--g50);
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;
+}
+.provider-header:hover{background:var(--g100)}
+.provider-name{font-size:14px;font-weight:600;color:var(--g800);display:flex;align-items:center;gap:8px}
+.provider-badge{
+  font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;
+  background:#dcfce7;color:#16a34a;
+}
+.provider-badge.inactive{background:var(--g100);color:var(--g400)}
+.provider-body{padding:14px 16px;display:none;border-top:1px solid var(--g200)}
+.provider-body.open{display:block}
+.setting-label{font-size:12px;font-weight:600;color:var(--g600);margin-bottom:5px;display:block}
+.setting-input{
+  width:100%;padding:9px 12px;border:1.5px solid var(--g200);border-radius:8px;
+  font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;
+  transition:border-color .15s;
+}
+.setting-input:focus{border-color:var(--blue)}
+.setting-select{
+  width:100%;padding:9px 12px;border:1.5px solid var(--g200);border-radius:8px;
+  font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;
+  background:var(--white);cursor:pointer;
+}
+.setting-row{margin-bottom:12px}
+.setting-row:last-child{margin-bottom:0}
+.settings-footer{
+  padding:16px 24px;border-top:1px solid var(--g100);
+  display:flex;gap:8px;justify-content:flex-end;
+}
+.btn-save{
+  padding:9px 20px;border:none;border-radius:8px;
+  background:var(--blue);color:var(--white);
+  font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:opacity .15s;
+}
+.btn-save:hover{opacity:.9}
+.btn-cancel{
+  padding:9px 20px;border:1px solid var(--g200);border-radius:8px;
+  background:var(--white);color:var(--g600);
+  font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;
+}
+.btn-cancel:hover{background:var(--g50)}
+.save-toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:#16a34a;color:#fff;padding:10px 24px;border-radius:10px;
+  font-size:13px;font-weight:600;z-index:300;
+  opacity:0;transition:opacity .3s;pointer-events:none;
+}
+.save-toast.show{opacity:1}
+
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%)}
@@ -271,6 +360,10 @@ body{display:flex;min-height:100vh;background:var(--g50);overflow:hidden}
     <!-- JS generates navigation here -->
   </nav>
   <div class="sidebar-footer" id="sidebarFooter"></div>
+  <button class="btn-settings" onclick="openSettings()" aria-label="LLM Settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    LLM API 설정
+  </button>
   <button class="btn-collapse" onclick="collapseSidebar()" aria-label="Hide sidebar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
     사이드바 숨기기
@@ -297,6 +390,24 @@ body{display:flex;min-height:100vh;background:var(--g50);overflow:hidden}
     <!-- Welcome or iframe goes here -->
   </div>
 </div>
+
+<!-- Settings Modal -->
+<div class="settings-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-modal">
+    <div class="settings-header">
+      <h2>LLM API 설정</h2>
+      <button class="settings-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="settings-body" id="settingsBody">
+      <!-- JS generates provider sections here -->
+    </div>
+    <div class="settings-footer">
+      <button class="btn-cancel" onclick="closeSettings()">취소</button>
+      <button class="btn-save" onclick="saveSettings()">저장</button>
+    </div>
+  </div>
+</div>
+<div class="save-toast" id="saveToast">설정이 저장되었습니다</div>
 
 <script>
 // ============================================================
@@ -406,14 +517,16 @@ function togglePhase(phase) {
 // ============================================================
 // Load Page in iframe
 // ============================================================
-function loadPage(file, phaseName, title, skipHash) {
+function loadPage(file, phaseName, title, skipHash, section) {
   currentFile = file;
   const content = document.getElementById('content');
-  content.innerHTML = `<iframe src="${file}" title="${title}"></iframe>`;
+  const srcSuffix = section ? '?section=' + section : '';
+  content.innerHTML = `<iframe src="${file}${srcSuffix}" title="${title}"></iframe>`;
 
   // Update URL hash
   if (!skipHash) {
-    history.pushState({ file, phaseName, title }, '', '#page=' + encodeURIComponent(file));
+    const sectionPart = section ? '&section=' + section : '';
+    history.pushState({ file, phaseName, title }, '', '#page=' + encodeURIComponent(file) + sectionPart);
   }
 
   // Update breadcrumb
@@ -512,10 +625,13 @@ function closeSidebar() {
 function loadFromHash() {
   const hash = location.hash;
   if (hash.startsWith('#page=')) {
-    const file = decodeURIComponent(hash.slice(6));
+    // Split hash: #page=file&section=xxx
+    const parts = hash.slice(6).split('&section=');
+    const file = decodeURIComponent(parts[0]);
+    const section = parts[1] || null;
     const page = PAGES.find(p => p.file === file);
     if (page) {
-      loadPage(page.file, 'Phase ' + page.phase, page.title, true);
+      loadPage(page.file, 'Phase ' + page.phase, page.title, true, section);
       return;
     }
   }
@@ -523,6 +639,134 @@ function loadFromHash() {
 }
 
 window.addEventListener('popstate', loadFromHash);
+
+// ============================================================
+// Listen for section changes from iframes via postMessage
+// ============================================================
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'section-change' && currentFile) {
+    const base = '#page=' + encodeURIComponent(currentFile);
+    const newHash = e.data.section ? base + '&section=' + e.data.section : base;
+    history.replaceState(null, '', newHash);
+  }
+});
+
+// ============================================================
+// LLM Provider Config
+// ============================================================
+const LLM_PROVIDERS = {
+  anthropic: {
+    label: 'Anthropic (Claude)', icon: 'A',
+    models: [
+      'claude-sonnet-4-6-20250725','claude-sonnet-4-5-20250514',
+      'claude-opus-4-5-20250414','claude-haiku-4-5-20250414'
+    ],
+    defaultModel: 'claude-sonnet-4-5-20250514'
+  },
+  gemini: {
+    label: 'Google Gemini', icon: 'G',
+    models: [
+      'gemini-2.5-flash-preview-05-20','gemini-2.5-pro-preview-05-06',
+      'gemini-3.0-flash','gemini-3.1-flash',
+      'gemini-3.0-pro','gemini-3.1-pro',
+      'gemini-2.0-flash'
+    ],
+    defaultModel: 'gemini-2.5-flash-preview-05-20'
+  },
+  openai: {
+    label: 'OpenAI (GPT)', icon: 'O',
+    models: [
+      'gpt-5.4','gpt-5.4-mini','gpt-5.4-nano',
+      'gpt-5.2','gpt-5.1',
+      'gpt-5-mini','gpt-5-nano',
+      'gpt-4.1','gpt-4.1-mini','gpt-4.1-nano',
+      'gpt-4o','gpt-4o-mini','o4-mini'
+    ],
+    defaultModel: 'gpt-4.1'
+  },
+  zai: {
+    label: 'Z.ai (Zhipu GLM)', icon: 'Z',
+    models: [
+      'glm-5.1','glm-5',
+      'glm-4.7','glm-4.7-flash',
+      'glm-4.6v','glm-4.6v-flash',
+      'glm-4-plus','glm-4-air','glm-4-alltools',
+      'codingplan'
+    ],
+    defaultModel: 'glm-4-plus'
+  }
+};
+
+// ── Cookie helpers ──
+function setCookie(name, value, days) {
+  var d = new Date();
+  d.setTime(d.getTime() + (days || 365) * 24 * 60 * 60 * 1000);
+  document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+}
+function getCookie(name) {
+  var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+  return m ? decodeURIComponent(m[1]) : '';
+}
+function getLLMConfig() {
+  var raw = getCookie('caselink_llm');
+  if (!raw) return {};
+  try { return JSON.parse(raw); } catch(e) { return {}; }
+}
+function saveLLMConfig(cfg) {
+  setCookie('caselink_llm', JSON.stringify(cfg), 365);
+}
+
+// ── Settings UI ──
+function openSettings() {
+  var cfg = getLLMConfig();
+  var body = document.getElementById('settingsBody');
+  var html = '';
+  Object.keys(LLM_PROVIDERS).forEach(function(key) {
+    var p = LLM_PROVIDERS[key];
+    var pcfg = cfg[key] || {};
+    var hasKey = !!(pcfg.apiKey);
+    var isOpen = hasKey ? '' : '';
+    html += '<div class="provider-section">';
+    html += '<div class="provider-header" onclick="this.nextElementSibling.classList.toggle(\'open\')">';
+    html += '<span class="provider-name"><strong>' + p.icon + '</strong> ' + p.label + '</span>';
+    html += '<span class="provider-badge ' + (hasKey ? '' : 'inactive') + '">' + (hasKey ? 'API Key 설정됨' : '미설정') + '</span>';
+    html += '</div>';
+    html += '<div class="provider-body' + (hasKey ? '' : ' open') + '">';
+    html += '<div class="setting-row"><label class="setting-label">API Key</label>';
+    html += '<input type="password" class="setting-input" id="cfg_key_' + key + '" value="' + (pcfg.apiKey || '') + '" placeholder="API Key 입력..."></div>';
+    html += '<div class="setting-row"><label class="setting-label">모델</label>';
+    html += '<select class="setting-select" id="cfg_model_' + key + '">';
+    p.models.forEach(function(m) {
+      var sel = (pcfg.model === m || (!pcfg.model && m === p.defaultModel)) ? ' selected' : '';
+      html += '<option value="' + m + '"' + sel + '>' + m + '</option>';
+    });
+    html += '</select></div>';
+    html += '</div></div>';
+  });
+  body.innerHTML = html;
+  document.getElementById('settingsOverlay').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settingsOverlay').classList.remove('open');
+}
+
+function saveSettings() {
+  var cfg = {};
+  Object.keys(LLM_PROVIDERS).forEach(function(key) {
+    var keyEl = document.getElementById('cfg_key_' + key);
+    var modelEl = document.getElementById('cfg_model_' + key);
+    var apiKey = keyEl ? keyEl.value.trim() : '';
+    var model = modelEl ? modelEl.value : LLM_PROVIDERS[key].defaultModel;
+    if (apiKey) cfg[key] = { apiKey: apiKey, model: model };
+  });
+  saveLLMConfig(cfg);
+  closeSettings();
+  // Show toast
+  var toast = document.getElementById('saveToast');
+  toast.classList.add('show');
+  setTimeout(function() { toast.classList.remove('show'); }, 2000);
+}
 
 // ============================================================
 // Init
