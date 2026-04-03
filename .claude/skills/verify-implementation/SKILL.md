@@ -29,12 +29,7 @@ argument-hint: "[선택사항: 특정 verify 스킬 이름]"
 
 | # | 스킬 | 설명 |
 |---|------|------|
-| 1 | `verify-drizzle-adoption` | Drizzle ORM 보조 계층이 아키텍처 규칙에 맞게 구성되었는지 검증 |
-| 2 | `verify-supabase-migration` | Supabase 마이그레이션이 프로덕션/브랜치 환경 모두에서 안전한지 검증 |
-| 3 | `verify-db-sync` | 로컬-원격 DB 동기화 상태 검증 (배포 전 필수) |
-| 4 | `verify-test-quality` | 계약 테스트 품질 검수 — 잘못된 단언, 코드-테스트 불일치, dead test 탐지 |
-| 5 | `verify-role-scope-integrity` | 역할-스코프 정합성 검증 — 부서장 부서 누락, 수업 미배정 탐지 |
-| 6 | `verify-url-routing` | HTML 페이지의 URL hash 라우팅 검증 — goPage hash 업데이트, 복원, hashchange, postMessage 연동 |
+| 1 | `verify-url-routing` | HTML 페이지의 URL hash 라우팅 검증 — goPage hash 업데이트, 복원, hashchange, postMessage 연동 |
 
 ## 워크플로우
 
