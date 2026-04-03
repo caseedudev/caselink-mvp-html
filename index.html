@@ -713,6 +713,8 @@ function closeSettings() {
 
 function saveSettings() {
   var cfg = {};
+  // config.json의 defaultProvider를 쿠키에도 저장
+  if (window._configDefaultProvider) cfg._defaultProvider = window._configDefaultProvider;
   Object.keys(LLM_PROVIDERS).forEach(function(key) {
     var keyEl = document.getElementById('cfg_key_' + key);
     var modelEl = document.getElementById('cfg_model_' + key);
@@ -736,6 +738,7 @@ function saveSettings() {
     var res = await fetch('config.json');
     var cfg = await res.json();
     LLM_PROVIDERS = cfg.providers || {};
+    window._configDefaultProvider = cfg.defaultProvider || 'gemini';
   } catch(e) {
     console.warn('config.json load failed, using empty config:', e);
   }

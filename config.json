@@ -1,4 +1,5 @@
 {
+  "defaultProvider": "gemini",
   "providers": {
     "anthropic": {
       "label": "Anthropic (Claude)",
@@ -17,7 +18,7 @@
         "gemini-2.5-flash-lite",
         "gemini-2.5-pro"
       ],
-      "defaultModel": "gemini-2.5-flash"
+      "defaultModel": "gemini-3.1-flash-lite-preview"
     },
     "openai": {
       "label": "OpenAI (GPT)",

@@ -1030,11 +1030,15 @@ function getLLMConfig() {
   if (!raw) return {};
   try { return JSON.parse(raw); } catch(e) { return {}; }
 }
-// 첫 번째로 API Key가 설정된 프로바이더를 기본 선택
+// 기본 프로바이더 우선, 그 외 설정된 프로바이더 순
 function getActiveLLM() {
   var cfg = getLLMConfig();
-  var order = ['anthropic','gemini','openai','zai'];
+  var dp = cfg._defaultProvider || 'gemini';
+  var order = [dp, 'anthropic','gemini','openai','zai'];
+  var seen = {};
   for (var i = 0; i < order.length; i++) {
+    if (seen[order[i]]) continue;
+    seen[order[i]] = true;
     if (cfg[order[i]] && cfg[order[i]].apiKey) {
       return { provider: order[i], apiKey: cfg[order[i]].apiKey, model: cfg[order[i]].model };
     }
