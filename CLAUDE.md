@@ -14,7 +14,8 @@ caselink-mvp-html/
 ├── Phase0/                     # Phase 0 HTML 페이지들
 │   └── 260331_퇴원예방서비스.html
 ├── Phase1/                     # Phase 1 HTML 페이지들
-│   └── 260403_강사용UI.html
+│   ├── 260403_강사용UI_V1.html
+│   └── 260403_강사용UI_V2.html
 ├── start.sh                    # 로컬 개발 서버 시작
 └── stop.sh                     # 로컬 개발 서버 중지
 ```
@@ -110,6 +111,52 @@ caselink-mvp-html/
 |------|----------|
 | `index.html` | 설정 UI (`openSettings`, `saveSettings`) + `loadLLMProviders()` 호출 |
 | 서브 페이지들 | `getActiveLLM()` → `callLLM()` 호출만 (설정 UI 없음) |
+
+## URL 기반 네비게이션 (필수)
+
+**모든 HTML 페이지의 메뉴/탭 전환은 반드시 URL hash로 구분 가능해야 한다.**
+
+### 원칙
+
+- 사이드바 메뉴, 탭, 서브페이지 전환 시 `location.hash`를 업데이트한다 (`#dash`, `#sb`, `#withdraw` 등)
+- 페이지 로드 시 hash를 읽어 해당 섹션으로 자동 복원한다
+- `hashchange` 이벤트를 리슨하여 브라우저 뒤로가기/앞으로가기를 지원한다
+- 쿼리 파라미터 `?section=xxx` 도 fallback으로 지원한다
+
+### 필수 구현 패턴
+
+```javascript
+// 1. goPage에서 hash 업데이트
+function goPage(id, skipHash) {
+  // ... 페이지 전환 로직 ...
+  if (!skipHash) {
+    history.replaceState(null, '', '#' + id);
+    try { window.parent.postMessage({type:'section-change', section:id}, '*'); } catch(e) {}
+  }
+  window.scrollTo(0, 0);
+}
+
+// 2. 페이지 로드 시 hash/query param에서 섹션 복원
+(function() {
+  var h = location.hash.replace('#', '');
+  if (h && pages.indexOf(h) !== -1) { goPage(h, true); return; }
+  var p = new URLSearchParams(location.search);
+  var s = p.get('section');
+  if (s && pages.indexOf(s) !== -1) goPage(s, true);
+})();
+
+// 3. hashchange 이벤트 리스너
+window.addEventListener('hashchange', function() {
+  var h = location.hash.replace('#', '');
+  if (h && pages.indexOf(h) !== -1) goPage(h, true);
+});
+```
+
+### 금지 사항
+
+- hash/URL 변경 없이 `goPage(id)`만 호출하는 메뉴를 만들지 않는다
+- 신규 HTML 추가 또는 기존 메뉴 교체 시 반드시 위 패턴을 적용한다
+- 탭/서브탭이 있는 경우에도 `#page/tab` 형태로 URL에 반영한다
 
 ## 새 HTML 페이지 추가 가이드
 
