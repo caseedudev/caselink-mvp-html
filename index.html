@@ -305,6 +305,41 @@ body{display:flex;min-height:100vh;background:var(--g50);overflow:hidden}
 }
 .setting-row{margin-bottom:12px}
 .setting-row:last-child{margin-bottom:0}
+.option-divider{
+  margin:14px 0 10px;padding-top:12px;
+  border-top:1px dashed var(--g200);
+  font-size:11px;font-weight:600;color:var(--g500);letter-spacing:.3px;
+}
+.setting-label-wrap{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.tooltip-icon{
+  width:16px;height:16px;border-radius:50%;
+  background:var(--g200);color:var(--g600);
+  font-size:10px;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;
+  cursor:help;position:relative;flex-shrink:0;
+}
+.tooltip-icon:hover .tooltip-text{display:block}
+.tooltip-text{
+  display:none;position:absolute;bottom:calc(100% + 8px);left:50%;
+  transform:translateX(-50%);width:280px;
+  background:var(--g800);color:var(--white);
+  font-size:11px;font-weight:400;line-height:1.6;
+  padding:10px 12px;border-radius:8px;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+  z-index:10;pointer-events:none;
+}
+.tooltip-text::after{
+  content:'';position:absolute;top:100%;left:50%;
+  transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:var(--g800);
+}
+.range-wrap{display:flex;align-items:center;gap:10px}
+.range-wrap input[type=range]{flex:1;accent-color:var(--blue)}
+.range-val{
+  min-width:40px;text-align:center;
+  font-size:12px;font-weight:600;color:var(--g600);
+  background:var(--g50);padding:4px 8px;border-radius:6px;
+}
 .settings-footer{
   padding:16px 24px;border-top:1px solid var(--g100);
   display:flex;gap:8px;justify-content:flex-end;
@@ -726,6 +761,27 @@ function openSettings() {
       html += '<option value="' + m + '"' + sel + '>' + m + '</option>';
     });
     html += '</select></div>';
+    // Render provider-specific options
+    if (p.options && p.options.length) {
+      html += '<div class="option-divider">고급 옵션</div>';
+      var savedOpts = pcfg.options || {};
+      p.options.forEach(function(opt) {
+        var val = savedOpts[opt.key] !== undefined ? savedOpts[opt.key] : opt.default;
+        var eid = 'cfg_opt_' + key + '_' + opt.key;
+        html += '<div class="setting-row">';
+        html += '<div class="setting-label-wrap"><label class="setting-label" style="margin-bottom:0">' + opt.label + '</label>';
+        html += '<span class="tooltip-icon">?<span class="tooltip-text">' + opt.tooltip + '</span></span></div>';
+        if (opt.type === 'range') {
+          html += '<div class="range-wrap">';
+          html += '<input type="range" id="' + eid + '" min="' + opt.min + '" max="' + opt.max + '" step="' + opt.step + '" value="' + val + '" oninput="document.getElementById(\'' + eid + '_v\').textContent=this.value">';
+          html += '<span class="range-val" id="' + eid + '_v">' + val + '</span>';
+          html += '</div>';
+        } else if (opt.type === 'number') {
+          html += '<input type="number" class="setting-input" id="' + eid + '" min="' + opt.min + '" max="' + opt.max + '" step="' + opt.step + '" value="' + val + '">';
+        }
+        html += '</div>';
+      });
+    }
     html += '</div></div>';
   });
   body.innerHTML = html;
@@ -741,13 +797,26 @@ function saveSettings() {
   // 선택된 활성 프로바이더 저장
   var activeRadio = document.querySelector('input[name="activeProvider"]:checked');
   cfg._activeProvider = activeRadio ? activeRadio.value : (window._configDefaultProvider || 'gemini');
-  // 각 프로바이더 키/모델 저장
+  // 각 프로바이더 키/모델/옵션 저장
   Object.keys(LLM_PROVIDERS).forEach(function(key) {
     var keyEl = document.getElementById('cfg_key_' + key);
     var modelEl = document.getElementById('cfg_model_' + key);
     var apiKey = keyEl ? keyEl.value.trim() : '';
     var model = modelEl ? modelEl.value : LLM_PROVIDERS[key].defaultModel;
-    if (apiKey) cfg[key] = { apiKey: apiKey, model: model };
+    if (apiKey) {
+      var entry = { apiKey: apiKey, model: model };
+      // Save options
+      var p = LLM_PROVIDERS[key];
+      if (p.options && p.options.length) {
+        var opts = {};
+        p.options.forEach(function(opt) {
+          var el = document.getElementById('cfg_opt_' + key + '_' + opt.key);
+          if (el) opts[opt.key] = parseFloat(el.value);
+        });
+        entry.options = opts;
+      }
+      cfg[key] = entry;
+    }
   });
   saveLLMConfig(cfg);
   closeSettings();

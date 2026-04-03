@@ -5,7 +5,37 @@
       "label": "Anthropic (Claude)",
       "icon": "A",
       "models": ["claude-sonnet-4-6", "claude-haiku-4-5"],
-      "defaultModel": "claude-sonnet-4-6"
+      "defaultModel": "claude-sonnet-4-6",
+      "options": [
+        {
+          "key": "temperature",
+          "label": "Temperature",
+          "type": "range",
+          "min": 0, "max": 1, "step": 0.1, "default": 1,
+          "tooltip": "응답의 창의성/무작위성을 조절합니다. 0에 가까울수록 일관되고 예측 가능한 답변, 1에 가까울수록 다양하고 창의적인 답변을 생성합니다. 보고서나 분석 작업에는 0.3~0.5, 브레인스토밍이나 창작에는 0.7~1.0을 추천합니다."
+        },
+        {
+          "key": "max_tokens",
+          "label": "Max Tokens",
+          "type": "number",
+          "min": 100, "max": 8192, "step": 100, "default": 4096,
+          "tooltip": "AI가 생성할 최대 토큰(단어 조각) 수입니다. 한국어 1글자 ≈ 2~3토큰입니다. 짧은 답변은 500~1000, 상세 보고서는 2000~4096, 매우 긴 분석은 4096~8192로 설정하세요. 토큰이 많을수록 비용이 증가합니다."
+        },
+        {
+          "key": "top_p",
+          "label": "Top P",
+          "type": "range",
+          "min": 0, "max": 1, "step": 0.05, "default": 1,
+          "tooltip": "핵 샘플링(Nucleus Sampling) 확률입니다. 상위 P% 확률의 토큰만 선택 대상으로 합니다. 0.1이면 상위 10% 토큰만 고려하여 매우 보수적, 1.0이면 모든 토큰 고려. Temperature와 함께 조절하되, 보통 둘 중 하나만 변경하는 것이 좋습니다."
+        },
+        {
+          "key": "top_k",
+          "label": "Top K",
+          "type": "number",
+          "min": 1, "max": 500, "step": 1, "default": 0,
+          "tooltip": "상위 K개 토큰만 샘플링 대상으로 합니다. 0이면 비활성화(기본값). 작은 값(10~40)은 집중적이고 일관된 응답, 큰 값(100+)은 다양한 표현을 생성합니다. Anthropic 전용 옵션으로, 일반적으로 기본값(0)을 유지하세요."
+        }
+      ]
     },
     "gemini": {
       "label": "Google Gemini",
@@ -18,7 +48,37 @@
         "gemini-2.5-flash-lite",
         "gemini-2.5-pro"
       ],
-      "defaultModel": "gemini-3.1-flash-lite-preview"
+      "defaultModel": "gemini-3.1-flash-lite-preview",
+      "options": [
+        {
+          "key": "temperature",
+          "label": "Temperature",
+          "type": "range",
+          "min": 0, "max": 2, "step": 0.1, "default": 1,
+          "tooltip": "응답의 창의성/무작위성을 조절합니다. 0에 가까울수록 결정적이고 사실적인 답변, 2에 가까울수록 예상치 못한 창의적 답변을 생성합니다. 데이터 분석에는 0.2~0.5, 일반 대화에는 0.7~1.0, 창작에는 1.0~1.5를 추천합니다."
+        },
+        {
+          "key": "maxOutputTokens",
+          "label": "Max Output Tokens",
+          "type": "number",
+          "min": 100, "max": 8192, "step": 100, "default": 4096,
+          "tooltip": "AI가 생성할 최대 출력 토큰 수입니다. Gemini는 긴 컨텍스트를 잘 처리하므로, 상세 분석에는 4096 이상을 권장합니다. Flash 모델은 빠르지만 짧은 응답에 최적화되어 있어 1000~2000이면 충분할 수 있습니다."
+        },
+        {
+          "key": "topP",
+          "label": "Top P",
+          "type": "range",
+          "min": 0, "max": 1, "step": 0.05, "default": 0.95,
+          "tooltip": "핵 샘플링 확률입니다. 0.95(기본)이면 상위 95% 확률의 토큰 중 선택합니다. 정확한 답변이 필요할 때는 0.5~0.8, 다양한 표현이 필요할 때는 0.9~1.0으로 설정하세요."
+        },
+        {
+          "key": "topK",
+          "label": "Top K",
+          "type": "number",
+          "min": 1, "max": 100, "step": 1, "default": 40,
+          "tooltip": "상위 K개 토큰 중에서 다음 토큰을 선택합니다. 작은 값(1~10)은 매우 집중적인 응답, 큰 값(40~100)은 다양한 어휘를 사용합니다. Gemini 기본값은 40이며, 대부분의 경우 변경할 필요가 없습니다."
+        }
+      ]
     },
     "openai": {
       "label": "OpenAI (GPT)",
@@ -28,7 +88,44 @@
         "gpt-5.2", "gpt-5.1",
         "gpt-5-mini", "gpt-5-nano"
       ],
-      "defaultModel": "gpt-5.4-mini"
+      "defaultModel": "gpt-5.4-mini",
+      "options": [
+        {
+          "key": "temperature",
+          "label": "Temperature",
+          "type": "range",
+          "min": 0, "max": 2, "step": 0.1, "default": 1,
+          "tooltip": "응답의 창의성을 조절합니다. 0이면 가장 확률 높은 토큰만 선택(결정적), 2이면 매우 무작위적입니다. 코드 생성이나 정확한 분석에는 0~0.3, 자연스러운 대화에는 0.7~1.0, 창의적 글쓰기에는 1.0~1.5를 추천합니다."
+        },
+        {
+          "key": "max_completion_tokens",
+          "label": "Max Completion Tokens",
+          "type": "number",
+          "min": 100, "max": 16384, "step": 100, "default": 4096,
+          "tooltip": "AI가 생성할 최대 토큰 수입니다. GPT-5.x 모델은 max_completion_tokens를 사용합니다. 짧은 답변은 500, 보고서는 2000~4096, 긴 분석은 8000+로 설정하세요. 값이 클수록 비용이 증가하지만 중간에 잘리지 않습니다."
+        },
+        {
+          "key": "top_p",
+          "label": "Top P",
+          "type": "range",
+          "min": 0, "max": 1, "step": 0.05, "default": 1,
+          "tooltip": "핵 샘플링 확률입니다. Temperature와 동시에 변경하는 것은 권장하지 않습니다. Temperature를 조정했다면 Top P는 1.0(기본)으로 유지하세요. 반대로 Top P만 조정한다면 Temperature를 1.0으로 유지하세요."
+        },
+        {
+          "key": "frequency_penalty",
+          "label": "Frequency Penalty",
+          "type": "range",
+          "min": -2, "max": 2, "step": 0.1, "default": 0,
+          "tooltip": "같은 단어/구문의 반복을 억제합니다. 양수(0.1~1.0)이면 이미 등장한 토큰의 재등장 확률을 낮춰 다양한 표현을 유도합니다. 음수이면 반복을 장려합니다. 보고서 작성 시 0.3~0.5로 설정하면 반복 없이 풍부한 내용을 생성합니다."
+        },
+        {
+          "key": "presence_penalty",
+          "label": "Presence Penalty",
+          "type": "range",
+          "min": -2, "max": 2, "step": 0.1, "default": 0,
+          "tooltip": "새로운 주제 도입을 장려합니다. 양수(0.1~1.0)이면 아직 언급하지 않은 새 토픽을 더 많이 다루도록 유도합니다. 음수이면 기존 주제에 집중합니다. 다양한 관점의 분석이 필요할 때 0.3~0.6, 특정 주제 집중 시 0 또는 음수로 설정하세요."
+        }
+      ]
     },
     "zai": {
       "label": "Z.ai CodingPlan",
@@ -39,7 +136,30 @@
         "glm-4.7", "glm-4.6v", "glm-4.6v-flash",
         "glm-4.5-Air"
       ],
-      "defaultModel": "glm-5.1"
+      "defaultModel": "glm-5.1",
+      "options": [
+        {
+          "key": "temperature",
+          "label": "Temperature",
+          "type": "range",
+          "min": 0, "max": 1, "step": 0.1, "default": 0.7,
+          "tooltip": "응답의 창의성을 조절합니다. Z.ai GLM 모델은 0~1 범위를 사용합니다. 코드 생성이나 정확한 답변에는 0.1~0.3, 일반 대화에는 0.5~0.7, 창의적 작업에는 0.8~1.0을 추천합니다. 기본값 0.7은 대부분의 용도에 적합합니다."
+        },
+        {
+          "key": "max_tokens",
+          "label": "Max Tokens",
+          "type": "number",
+          "min": 100, "max": 4096, "step": 100, "default": 4096,
+          "tooltip": "AI가 생성할 최대 토큰 수입니다. GLM 모델은 최대 4096토큰까지 지원합니다. 짧은 답변은 500~1000, 상세 보고서는 2000~4096으로 설정하세요."
+        },
+        {
+          "key": "top_p",
+          "label": "Top P",
+          "type": "range",
+          "min": 0, "max": 1, "step": 0.05, "default": 0.7,
+          "tooltip": "핵 샘플링 확률입니다. Temperature와 함께 사용되며, 둘 중 하나만 조절하는 것을 권장합니다. 0.7(기본)은 균형 잡힌 응답을 생성합니다. 정확도가 중요하면 0.3~0.5, 다양성이 필요하면 0.8~1.0으로 설정하세요."
+        }
+      ]
     }
   }
 }
