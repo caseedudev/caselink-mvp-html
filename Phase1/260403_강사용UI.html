@@ -1506,7 +1506,7 @@ async function callLLM(provider,apiKey,prompt,model,systemPrompt){
     var m2=[];if(systemPrompt)m2.push({role:'system',content:systemPrompt});m2.push({role:'user',content:prompt});
     res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-      body:JSON.stringify({model:model,max_tokens:800,messages:m2})});
+      body:JSON.stringify({model:model,max_completion_tokens:800,messages:m2})});
     data=await res.json();if(data.error)throw new Error(data.error.message);
     return(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'';
   }else if(provider==='zai'){

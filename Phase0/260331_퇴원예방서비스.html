@@ -1583,7 +1583,7 @@ async function callLLM(provider, apiKey, prompt, model) {
     res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-      body: JSON.stringify({ model: model, max_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: model, max_completion_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
     });
     data = await res.json();
     if (data.error) throw new Error(data.error.message);
