@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CaseLink — 퇴원경고 알고리즘 명세서</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0B1E3D;--navy2:#142952;--blue:#1E6FD9;--blue-l:#EBF3FF;
+  --teal:#0A9268;--teal-l:#E3F6EF;
+  --amber:#C97008;--amber-l:#FEF3C7;--amber-d:#92400E;
+  --red:#C8220E;--red-l:#FEE2E2;--red-d:#7F1D1D;
+  --purple:#6B2FBA;--purple-l:#F0E9FF;
+  --g50:#F7F8FA;--g100:#EEF0F4;--g150:#E4E7ED;--g200:#D6DAE3;
+  --g300:#B8BFCC;--g400:#9AA3B4;--g500:#737D90;
+  --g600:#565E6D;--g700:#3D4452;--g800:#252B36;--g900:#141820;
+  --white:#FFFFFF;
+  font-family:'Noto Sans KR',-apple-system,sans-serif;
+  font-size:15px;color:var(--g800);
+}
+body{background:var(--g50);min-height:100vh}
+
+/* ── COVER ── */
+.cover{background:var(--navy);padding:60px 80px 50px;position:relative;overflow:hidden}
+.cover::before{content:'';position:absolute;top:-40px;right:-40px;width:300px;height:300px;border-radius:50%;background:rgba(30,111,217,.12)}
+.cover::after{content:'';position:absolute;bottom:-60px;left:200px;width:180px;height:180px;border-radius:50%;background:rgba(10,146,104,.08)}
+.cover-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(30,111,217,.2);border:1px solid rgba(30,111,217,.4);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#7AB3F5;letter-spacing:.06em;margin-bottom:20px}
+.cover-title{font-size:28px;font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.3;margin-bottom:12px}
+.cover-title span{color:#7AB3F5}
+.cover-sub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:28px;line-height:1.65}
+.cover-meta{display:flex;gap:24px;flex-wrap:wrap}
+.cover-meta-item{font-size:12px;color:rgba(255,255,255,.4)}
+.cover-meta-item strong{color:rgba(255,255,255,.7);font-weight:600}
+
+/* ── TOC SIDEBAR ── */
+.layout{display:flex;max-width:1200px;margin:0 auto;position:relative}
+.toc-sidebar{
+  width:260px;flex-shrink:0;
+  position:sticky;top:20px;align-self:flex-start;
+  padding:24px 0 24px 20px;
+  max-height:calc(100vh - 40px);overflow-y:auto;
+}
+.toc-title{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--blue);margin-bottom:12px;padding-left:12px}
+.toc-list{list-style:none;padding:0}
+.toc-list li{margin-bottom:2px}
+.toc-list a{
+  display:block;padding:6px 12px;border-radius:6px;
+  font-size:12px;color:var(--g500);text-decoration:none;
+  line-height:1.5;transition:all .15s;
+  border-left:2px solid transparent;
+}
+.toc-list a:hover{background:var(--blue-l);color:var(--blue);border-left-color:var(--blue)}
+.toc-list a.active{background:var(--blue-l);color:var(--blue);font-weight:600;border-left-color:var(--blue)}
+
+/* ── CONTENT ── */
+.content{flex:1;min-width:0;padding:40px 40px 80px}
+
+/* ── MARKDOWN STYLES ── */
+.md-body h1{font-size:24px;font-weight:900;color:var(--g900);letter-spacing:-.03em;margin:48px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--g150)}
+.md-body h2{font-size:19px;font-weight:800;color:var(--g900);letter-spacing:-.02em;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--g150)}
+.md-body h3{font-size:15px;font-weight:700;color:var(--g800);margin:28px 0 10px}
+.md-body h4{font-size:14px;font-weight:700;color:var(--g700);margin:20px 0 8px}
+.md-body h1:first-child{margin-top:0}
+.md-body p{line-height:1.8;margin-bottom:14px;color:var(--g700)}
+.md-body ul,
+.md-body ol{margin:0 0 16px 20px;line-height:1.8;color:var(--g700)}
+.md-body li{margin-bottom:4px}
+.md-body strong{color:var(--g900);font-weight:700}
+.md-body em{color:var(--g600)}
+.md-body hr{border:none;height:1px;background:var(--g150);margin:32px 0}
+.md-body a{color:var(--blue);text-decoration:none;font-weight:500}
+.md-body a:hover{text-decoration:underline}
+.md-body blockquote{
+  border-left:3px solid var(--blue);
+  background:var(--blue-l);
+  padding:12px 16px;margin:16px 0;
+  border-radius:0 8px 8px 0;
+  color:var(--g700);font-size:14px;line-height:1.7;
+}
+.md-body code{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;background:var(--g100);
+  padding:2px 6px;border-radius:4px;
+  color:var(--blue);font-weight:600;
+}
+.md-body pre{
+  background:#0F1A2E;border-radius:10px;
+  padding:20px;margin:16px 0;overflow-x:auto;
+}
+.md-body pre code{
+  background:none;padding:0;
+  color:#E2E8F0;font-size:13px;line-height:1.75;
+  font-weight:400;
+}
+
+/* ── TABLES ── */
+.md-body table{
+  width:100%;border-collapse:collapse;
+  font-size:13px;margin:16px 0;
+  background:var(--white);
+  border:1px solid var(--g150);border-radius:10px;
+  overflow:hidden;
+}
+.md-body thead th{
+  padding:10px 14px;font-size:11px;font-weight:700;
+  color:var(--g500);letter-spacing:.05em;
+  border-bottom:2px solid var(--g150);
+  text-align:left;background:var(--g50);
+}
+.md-body tbody td{
+  padding:10px 14px;border-bottom:1px solid var(--g100);
+  color:var(--g800);vertical-align:top;line-height:1.6;
+}
+.md-body tbody tr:last-child td{border-bottom:none}
+.md-body tbody tr:hover td{background:var(--g50)}
+
+/* ── MERMAID ── */
+.mermaid{
+  background:var(--white);border:1px solid var(--g150);
+  border-radius:10px;padding:20px;margin:16px 0;
+  text-align:center;
+}
+
+/* ── KATEX ── */
+.katex-display{margin:16px 0;overflow-x:auto}
+
+/* ── SCROLL TO TOP ── */
+.scroll-top{
+  position:fixed;bottom:24px;right:24px;
+  width:40px;height:40px;border-radius:50%;
+  background:var(--blue);color:var(--white);
+  border:none;cursor:pointer;font-size:18px;
+  box-shadow:0 4px 12px rgba(30,111,217,.3);
+  display:none;align-items:center;justify-content:center;
+  transition:opacity .2s;z-index:100;
+}
+.scroll-top:hover{opacity:.85}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  .cover{padding:40px 24px 32px}
+  .cover-title{font-size:22px}
+  .toc-sidebar{display:none}
+  .content{padding:24px 20px 60px}
+  .md-body h1{font-size:20px}
+  .md-body h2{font-size:17px}
+  .md-body table{font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-badge">📋 PHASE 1 · 알고리즘 명세</div>
+  <div class="cover-title">CaseLink <span>특허 출원을 위한</span><br/>알고리즘 및 기술 명세서</div>
+  <div class="cover-sub">학원 운영 통합 관리 플랫폼의 핵심 알고리즘 12개에 대한 기술 명세.<br/>퇴원 위험 감지, 신입생 상담 루틴, 내신 예측 등 자동화 알고리즘을 포함합니다.</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">버전 <strong>v7.0</strong></div>
+    <div class="cover-meta-item">알고리즘 <strong>12개</strong></div>
+    <div class="cover-meta-item">작성일 <strong>2026.04.06</strong></div>
+    <div class="cover-meta-item">분류 <strong>특허 출원용 기술 명세</strong></div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+  <nav class="toc-sidebar" id="toc"></nav>
+  <div class="content">
+    <div class="md-body" id="md-content"></div>
+  </div>
+</div>
+
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// ── MARKDOWN SOURCE ──
+var MD_SOURCE = `# CaseLink 특허 출원을 위한 알고리즘 및 기술 명세서
+
+## \\[문서 개요\\]
+| 구분 | 내용 |
+| :--- | :--- |
+| **출원인** | 케이스수학과학학원 / ㈜케이스링크 |
+| **시스템명** | CaseLink — 학원 운영 통합 관리 플랫폼 |
+| **버전** | v7.0 |
+| **문서 작성일** | 2026년 4월 6일 |
+| **알고리즘 수** | 총 12개 (기존 8개 + 신규 4개) |
+| **문서 분류** | 특허 출원용 기술 명세 (대외비) |
+
+---
+
+## I. 시스템 개요 및 핵심 알고리즘 목록
+CaseLink는 사교육 환경에서 강사·학생·학부모 간의 학습 데이터를 통합 관리하는 학원 운영 플랫폼입니다. 단순한 **"기록 도구"**가 아닌 **"개입(Intervention) 도구"**를 핵심 철학으로 하며, 학원의 표준 운영 매뉴얼을 디지털 알고리즘화하여 강사가 판단 없이도 매뉴얼대로 행동할 수 있도록 지원합니다.
+
+### 핵심 알고리즘 목록
+| No | 알고리즘명 | 특허 핵심 가치 |
+| :-- | :--- | :--- |
+| 1 | 재원생 학교별 내신 평균 자동 산출 | 외부 데이터 없이 재원생 데이터만으로 학교별 평균 자동 계산 |
+| 2 | 학부모 성향 자동 분류 및 상담 전략 도출 | 상담 이력 텍스트 분석 → 성향 태그 + 맞춤 상담 전략 자동 생성 |
+| 3 | 내신대비 단계 프로세스 마스터 구조 | 반 단위 1회 설정으로 전체 학생 자동 배정 및 이력 누적 |
+| 4 | 현재 날짜 기반 내신 시험 자동 예측 | 현재 날짜 분석 → 학기·시험 종류·시험일 자동 추천 |
+| 5 | 모의고사 점수 추이 분석 및 색상 코딩 | 회차별 점수 변화 추세 자동 판정 + 5단계 시각적 색상 인코딩 |
+| 6 | 학생부-수업관리 데이터 동기화 | 단일 마스터 저장소에서 두 화면이 실시간 동기화되는 구조 |
+| 7 | 퇴원 위험 학생 자동 감지 | 출결·점수·상담 이력 복합 분석 → 위험도 분류 및 계층 알림 |
+| 8 | 학습 보고서 자동 생성 (Hybrid) | LLM API + 규칙 기반 이중 엔진으로 안정성·품질 동시 확보 |
+| 9 | 신입생 3단계 상담 루틴 (신규) | 등록일 기준 D+1·D+7·D+30 자동 계산 및 체크리스트 제시 |
+| 10 | 다차원 위험 경고 메시지 (신규) | 4개 지표 복합 분석 → 등급별 경고 메시지 자동 생성 |
+| 11 | 예상퇴원생 관리 시스템 (신규) | 퇴원 예측 → 상담 분류 → 보고서 자동 완성 전체 파이프라인 |
+| 12 | 일일 업무 흐름 순서화 (신규) | 업무 종속성 기반 4단계 흐름 자동 구성 및 우선순위화 |
+
+### 시스템 아키텍처 개요
+
+\`\`\`mermaid
+graph TB
+    subgraph 데이터_수집["📊 데이터 수집 레이어"]
+        A1[출결 데이터] --> CORE
+        A2[시험 점수] --> CORE
+        A3[상담 이력] --> CORE
+        A4[과제 수행] --> CORE
+    end
+
+    subgraph 핵심_엔진["⚙️ 핵심 분석 엔진"]
+        CORE[통합 데이터 저장소]
+        CORE --> ALG7[알고리즘 7: 퇴원 위험 감지]
+        CORE --> ALG9[알고리즘 9: 신입생 상담 루틴]
+        CORE --> ALG10[알고리즘 10: 위험 경고 생성]
+        CORE --> ALG11[알고리즘 11: 예상퇴원 관리]
+        CORE --> ALG12[알고리즘 12: 업무 흐름 순서화]
+    end
+
+    subgraph 액션["🔔 자동 액션"]
+        ALG7 --> N1[강사 알림]
+        ALG7 --> N2[부서장 알림]
+        ALG10 --> N3[위험 등급 배지]
+        ALG11 --> N4[퇴원서 자동 생성]
+        ALG9 --> N5[상담 체크리스트]
+        ALG12 --> N6[업무 우선순위]
+    end
+
+    style 데이터_수집 fill:#EBF3FF,stroke:#1E6FD9,color:#0B1E3D
+    style 핵심_엔진 fill:#E3F6EF,stroke:#0A9268,color:#0B1E3D
+    style 액션 fill:#FEF3C7,stroke:#C97008,color:#0B1E3D
+\`\`\`
+
+---
+
+## II. 알고리즘 1 — 재원생 학교별 내신 평균 자동 산출
+
+### 1-1. 기술적 배경
+기존 시스템은 개인 성적만 기록할 뿐, 학교 공식 평균이 공개되기 전까지는 실시간 비교가 불가능했습니다. CaseLink는 보유한 재원생 데이터를 활용해 실시간 비교 지표를 산출합니다.
+
+### 1-2. 알고리즘 구조
+* **함수명:** \`calcSchoolAvg(school, exam)\`
+* **입력:** 학교명(string), 시험명(string)
+* **로직:** 전체 재원생 데이터 중 조건에 부합하는 점수들의 산술 평균(반올림) 반환.
+* **시간복잡도:** $O(N \\cdot M)$ ($N$: 전체 학생 수, $M$: 학생당 시험 기록 수)
+
+### 1-3. 처리 흐름
+
+\`\`\`mermaid
+flowchart LR
+    A[학교명 + 시험명 입력] --> B[전체 재원생 필터링]
+    B --> C[해당 학교 학생 추출]
+    C --> D[시험 점수 수집]
+    D --> E[산술 평균 계산]
+    E --> F[반올림 후 반환]
+    style A fill:#EBF3FF,stroke:#1E6FD9
+    style F fill:#E3F6EF,stroke:#0A9268
+\`\`\`
+
+### 1-4. 특허 핵심 클레임
+* 외부 데이터 없이 학원 자체 데이터만으로 실시간 학교별 평균을 산출하는 방법.
+* 성적 입력 시 동일 학교 재원생 평균이 자동 갱신되어 관련 학생 지표에 즉시 반영되는 구조.
+
+---
+
+## III. 알고리즘 2 — 학부모 성향 자동 분류 및 상담 전략 도출
+
+### 2-1. 하이브리드 처리 구조
+
+\`\`\`mermaid
+flowchart TB
+    A[상담 이력 텍스트] --> B{LLM API 호출}
+    B -->|성공| C[구조화 JSON 획득]
+    B -->|실패| D[규칙 기반 폴백 엔진]
+    D --> E[키워드 분석]
+    E --> C
+    C --> F[성향 태그 + 맞춤 전략]
+    style B fill:#FEF3C7,stroke:#C97008
+    style C fill:#E3F6EF,stroke:#0A9268
+    style D fill:#FEE2E2,stroke:#C8220E
+\`\`\`
+
+### 2-2. 규칙 기반 분류 로직
+| 분류 조건 | 도출 성향 태그 | 맞춤 전략 |
+| :--- | :--- | :--- |
+| "퇴원" 포함 | 퇴원 위험 | 공감 우선 → 조건부 유지 제안 |
+| "과제" 포함 | 과제 민감 | 과제 부담 경감 옵션 선제 제시 |
+| "점수/성적" 포함 | 성과 중시 | 정기 성취 데이터 공유 강화 |
+| 상담 3건 이상 | 적극 소통형 | 신속 회신 및 상세 보고 제공 |
+
+### 2-3. 특허 핵심 클레임
+* 자연어 상담 텍스트를 분석하여 학부모를 성향 카테고리로 자동 분류하는 방법.
+* LLM과 규칙 기반 엔진의 하이브리드 구성을 통한 서비스 연속성 보장.
+
+---
+
+## IV. 알고리즘 3 — 내신대비 단계 프로세스 마스터 구조
+
+### 3-1. 데이터 구조
+* \`nsMasterProcesses[]\`: 시험별 프로세스 메타데이터 (시험명, 반, 단계별 과제 등)
+* \`nsMasterChecks{procKey}{studentId}\`: 학생별 수행 데이터 (완료 여부, 점수 등)
+
+### 3-2. 특허 핵심 클레임
+* 반 단위 1회 설정으로 전체 학생에게 자동 배정되는 메커니즘.
+* 메타데이터와 수행 데이터를 분리 저장하여 데이터 효율성 및 이력 누적 기능을 강화한 구조.
+
+---
+
+## V. 알고리즘 4 — 현재 날짜 기반 내신 시험 자동 예측
+
+### 4-1. 날짜 분류 및 추천 규칙
+| 현재 월 | 학기/시험 종류 | 추천 시험일 | 추천 대비 시작일 |
+| :--- | :--- | :--- | :--- |
+| 1월~5월 | 1학기 중간고사 | 5월 15일 | 4월 17일 |
+| 6월 | 1학기 기말고사 | 7월 10일 | 6월 12일 |
+| 7월~10월 | 2학기 중간고사 | 10월 15일 | 9월 18일 |
+| 11월~12월 | 2학기 기말고사 | 12월 10일 | 11월 13일 |
+
+### 4-2. 특허 핵심 클레임
+* 한국 학사 일정 패턴을 추론하여 시험 종류와 일정을 자동 예측하는 방법.
+* 자동 생성된 값을 수정 가능한 **Editable Auto-fill UX** 설계.
+
+---
+
+## VI. 알고리즘 5 — 모의고사 점수 추이 분석 및 색상 코딩
+
+### 5-1. 추세 판정 및 구간 색상
+* **상승:** 마지막-첫 점수 $\\ge$ +5점 (**Teal**)
+* **안정:** -5점 < 변화 < +5점 (**Blue**)
+* **하락:** 마지막-첫 점수 $\\le$ -5점 (**Red**)
+
+| 점수 범위 | 색상 | 의미 |
+| :--- | :--- | :--- |
+| 85점 이상 | Teal | 우수 (목표 달성) |
+| 70~84점 | Blue | 양호 (안정권) |
+| 55~69점 | Amber | 주의 (보완 필요) |
+| 54점 이하 | Red | 위험 (집중 지도) |
+
+---
+
+## VII. 알고리즘 6 — 학생부-수업관리 양방향 데이터 동기화
+
+\`\`\`mermaid
+flowchart LR
+    A[수업관리 화면<br/>반 단위 입력] <-->|단일 마스터| B[(통합 데이터<br/>저장소)]
+    B <-->|단일 마스터| C[학생부 화면<br/>개인 조회]
+    style B fill:#E3F6EF,stroke:#0A9268
+\`\`\`
+
+* **구조:** 반 단위 입력 화면(수업관리)과 학생 개인 조회 화면(학생부)이 단일 마스터를 공유.
+* **핵심:** 이중 뷰 아키텍처를 통해 데이터 일관성을 보장하고 각 관점에 맞는 렌더링 제공.
+
+---
+
+## VIII. 알고리즘 7 — 퇴원 위험 학생 자동 감지 및 상담 트리거
+
+### 7-1. 판단 기준
+
+\`\`\`mermaid
+flowchart TB
+    subgraph 지표["📊 4대 위험 지표"]
+        I1[출결률 < 85%]
+        I2[테스트 점수 2회 연속 하락]
+        I3[과제 미흡 3회 이상]
+        I4[키워드 감지: 퇴원, 그만]
+    end
+
+    I1 --> EVAL[위험도 종합 평가]
+    I2 --> EVAL
+    I3 --> EVAL
+    I4 --> EVAL
+
+    EVAL -->|높음| RED[🔴 부서장 즉시 알림]
+    EVAL -->|중간| ORANGE[🟠 강사 팝업 알림]
+    EVAL -->|낮음| BLUE[🔵 관찰 목록 추가]
+
+    style 지표 fill:#FEE2E2,stroke:#C8220E,color:#7F1D1D
+    style RED fill:#7F1D1D,stroke:#C8220E,color:#FCA5A5
+    style ORANGE fill:#FEF3C7,stroke:#C97008,color:#92400E
+    style BLUE fill:#EBF3FF,stroke:#1E6FD9,color:#1E6FD9
+\`\`\`
+
+### 7-2. 알림 트리거
+위험도에 따라 강사 알림 또는 부서장 알림으로 자동 분기.
+
+---
+
+## IX. 알고리즘 8 — 학습 보고서 자동 생성 (Hybrid)
+* **로직:** LLM API를 1차로 사용하고, 실패 시 미리 정의된 임계값 규칙(출결, 점수, 과제 등)에 따라 서술형 문장을 생성.
+* **특징:** 카카오톡 발송 포맷에 최적화된 문체 자동 생성.
+
+---
+
+## X. 알고리즘 9 — 신입생 3단계 상담 루틴 자동 트리거 ★ 신규
+
+### 9-1. 3단계 루틴 구조
+
+\`\`\`mermaid
+timeline
+    title 신입생 상담 루틴
+    D+1 : 첫날 상담
+        : 시스템 안내
+        : 첫인상 피드백
+    D+7 : 1주일 상담
+        : 적응 확인
+        : 과제 수행 확인
+    D+30 : 1개월 상담
+        : 학습 개선점
+        : 적응 종합 점검
+\`\`\`
+
+### 9-2. 특허 핵심 클레임
+* 등록일 기준 상담 시점 자동 계산 및 단계별 체크리스트 자동 제시 방법.
+* 신입생 적응도(4단계) 분류에 따른 계층적 에스컬레이션(부서장 알림) 구조.
+
+---
+
+## XI. 알고리즘 10 — 다차원 위험 경고 메시지 자동 생성 ★ 신규
+
+### 10-1. 경고 등급 분류
+* **🔴 위험:** 퇴원 의사 표명 등 (빨간 뱃지 + 진동 + 부서장 알림)
+* **🟠 주의:** 출결/점수 하락 (주황 뱃지 + 강사 팝업)
+* **🔵 관찰:** 상담 미완료 등 (파란 뱃지 + 업무 목록 추가)
+
+### 10-2. 특허 핵심 클레임
+* 데이터 실시간 모니터링을 통한 3단계 위험도 자동 분류.
+* 지표값을 템플릿에 동적 삽입하여 즉각 대응 가능한 구체적 메시지 생성 방법.
+
+---
+
+## XII. 알고리즘 11 — 예상퇴원생 관리 시스템 알고리즘 ★ 신규
+
+### 11-1. 관리 파이프라인
+
+\`\`\`mermaid
+flowchart LR
+    A[🔍 감지<br/>복합 지표 분석] --> B[🗂 상담 분기<br/>유형별 자동 분류]
+    B --> C[📄 문서 완성<br/>학습 데이터 자동 매핑]
+    C --> D[✅ 승인<br/>부서장 최종 결재]
+    style A fill:#FEE2E2,stroke:#C8220E
+    style B fill:#FEF3C7,stroke:#C97008
+    style C fill:#EBF3FF,stroke:#1E6FD9
+    style D fill:#E3F6EF,stroke:#0A9268
+\`\`\`
+
+### 11-2. 특허 핵심 클레임
+* 퇴원 위험 감지부터 승인까지의 통합 파이프라인 프로세스.
+* 학습 이력(출결, 점수, 상담 등)을 퇴원서 양식에 자동으로 취합 및 입력하는 방법.
+
+---
+
+## XIII. 알고리즘 12 — 일일 업무 흐름 자동 순서화 알고리즘 ★ 신규
+
+### 12-1. 4단계 업무 종속성
+
+\`\`\`mermaid
+flowchart TB
+    S1[STEP 1<br/>수업 기록 입력] -->|시간 의존| S2[STEP 2<br/>상담 입력]
+    S1 -->|강한 의존| S3[STEP 3<br/>알림톡 발송]
+    S2 --> S4[STEP 4<br/>업무일지 제출]
+    S3 --> S4
+    style S1 fill:#EBF3FF,stroke:#1E6FD9
+    style S2 fill:#F0E9FF,stroke:#6B2FBA
+    style S3 fill:#FEF3C7,stroke:#C97008
+    style S4 fill:#E3F6EF,stroke:#0A9268
+\`\`\`
+
+### 12-2. 상담 우선순위
+1.  예상퇴원/긴급상담
+2.  콜백 요청
+3.  신입생 단계 상담
+4.  재원생 정기 상담
+
+### 12-3. 특허 핵심 클레임
+* 업무 간 종속 관계를 분석하여 최적의 경로를 제시하는 Daily Workflow 알고리즘.
+* 업무 완료 상태를 실시간 추적하여 4단계 도트로 시각화하는 방법.
+
+---
+
+## XIV. 특허 청구 핵심 포인트 요약
+1.  **재원생 기반 실시간 학교 평균 산출**
+2.  **텍스트 분석 기반 학부모 성향 자동 분류**
+3.  **반 단위 설정 기반 학생 자동 배정 마스터 구조**
+4.  **학사 일정 기반 시험 일정 자동 예측**
+5.  **추세 분석 및 5단계 색상 코딩 UX**
+6.  **단일 마스터 기반 이중 뷰 동기화 아키텍처**
+7.  **4개 지표 복합 분석 기반 퇴원 위험 감지**
+8.  **LLM-규칙 하이브리드 보고서 생성 엔진**
+9.  **신입생 상담 루틴 자동 계산 및 에스컬레이션 (신규)**
+10. **다차원 지표 기반 동적 경고 메시지 생성 (신규)**
+11. **퇴원 프로세스 통합 관리 파이프라인 (신규)**
+12. **업무 의존성 기반 Daily Workflow 순서화 (신규)**
+
+---
+*본 문서는 CaseLink v7.0 구현 기능을 기준으로 작성되었으며, 변리사 검토를 통해 최종 청구항을 확정할 것을 권장합니다.*`;
+
+// ── RENDER ──
+(function(){
+  // Configure marked
+  var renderer = new marked.Renderer();
+
+  // Custom code block renderer for mermaid
+  renderer.code = function(obj) {
+    var text = obj.text || obj;
+    var lang = obj.lang || '';
+    if(lang === 'mermaid'){
+      return '<div class="mermaid">' + text + '</div>';
+    }
+    return '<pre><code>' + (typeof text === 'string' ? text.replace(/</g,'&lt;').replace(/>/g,'&gt;') : text) + '</code></pre>';
+  };
+
+  marked.setOptions({
+    renderer: renderer,
+    gfm: true,
+    breaks: false
+  });
+
+  // Render markdown
+  var html = marked.parse(MD_SOURCE);
+
+  // Process inline KaTeX ($...$)
+  html = html.replace(/\$([^$]+)\$/g, function(m, tex){
+    try { return katex.renderToString(tex, {throwOnError:false}); }
+    catch(e){ return m; }
+  });
+
+  document.getElementById('md-content').innerHTML = html;
+
+  // Initialize mermaid
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#EBF3FF',
+      primaryBorderColor: '#1E6FD9',
+      primaryTextColor: '#0B1E3D',
+      lineColor: '#B8BFCC',
+      secondaryColor: '#E3F6EF',
+      tertiaryColor: '#FEF3C7',
+      fontSize: '13px',
+      fontFamily: 'Noto Sans KR, sans-serif'
+    }
+  });
+
+  // Build TOC from h2 elements
+  buildTOC();
+
+  // Scroll to top button
+  window.addEventListener('scroll', function(){
+    var btn = document.getElementById('scrollTop');
+    btn.style.display = window.scrollY > 400 ? 'flex' : 'none';
+  });
+})();
+
+function buildTOC(){
+  var headings = document.querySelectorAll('.md-body h2');
+  var tocHtml = '<div class="toc-title">목차</div><ul class="toc-list">';
+  headings.forEach(function(h, i){
+    var id = 'section-' + i;
+    h.id = id;
+    var text = h.textContent.replace(/^\[|\]$/g,'').trim();
+    if(text.length > 30) text = text.substring(0,30) + '…';
+    tocHtml += '<li><a href="#' + id + '" data-target="' + id + '">' + text + '</a></li>';
+  });
+  tocHtml += '</ul>';
+  document.getElementById('toc').innerHTML = tocHtml;
+
+  // Highlight active TOC item on click + scroll
+  var links = document.querySelectorAll('.toc-list a');
+
+  // Click handler: immediately set active state
+  links.forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      var targetId = this.getAttribute('data-target');
+      var target = document.getElementById(targetId);
+      if(!target) return;
+      links.forEach(function(l){ l.classList.remove('active'); });
+      this.classList.add('active');
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+      // Also scroll TOC sidebar to keep active item visible
+      var tocSidebar = document.getElementById('toc');
+      if(tocSidebar && this.offsetTop > tocSidebar.clientHeight){
+        tocSidebar.scrollTop = this.offsetTop - tocSidebar.clientHeight / 2;
+      }
+    });
+  });
+
+  // Scroll observer: update active state while scrolling
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        links.forEach(function(l){ l.classList.remove('active'); });
+        var active = document.querySelector('.toc-list a[data-target="'+entry.target.id+'"]');
+        if(active) active.classList.add('active');
+      }
+    });
+  }, {rootMargin:'0px 0px -60% 0px', threshold:0.1});
+  headings.forEach(function(h){ observer.observe(h); });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CaseLink 퇴원방지 알고리즘 스펙 v1.1</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0B1E3D;--navy2:#142952;--blue:#1E6FD9;--blue-l:#EBF3FF;
+  --teal:#0A9268;--teal-l:#E3F6EF;
+  --amber:#C97008;--amber-l:#FEF3C7;--amber-d:#92400E;
+  --red:#C8220E;--red-l:#FEE2E2;--red-d:#7F1D1D;
+  --purple:#6B2FBA;--purple-l:#F0E9FF;
+  --g50:#F7F8FA;--g100:#EEF0F4;--g150:#E4E7ED;--g200:#D6DAE3;
+  --g300:#B8BFCC;--g400:#9AA3B4;--g500:#737D90;
+  --g600:#565E6D;--g700:#3D4452;--g800:#252B36;--g900:#141820;
+  --white:#FFFFFF;
+  font-family:'Noto Sans KR',-apple-system,sans-serif;
+  font-size:14px;color:var(--g800);
+}
+body{background:var(--g50);min-height:100vh}
+.cover{background:var(--navy);padding:60px 80px 50px;position:relative;overflow:hidden}
+.cover::before{content:'';position:absolute;top:-40px;right:-40px;width:300px;height:300px;border-radius:50%;background:rgba(30,111,217,.12)}
+.cover::after{content:'';position:absolute;bottom:-60px;left:200px;width:180px;height:180px;border-radius:50%;background:rgba(10,146,104,.08)}
+.cover-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(30,111,217,.2);border:1px solid rgba(30,111,217,.4);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#7AB3F5;letter-spacing:.06em;margin-bottom:20px}
+.cover-title{font-size:30px;font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.25;margin-bottom:12px}
+.cover-title span{color:#7AB3F5}
+.cover-sub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:28px;line-height:1.65}
+.cover-meta{display:flex;gap:24px;flex-wrap:wrap}
+.cover-meta-item{font-size:12px;color:rgba(255,255,255,.4)}
+.cover-meta-item strong{color:rgba(255,255,255,.7);font-weight:600}
+.content{max-width:960px;margin:0 auto;padding:40px 40px 80px}
+.sec{margin-bottom:48px}
+.sec-title{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--blue);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--g150)}
+.sec-h{font-size:19px;font-weight:800;color:var(--g900);letter-spacing:-.02em;margin-bottom:6px}
+.sec-desc{font-size:13px;color:var(--g500);line-height:1.7;margin-bottom:18px}
+.card{background:#fff;border:1px solid var(--g150);border-radius:12px;padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:14px}
+.card-title{font-size:14px;font-weight:800;color:var(--g900);margin-bottom:14px}
+.level-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:22px}
+.lv{border-radius:10px;padding:18px;border:2px solid}
+.lv.ca{background:var(--amber-l);border-color:var(--amber)}
+.lv.wa{background:var(--red-l);border-color:var(--red)}
+.lv.cr{background:#1a0505;border-color:var(--red-d)}
+.lv-t{font-size:13px;font-weight:900;letter-spacing:.04em;margin-bottom:5px}
+.lv.ca .lv-t{color:var(--amber-d)}.lv.wa .lv-t{color:var(--red)}.lv.cr .lv-t{color:#FCA5A5}
+.lv-d{font-size:12px;line-height:1.6}
+.lv.ca .lv-d{color:var(--amber-d)}.lv.wa .lv-d{color:var(--red-d)}.lv.cr .lv-d{color:#FECACA}
+.lv-tr{font-size:11px;font-weight:700;margin-top:8px;padding:3px 8px;border-radius:5px;display:inline-block}
+.lv.ca .lv-tr{background:rgba(201,112,8,.15);color:var(--amber-d)}
+.lv.wa .lv-tr{background:rgba(200,34,14,.15);color:var(--red)}
+.lv.cr .lv-tr{background:rgba(255,255,255,.08);color:#FCA5A5}
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin:14px 0}
+.fs{background:#fff;border:1.5px solid var(--g200);border-radius:7px;padding:9px 13px;font-size:12px;font-weight:700;color:var(--g700)}
+.fs.ac{border-color:var(--blue);background:var(--blue-l);color:var(--blue)}
+.fa{font-size:17px;color:var(--g300);padding:0 5px}
+.vt{width:100%;border-collapse:collapse;font-size:13px}
+.vt th{padding:9px 13px;font-size:11px;font-weight:700;color:var(--g500);letter-spacing:.05em;border-bottom:2px solid var(--g150);text-align:left;background:var(--g50)}
+.vt td{padding:10px 13px;border-bottom:1px solid var(--g100);color:var(--g800);vertical-align:top;line-height:1.55}
+.vt tbody tr:last-child td{border-bottom:none}
+.vt tbody tr:hover td{background:var(--g50)}
+.vk{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--blue);background:var(--blue-l);padding:2px 7px;border-radius:4px}
+.sm{display:flex;flex-direction:column;gap:4px;margin-top:3px}
+.si{font-size:12px;color:var(--g600);display:flex;align-items:baseline;gap:7px}
+.sv{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--g800);font-size:11px;min-width:76px}
+.p0{color:var(--teal);font-weight:800}.p1{color:var(--amber-d);font-weight:800}.p2{color:var(--red);font-weight:800}.p3{color:#7F1D1D;font-weight:800}
+.ab{background:#0F1A2E;border-radius:10px;padding:20px;margin-bottom:12px;position:relative;overflow:hidden}
+.ab::before{content:attr(data-lang);position:absolute;top:10px;right:14px;font-size:10px;font-weight:700;color:rgba(255,255,255,.2);letter-spacing:.1em}
+.ac{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.75;color:#E2E8F0;white-space:pre}
+.kw{color:#93C5FD}.fn{color:#6EE7B7}.st{color:#FDE68A}.nm{color:#FCA5A5}.cm{color:#64748B;font-style:italic}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rc{border-radius:8px;padding:14px 16px;border-left:4px solid}
+.rc.r1{background:var(--amber-l);border-color:var(--amber)}
+.rc.r2{background:var(--red-l);border-color:var(--red)}
+.rc.r3{background:#FFF1F1;border-color:#7F1D1D}
+.rh{font-size:11px;font-weight:800;letter-spacing:.06em;margin-bottom:7px}
+.rc.r1 .rh{color:var(--amber-d)}.rc.r2 .rh{color:var(--red)}.rc.r3 .rh{color:#7F1D1D}
+.rb{font-size:12px;line-height:1.7;color:var(--g700)}
+.rb li{margin-left:14px;margin-bottom:3px}
+.seg{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-right:4px}
+.se{background:#DBEAFE;color:#1E40AF}.sm2{background:#D1FAE5;color:#065F46}.sh{background:#FEE2E2;color:#7F1D1D}
+.sp{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.sp-g{background:var(--teal-l);color:var(--teal)}.sp-b{background:var(--blue-l);color:var(--blue)}.sp-a{background:var(--amber-l);color:var(--amber-d)}.sp-r{background:var(--red-l);color:var(--red)}
+.ax{border-radius:9px;padding:15px 17px;margin-bottom:9px;border:1px solid}
+.ax.ca{background:var(--amber-l);border-color:rgba(201,112,8,.3)}
+.ax.wa{background:var(--red-l);border-color:rgba(200,34,14,.3)}
+.ax.cr{background:#1a0505;border-color:rgba(200,34,14,.5)}
+.at{font-size:12px;font-weight:800;letter-spacing:.05em;margin-bottom:7px}
+.ax.ca .at{color:var(--amber-d)}.ax.wa .at{color:var(--red)}.ax.cr .at{color:#FCA5A5}
+.al{list-style:none;padding:0}
+.al li{font-size:12px;line-height:1.65;padding:3px 0 3px 15px;position:relative}
+.al li::before{content:'›';position:absolute;left:0;font-weight:700}
+.ax.ca .al li{color:var(--amber-d)}.ax.ca .al li::before{color:var(--amber)}
+.ax.wa .al li{color:var(--red-d)}.ax.wa .al li::before{color:var(--red)}
+.ax.cr .al li{color:#FECACA}.ax.cr .al li::before{color:#FCA5A5}
+.im{background:var(--blue-l);border:1px solid rgba(30,111,217,.2);border-radius:7px;padding:11px 13px;margin-top:9px}
+.im-l{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--blue);margin-bottom:4px}
+.im-t{font-size:12px;color:var(--navy2);line-height:1.7}
+.pg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pc{border-radius:10px;padding:17px;border:1.5px solid}
+.pc.in{background:#EFF6FF;border-color:#93C5FD}
+.pc.ex{background:#F0FDF4;border-color:#6EE7B7}
+.pt{font-size:13px;font-weight:800;margin-bottom:9px}
+.pc.in .pt{color:#1E40AF}.pc.ex .pt{color:#065F46}
+.ps{font-size:12px;line-height:1.65;color:var(--g700)}
+.ps li{margin-left:14px;margin-bottom:4px}
+.note{background:var(--g50);border:1px solid var(--g200);border-radius:7px;padding:13px 15px;font-size:12px;color:var(--g600);line-height:1.7;margin-top:11px}
+.note strong{color:var(--g800)}
+.tv{display:flex;height:30px;border-radius:7px;overflow:hidden;margin:10px 0}
+.ts{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff}
+.ts.n{flex:3;background:var(--teal)}.ts.ca{flex:2;background:var(--amber)}.ts.wa{flex:2;background:var(--red)}.ts.cr{flex:1;background:#7F1D1D}
+.hl{background:var(--amber-l);color:var(--amber-d);font-weight:700;padding:1px 5px;border-radius:4px;font-size:12px}
+.hl-r{background:var(--red-l);color:var(--red);font-weight:700;padding:1px 5px;border-radius:4px;font-size:12px}
+@media print{
+  body{background:#fff}.cover{padding:40px}.content{padding:20px}
+  .ab{background:#F0F0F0;border:1px solid #ccc}.ac{color:#333}
+  .kw{color:#00c}.fn{color:#060}.st{color:#960}.nm{color:#c00}.cm{color:#888}
+  .lv.cr,.ax.cr{background:#fff;border:1px solid #7F1D1D}
+  .lv.cr .lv-t,.lv.cr .lv-d,.ax.cr .at,.ax.cr .al li{color:#7F1D1D}
+}
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="cover-badge">📋 CaseLink 개발 스펙 문서</div>
+  <div class="cover-title">퇴원방지 경고 알고리즘<br/><span>Withdrawal Prevention Alert System</span></div>
+  <div class="cover-sub">케이스수학과학학원 퇴원보고서(2025.05~2026.03) 분석 기반<br/>CaseLink 강사 포털 실시간 알림 시스템 알고리즘 정의서</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item"><strong>버전</strong> v1.1</div>
+    <div class="cover-meta-item"><strong>기준 단위</strong> 1주(7일)</div>
+    <div class="cover-meta-item"><strong>대상</strong> 강사 포털 · 부서장 대시보드</div>
+    <div class="cover-meta-item"><strong>작성</strong> 2026.04</div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- 01 개요 -->
+  <div class="sec">
+    <div class="sec-title">01 · OVERVIEW</div>
+    <div class="sec-h">시스템 개요</div>
+    <div class="sec-desc">
+      강사가 수업일지에 입력하는 <strong>출결 · 과제 · WT점수 · 참여도</strong> 4개 변수를
+      <span class="hl">1주 단위</span>로 누적 스코어링합니다.
+      학생별 주간 위험점수가 임계값을 넘으면 <span class="hl">주의</span> → <span class="hl-r">경고</span> → <span class="hl-r">예상퇴원</span> 3단계 알림이 자동 발생합니다.
+      <strong>경고 이상</strong>은 부서장에게도 즉시 전달됩니다.
+    </div>
+    <div class="level-row">
+      <div class="lv ca"><div class="lv-t">🟡 주의 (CAUTION)</div><div class="lv-d">초기 이탈 징후 감지. 담당 강사가 해당 주 안에 개별 면담을 진행합니다.</div><div class="lv-tr">주간 위험점수 30점 이상</div></div>
+      <div class="lv wa"><div class="lv-t">🔴 경고 (WARNING)</div><div class="lv-d">복수 징후 동시 발생. 학부모 전화 상담 및 부서장 보고가 필요합니다.</div><div class="lv-tr">주간 위험점수 60점 이상 또는 즉각 트리거</div></div>
+      <div class="lv cr"><div class="lv-t">🚨 예상퇴원 (CRITICAL)</div><div class="lv-d">퇴원 결심 임박. 원장·부서장 직접 개입 및 학부모 긴급 연락.</div><div class="lv-tr">주간 위험점수 90점 이상 또는 즉각 트리거 2개+</div></div>
+    </div>
+    <div class="flow">
+      <div class="fs">수업일지 입력 (매 수업)</div><div class="fa">→</div>
+      <div class="fs">주간 위험점수 집계</div><div class="fa">→</div>
+      <div class="fs">즉각 트리거 감지</div><div class="fa">→</div>
+      <div class="fs ac">등급 결정</div><div class="fa">→</div>
+      <div class="fs">알림 + 대처 가이드</div>
+    </div>
+  </div>
+
+  <!-- 02 입력 변수 -->
+  <div class="sec">
+    <div class="sec-title">02 · INPUT VARIABLES</div>
+    <div class="sec-h">입력 변수 정의 및 점수 변환</div>
+    <div class="sec-desc">수업일지 입력 시 아래 5개 변수를 기록합니다. 각 값은 <strong>위험 포인트(pts)</strong>로 변환되어 주간 합산됩니다.</div>
+
+    <!-- 출결 -->
+    <div class="card">
+      <div class="card-title">① 출결 (attendance) — 5단계</div>
+      <table class="vt">
+        <thead><tr><th>입력값</th><th>위험 포인트</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>출석</td><td><span class="p0">0 pts</span></td><td>정상</td></tr>
+          <tr><td>지각 (사전 연락)</td><td><span class="p0">0 pts</span></td><td>사전에 연락하고 늦게 입실 — 점수 차감 없음</td></tr>
+          <tr><td>결석 (사전 연락)</td><td><span class="p0">0 pts</span></td><td>사전에 연락하고 불참 — 점수 차감 없음</td></tr>
+          <tr><td>무단지각</td><td><span class="p1">5 pts</span></td><td>연락 없이 늦게 입실</td></tr>
+          <tr><td>무단결석</td><td><span class="p3">25 pts</span></td><td>연락 없이 불참 — 즉각 경고 트리거 병행 발동</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <strong>주간 누적 가중 규칙</strong> — 같은 주에 무단지각·무단결석이 <strong>2회 이상</strong>이면 출결 합산 점수를 ×1.5 가중합니다.<br/>
+        예) 무단결석 1회(25) + 무단지각 1회(5) → (25+5) ×1.5 = <strong>45 pts</strong>
+      </div>
+    </div>
+
+    <!-- 과제 -->
+    <div class="card">
+      <div class="card-title">② 과제 수행도 (homework) — 3단계</div>
+      <table class="vt">
+        <thead><tr><th>입력값</th><th>위험 포인트</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>우수</td><td><span class="p0">0 pts</span></td><td>완성도 높음</td></tr>
+          <tr><td>보통</td><td><span class="p1">8 pts</span></td><td>부분 미완성 또는 성의 부족</td></tr>
+          <tr><td>미흡</td><td><span class="p2">20 pts</span></td><td>미제출·답 베끼기 포함 — 즉각 경고 트리거 병행</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <strong>연속 미흡 가중 규칙</strong> — <strong>2주 연속 미흡</strong>이면 다음 주 과제 점수를 ×1.5 가중합니다.<br/>
+        특이사항란에 "답 베낌" "찍음" 키워드가 감지되면 즉각 경고 트리거를 별도 발동합니다.
+      </div>
+    </div>
+
+    <!-- WT -->
+    <div class="card">
+      <div class="card-title">③ 주간테스트(WT) — 반 평균 대비 차이 + 추이 기준</div>
+      <table class="vt">
+        <thead><tr><th>판단 기준</th><th>조건</th><th>위험 포인트</th></tr></thead>
+        <tbody>
+          <tr>
+            <td rowspan="4"><strong>반 평균 대비 차이</strong><br/><span style="font-size:11px;color:var(--g400)">해당 주 1회 적용</span></td>
+            <td>평균 이상</td><td><span class="p0">0 pts</span></td>
+          </tr>
+          <tr><td>평균 미만 ~ –9점</td><td><span class="p1">5 pts</span></td></tr>
+          <tr><td>평균 –10점 ~ –19점</td><td><span class="p2">15 pts</span></td></tr>
+          <tr><td>평균 –20점 이상</td><td><span class="p3">25 pts</span></td></tr>
+          <tr>
+            <td rowspan="3"><strong>점수 추이 (연속 하락)</strong><br/><span style="font-size:11px;color:var(--g400)">주간 확정 후 추가 적용</span></td>
+            <td>하락 없음 또는 상승</td><td><span class="p0">+0 pts</span></td>
+          </tr>
+          <tr><td><strong>2주 연속</strong> 하락</td><td><span class="p1">+10 pts 추가</span></td></tr>
+          <tr><td><strong>3주 이상 연속</strong> 하락</td><td><span class="p2">+20 pts 추가 + 즉각 경고 트리거</span></td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <strong>반 평균 계산</strong> — 동일 수업 내 같은 주 WT 점수의 산술 평균으로 자동 계산됩니다.<br/>
+        결석 등으로 WT 미응시한 주는 추이 계산에서 제외합니다.
+      </div>
+    </div>
+
+    <!-- 참여도 -->
+    <div class="card">
+      <div class="card-title">④ 수업 참여도 (participation) — 3단계</div>
+      <table class="vt">
+        <thead><tr><th>입력값</th><th>위험 포인트</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>우수</td><td><span class="p0">0 pts</span></td><td>적극적 참여, 질문 있음</td></tr>
+          <tr><td>보통</td><td><span class="p1">5 pts</span></td><td>수동적 참여, 질문 없음</td></tr>
+          <tr><td>미흡</td><td><span class="p2">15 pts</span></td><td>엎드림·딴짓·시선 회피·대답 거부</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 키워드 -->
+    <div class="card">
+      <div class="card-title">⑤ 특이사항 키워드 감지 (remark_keywords)</div>
+      <table class="vt">
+        <thead><tr><th>키워드 / 패턴</th><th>위험 포인트</th><th>트리거</th></tr></thead>
+        <tbody>
+          <tr><td>"답 베낌" "찍음" "해설지 베낌"</td><td><span class="p2">+15 pts</span></td><td>🔴 즉각 경고</td></tr>
+          <tr><td>"엎드림" "졸음" "수면"</td><td><span class="p1">+10 pts</span></td><td>—</td></tr>
+          <tr><td>"질문없음" "시선회피" "대답안함"</td><td><span class="p1">+8 pts</span></td><td>—</td></tr>
+          <tr><td>"타학원" "레벨테스트" "다른학원"</td><td><span class="p2">+20 pts</span></td><td>🔴 즉각 경고</td></tr>
+          <tr><td>"독학" "인강" "혼자 공부"</td><td><span class="p3">+30 pts</span></td><td>🚨 즉각 예상퇴원</td></tr>
+          <tr><td>"왜 공부" "그만하고 싶다" "못하겠다"</td><td><span class="p3">+30 pts</span></td><td>🚨 즉각 예상퇴원</td></tr>
+        </tbody>
+      </table>
+      <div class="note">키워드는 특이사항 입력란 문자열 포함 여부로 감지합니다. 강사가 선택 가능한 체크박스 태그 형태로도 제공하면 감지율이 높아집니다.</div>
+    </div>
+  </div>
+
+  <!-- 03 주간 스코어링 엔진 -->
+  <div class="sec">
+    <div class="sec-title">03 · WEEKLY SCORING ENGINE</div>
+    <div class="sec-h">주간 위험점수 계산 알고리즘</div>
+    <div class="sec-desc">
+      매주 월요일 자정 직전 <strong>7일간</strong>의 수업일지 데이터를 집계하여 위험점수를 확정합니다.
+      재원기간 · 학년 · 성향 보정계수를 곱한 최종 점수로 등급을 결정합니다.
+    </div>
+
+    <div class="ab" data-lang="PSEUDO CODE">
+      <div class="ac"><span class="cm">// ══ CaseLink 주간 위험점수 계산 ══</span>
+
+<span class="kw">function</span> <span class="fn">calcWeeklyRisk</span>(student, weekRecords) {
+  <span class="kw">let</span> pts = <span class="nm">0</span>
+
+  <span class="cm">// ① 출결 합산 (사전연락 지각·결석 0pts, 무단지각·무단결석만 집계, 주간 2회+ 시 ×1.5)</span>
+  <span class="kw">const</span> absCount = weekRecords.<span class="fn">filter</span>(r =>
+    r.attendance === <span class="st">'무단지각'</span> || r.attendance === <span class="st">'무단결석'</span>
+  ).length
+  <span class="kw">const</span> attPts = weekRecords.<span class="fn">sumBy</span>(<span class="fn">attendanceScore</span>)
+  pts += absCount >= <span class="nm">2</span> ? attPts * <span class="nm">1.5</span> : attPts
+
+  <span class="cm">// ② 과제 합산 (2주 연속 미흡이면 이번 주 ×1.5)</span>
+  <span class="kw">const</span> hwStreak = <span class="fn">consecutivePoorHomework</span>(student.id, <span class="nm">2</span>)
+  <span class="kw">const</span> hwPts   = weekRecords.<span class="fn">sumBy</span>(<span class="fn">homeworkScore</span>)
+  pts += hwStreak ? hwPts * <span class="nm">1.5</span> : hwPts
+
+  <span class="cm">// ③ WT — 반 평균 대비 차이 점수</span>
+  <span class="kw">const</span> wtGap = <span class="fn">calcWtGap</span>(student, weekRecords)  <span class="cm">// 내 점수 − 반 평균</span>
+  pts += <span class="fn">wtGapScore</span>(wtGap)
+
+  <span class="cm">// ③-b WT — 연속 하락 추이 가산점</span>
+  <span class="kw">const</span> dropWeeks = <span class="fn">consecutiveWtDrop</span>(student.id)
+  <span class="kw">if</span>      (dropWeeks >= <span class="nm">3</span>) { pts += <span class="nm">20</span>; <span class="fn">triggerWarning</span>(student) }
+  <span class="kw">else if</span> (dropWeeks === <span class="nm">2</span>)   pts += <span class="nm">10</span>
+
+  <span class="cm">// ④ 참여도 합산</span>
+  pts += weekRecords.<span class="fn">sumBy</span>(<span class="fn">participationScore</span>)
+
+  <span class="cm">// ⑤ 키워드 포인트</span>
+  pts += weekRecords.<span class="fn">sumBy</span>(<span class="fn">keywordScore</span>)
+
+  <span class="cm">// ⑥ 보정 계수 적용</span>
+  pts *= <span class="fn">enrollmentWeight</span>(student.enrollment_months)
+  pts *= <span class="fn">gradeWeight</span>(student.grade_group)
+  <span class="kw">if</span> (student.personality === <span class="st">'적응형'</span>) pts *= <span class="nm">1.2</span>
+
+  <span class="kw">return</span> { score: Math.<span class="fn">round</span>(pts), grade: <span class="fn">toGrade</span>(pts) }
+}
+
+<span class="kw">function</span> <span class="fn">toGrade</span>(pts) {
+  <span class="kw">if</span> (pts >= <span class="nm">90</span>) <span class="kw">return</span> <span class="st">'예상퇴원'</span>
+  <span class="kw">if</span> (pts >= <span class="nm">60</span>) <span class="kw">return</span> <span class="st">'경고'</span>
+  <span class="kw">if</span> (pts >= <span class="nm">30</span>) <span class="kw">return</span> <span class="st">'주의'</span>
+  <span class="kw">return</span> <span class="st">'정상'</span>
+}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 주간 위험점수 → 등급 기준</div>
+      <div class="tv">
+        <div class="ts n">정상 (0~29)</div>
+        <div class="ts ca">🟡 주의 (30~59)</div>
+        <div class="ts wa">🔴 경고 (60~89)</div>
+        <div class="ts cr">🚨 (90+)</div>
+      </div>
+      <div style="font-size:12px;color:var(--g500);margin-top:8px">※ 즉각 트리거 발동 시 점수와 무관하게 해당 등급으로 즉시 상향됩니다.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚙️ 보정 계수</div>
+      <table class="vt">
+        <thead><tr><th>구분</th><th>조건</th><th>계수</th><th>이유</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="4"><strong>재원기간</strong></td><td><span class="sp sp-r">1개월 미만</span> 초단기</td><td><strong style="color:var(--red)">×1.5</strong></td><td>첫 적응 실패 → 즉각 퇴원 직결</td></tr>
+          <tr><td><span class="sp sp-a">1~3개월</span> 단기</td><td><strong style="color:var(--amber-d)">×1.3</strong></td><td>과제 누적 스트레스 시기</td></tr>
+          <tr><td><span class="sp sp-b">3개월~1년</span> 중기</td><td>×1.0</td><td>표준 기준</td></tr>
+          <tr><td><span class="sp sp-g">1년 이상</span> 장기</td><td>×0.9</td><td>매너리즘, 급격한 변화가 오히려 위험신호</td></tr>
+          <tr><td rowspan="3"><strong>학년군</strong></td><td><span class="seg se">초등</span></td><td><strong style="color:var(--red)">×1.2</strong></td><td>부모 의존도 높아 아이 불만 = 즉각 퇴원</td></tr>
+          <tr><td><span class="seg sm2">중등</span></td><td>×1.0</td><td>표준 기준</td></tr>
+          <tr><td><span class="seg sh">고등</span></td><td>×0.85</td><td>번아웃성 결석은 일시적일 수 있음</td></tr>
+          <tr><td><strong>성향</strong></td><td>적응형 (조용한 학생)</td><td><strong style="color:var(--red)">×1.2</strong></td><td>퇴원생의 70~80% — 겉으로 안 보임</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 04 즉각 트리거 -->
+  <div class="sec">
+    <div class="sec-title">04 · INSTANT TRIGGERS</div>
+    <div class="sec-h">점수 무관 즉각 트리거</div>
+    <div class="sec-desc">아래 사건은 주간 위험점수와 무관하게 발생 즉시 해당 등급을 강제 발동합니다.</div>
+    <div class="rg">
+      <div class="rc r2">
+        <div class="rh">🔴 즉각 경고 트리거</div>
+        <ul class="rb">
+          <li>과제 답 베끼기 / 찍기 <strong>1회 적발</strong></li>
+          <li>무단결석 + 당일 학부모 연락 없음</li>
+          <li>WT 점수 <strong>3주 연속 하락</strong></li>
+          <li>타 학원 레벨테스트 정황 포착</li>
+          <li>단짝 친구 퇴원 완료</li>
+          <li>레벨 다운(반 하향) 조치 직후</li>
+        </ul>
+      </div>
+      <div class="rc r3">
+        <div class="rh">🚨 즉각 예상퇴원 트리거</div>
+        <ul class="rb">
+          <li><strong>"독학" "인강" "혼자 공부"</strong> 키워드 감지</li>
+          <li><strong>"왜 공부해야 하는지" "그만하고 싶다"</strong> 발언</li>
+          <li>무단결석 후 학생 + 학부모 모두 연락 두절</li>
+          <li>타 학원 레벨테스트 + 무단결석 <strong>동시</strong> 발생</li>
+          <li>즉각 경고 트리거 <strong>2개 이상</strong> 같은 주 발동</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 학년별 세부 규칙 -->
+  <div class="sec">
+    <div class="sec-title">05 · GRADE-BASED RULES</div>
+    <div class="sec-h">학년별 세부 주간 발동 기준</div>
+
+    <div class="card" style="border-top:3px solid #3B82F6">
+      <div class="card-title"><span class="seg se">초등</span> 주간 발동 기준</div>
+      <div class="ax ca" style="margin-bottom:8px">
+        <div class="at">🟡 주의 — 해당 주 중 1개 이상</div>
+        <ul class="al"><li>지각 또는 결석 <strong>주 1회</strong></li><li>참여도 미흡 <strong>주 1회</strong></li><li>단짝 친구가 퇴원 조짐을 보이기 시작</li></ul>
+      </div>
+      <div class="ax wa" style="margin-bottom:8px">
+        <div class="at">🔴 경고 — 해당 주 중 1개 이상</div>
+        <ul class="al"><li>과제 미흡 <strong>주 2회 이상</strong></li><li>결석 + 과제 미흡 <strong>동시</strong></li><li>학부모 "과제 너무 많다" 피드백 접수</li></ul>
+      </div>
+      <div class="ax cr">
+        <div class="at">🚨 예상퇴원 — 1개 이상 즉시</div>
+        <ul class="al"><li>무단결석 <strong>주 1회</strong></li><li>단짝 친구 퇴원 완료 (동반이탈 최고 위험)</li><li>즉각 예상퇴원 트리거 발동</li></ul>
+      </div>
+    </div>
+
+    <div class="card" style="border-top:3px solid #10B981">
+      <div class="card-title"><span class="seg sm2">중등</span> 주간 발동 기준</div>
+      <div class="ax ca" style="margin-bottom:8px">
+        <div class="at">🟡 주의 — 해당 주 중 1개 이상</div>
+        <ul class="al"><li>WT 점수 반 평균 –10점 이상</li><li>참여도 미흡 <strong>주 2회 이상</strong></li><li>지각 <strong>주 2회</strong></li></ul>
+      </div>
+      <div class="ax wa" style="margin-bottom:8px">
+        <div class="at">🔴 경고 — 해당 주 중 1개 이상</div>
+        <ul class="al"><li>과제 답 베끼기 1회 적발 (즉각 트리거)</li><li>WT <strong>2주 연속 하락</strong> + 반 평균 –15점</li><li>보강/클리닉 무단 불참 <strong>주 1회</strong></li><li>레벨 다운 조치 직후 (즉각 트리거)</li></ul>
+      </div>
+      <div class="ax cr">
+        <div class="at">🚨 예상퇴원 — 1개 이상 즉시</div>
+        <ul class="al"><li>타 학원 레벨테스트 정황 포착 (즉각 트리거)</li><li>소통 완전 단절 + 무단결석 동시</li><li>경고 등급 <strong>2주 이상 지속 + 개선 없음</strong></li></ul>
+      </div>
+    </div>
+
+    <div class="card" style="border-top:3px solid #EF4444">
+      <div class="card-title"><span class="seg sh">고등</span> 주간 발동 기준</div>
+      <div class="ax ca" style="margin-bottom:8px">
+        <div class="at">🟡 주의 — 해당 주 중 1개 이상</div>
+        <ul class="al"><li>수업 중 졸음 <strong>주 2회 이상</strong> (번아웃 초기)</li><li>내신·모의고사 직후 WT 급락 (전주 대비 –15점+)</li></ul>
+      </div>
+      <div class="ax wa" style="margin-bottom:8px">
+        <div class="at">🔴 경고 — 해당 주 중 1개 이상</div>
+        <ul class="al"><li>특정 요일 결석 <strong>2주 연속 반복</strong> (회피 패턴)</li><li>WT <strong>3주 연속 하락</strong> (즉각 트리거)</li><li>"잠 못 잔다" 번아웃 호소 <strong>주 2회</strong></li></ul>
+      </div>
+      <div class="ax cr">
+        <div class="at">🚨 예상퇴원 — 1개 이상 즉시</div>
+        <ul class="al"><li>"왜 공부해야 하는지 모르겠다" 동기상실 발언 1회 (즉각 트리거)</li><li>무단결석 후 학생 + 학부모 연락 두절 (즉각 트리거)</li><li>예체능 전환 언급 + 결석 동시</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 재원기간별 -->
+  <div class="sec">
+    <div class="sec-title">06 · TENURE-BASED RULES</div>
+    <div class="sec-h">재원기간별 추가 감시 기준</div>
+    <div class="card">
+      <table class="vt">
+        <thead><tr><th>구간</th><th>핵심 감시 지표</th><th>즉각 발동 조건</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="sp sp-r">초단기</span><br/><span style="font-size:11px;color:var(--g400)">1개월 미만</span></td>
+            <td>첫 주 결석, 부모 불만</td>
+            <td>첫 달 결석 <strong>주 1회 이상</strong> → 즉각 경고<br/>부모 "수업방식 안 맞는다" → 즉각 경고</td>
+          </tr>
+          <tr>
+            <td><span class="sp sp-a">단기</span><br/><span style="font-size:11px;color:var(--g400)">1~3개월</span></td>
+            <td>과제 미완성, 교우 미형성</td>
+            <td>쉬는 시간 혼자 겉돌기 <strong>2주 연속</strong> → 경고<br/>과제 미흡 <strong>2주 연속</strong> → 경고</td>
+          </tr>
+          <tr>
+            <td><span class="sp sp-b">중기</span><br/><span style="font-size:11px;color:var(--g400)">3개월~1년</span></td>
+            <td>시험 결과, 친구 퇴원</td>
+            <td>분기 고사 후 레벨 다운 → 즉각 경고<br/>단짝 친구 퇴원 완료 → 즉각 경고</td>
+          </tr>
+          <tr>
+            <td><span class="sp sp-g">장기</span><br/><span style="font-size:11px;color:var(--g400)">1년 이상</span></td>
+            <td>매너리즘 무기력, 사춘기</td>
+            <td>WT 전주 대비 –15점+ 급락 → 즉각 경고<br/>독학 언급 → 즉각 예상퇴원</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 07 성향 -->
+  <div class="sec">
+    <div class="sec-title">07 · PERSONALITY ADJUSTMENT</div>
+    <div class="sec-h">성향별 징후 해석 및 강사 개입 가이드</div>
+    <div class="sec-desc">퇴원보고서 분석 결과 <strong>적응형(조용한 학생)이 70~80%</strong>를 차지합니다. 겉으로 이상 없어 보이다가 갑자기 퇴원 통보를 하므로 점수를 ×1.2 증폭합니다.</div>
+    <div class="pg">
+      <div class="pc in">
+        <div class="pt">🟦 적응형 — 조용하지만 고위험</div>
+        <div class="ps">
+          <strong>숨겨진 주간 위험신호</strong>
+          <ul style="margin-top:6px">
+            <li>참여도 미흡 3주 연속 → 경고</li>
+            <li>질문 0회 수업 2주 연속</li>
+            <li>단짝 친구 퇴원 → 즉각 경고</li>
+            <li>"독학" 언급 1회 → 즉각 예상퇴원</li>
+          </ul>
+          <div class="im">
+            <div class="im-l">🗣️ 강사 개입 — 나 전달법</div>
+            <div class="im-t">"OO이가 요즘 조용히 혼자 풀고만 있어서(사실), 혹시 힘든 게 있는 건 아닐까 봐 걱정이 돼(감정). 모르는 거 있으면 언제든 편하게 물어봐 줬으면 해(바람)."</div>
+          </div>
+        </div>
+      </div>
+      <div class="pc ex">
+        <div class="pt">🟩 표현형 — 신호가 명확하게 드러남</div>
+        <div class="ps">
+          <strong>노출된 주간 위험신호</strong>
+          <ul style="margin-top:6px">
+            <li>불만 표출 + 과제 미흡 → 주의</li>
+            <li>동아리로 지각·결석 반복 → 경고</li>
+            <li>교우 마찰 + 감정 폭발 → 경고</li>
+            <li>무단결석 + 학부모 동의 → 즉각 예상퇴원</li>
+          </ul>
+          <div class="im">
+            <div class="im-l">🗣️ 강사 개입 — 나 전달법</div>
+            <div class="im-t">"최근 지각이 잦고 과제가 밀리는 걸 보니(사실), 진도를 못 따라갈까 봐 조바심이 나(감정). 활동도 좋지만 수업 시간은 지켜줬으면 해(바람)."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 08 알림 액션 -->
+  <div class="sec">
+    <div class="sec-title">08 · ALERT ACTIONS</div>
+    <div class="sec-h">등급별 시스템 자동 액션</div>
+    <div class="card">
+      <div class="ax ca">
+        <div class="at">🟡 주의 — 담당 강사 액션</div>
+        <ul class="al">
+          <li>학생 배지 "주의"로 변경</li>
+          <li>강사 화면 팝업: "이번 주 안에 OO학생과 짧은 1:1 대화를 권장합니다."</li>
+          <li>수업일지 특이사항 입력 필수 표시 활성화</li>
+          <li>재원 초단기/단기 학생: "이번 주 안에 학부모 안부 전화" 가이드 표시</li>
+        </ul>
+      </div>
+      <div class="ax wa" style="margin-top:10px">
+        <div class="at">🔴 경고 — 강사 + 부서장 액션</div>
+        <ul class="al">
+          <li>상태 배지 "경고" + 강사 화면 상단 고정 배너</li>
+          <li>부서장 즉시 알림: "⚠️ [학생명] 경고 등급 — 학부모 상담 필요"</li>
+          <li>상담 관리 탭에 <strong>학부모 전화상담 TODO 자동 생성</strong> (기한: 이번 주 내)</li>
+          <li>카카오 알림톡 전송 버튼 원클릭 활성화</li>
+        </ul>
+      </div>
+      <div class="ax cr" style="margin-top:10px">
+        <div class="at">🚨 예상퇴원 — 원장 + 부서장 + 강사 전체 액션</div>
+        <ul class="al">
+          <li>상태 배지 "예상퇴원" + 대시보드 위험군 카드 즉시 추가</li>
+          <li>원장·부서장 푸시 알림: "🚨 [학생명] 퇴원 위험 — 즉각 개입 필요"</li>
+          <li><strong>원장 직접 상담 TODO 자동 생성</strong> (기한: 당일 또는 익일)</li>
+          <li>AI 퇴원 위험 평가 자동 실행 (Claude API)</li>
+          <li>퇴원 예방 상담 체크리스트 팝업</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 09 해제 조건 -->
+  <div class="sec">
+    <div class="sec-title">09 · RESOLUTION</div>
+    <div class="sec-h">경고 등급 해제 조건</div>
+    <div class="card">
+      <table class="vt">
+        <thead><tr><th>등급</th><th>해제 조건</th><th>관찰 기간</th></tr></thead>
+        <tbody>
+          <tr><td><span class="sp sp-a">🟡 주의</span></td><td>주간 위험점수 30점 미만 <strong>1주 유지</strong></td><td>1주</td></tr>
+          <tr><td><span class="sp sp-r">🔴 경고</span></td><td>학부모 상담 완료 기록 + 주간 위험점수 30점 미만 <strong>2주 연속</strong></td><td>2주</td></tr>
+          <tr><td><span class="sp sp-r">🚨 예상퇴원</span></td><td>원장 상담 완료 + 주간 위험점수 30점 미만 <strong>3주 연속</strong> + 강사 수동 해제 승인</td><td>3주</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 10 개발 우선순위 -->
+  <div class="sec">
+    <div class="sec-title">10 · DEV PRIORITY</div>
+    <div class="sec-h">개발팀 구현 우선순위</div>
+    <div class="card">
+      <table class="vt">
+        <thead><tr><th>우선순위</th><th>기능</th><th>구현 위치</th><th>난이도</th></tr></thead>
+        <tbody>
+          <tr><td><strong style="color:var(--red)">P0</strong></td><td>수업일지 출결(4단계)·과제(3단계)·참여도·WT점수 저장 API</td><td>백엔드 DB</td><td>낮음</td></tr>
+          <tr><td><strong style="color:var(--red)">P0</strong></td><td>주간 위험점수 계산 함수 (매주 7일 집계)</td><td>백엔드 서비스</td><td>중간</td></tr>
+          <tr><td><strong style="color:var(--amber-d)">P1</strong></td><td>즉각 트리거 키워드 감지 (문자열 포함 여부)</td><td>백엔드 — 단순 매칭</td><td>낮음</td></tr>
+          <tr><td><strong style="color:var(--amber-d)">P1</strong></td><td>등급 배지 표시 (학생 목록, 학생부)</td><td>프론트엔드</td><td>낮음</td></tr>
+          <tr><td><strong style="color:var(--amber-d)">P1</strong></td><td>강사 팝업 알림 + 부서장 알림</td><td>프론트엔드 폴링 or WebSocket</td><td>중간</td></tr>
+          <tr><td><strong style="color:var(--blue)">P2</strong></td><td>반 평균 대비 WT 점수 차이 자동 계산</td><td>백엔드 집계 쿼리</td><td>낮음</td></tr>
+          <tr><td><strong style="color:var(--blue)">P2</strong></td><td>재원기간·학년·성향 보정 계수 적용</td><td>백엔드 계산 로직</td><td>낮음</td></tr>
+          <tr><td><strong style="color:var(--blue)">P2</strong></td><td>상담 TODO 자동 생성 (상담 관리 연동)</td><td>백엔드 + 프론트엔드</td><td>중간</td></tr>
+          <tr><td><strong style="color:var(--g500)">P3</strong></td><td>AI 퇴원 위험 평가 자동 실행 (Claude API)</td><td>예상퇴원 발동 시 호출</td><td>중간</td></tr>
+          <tr><td><strong style="color:var(--g500)">P3</strong></td><td>경고 자동 해제 스케줄러</td><td>백엔드 배치</td><td>낮음</td></tr>
+        </tbody>
+      </table>
+      <div class="note" style="margin-top:12px">
+        <strong>📌 MVP 권장 범위 (P0 + P1)</strong> — 키워드 즉각 트리거는 문자열 포함 여부 체크만으로 구현 가능해 개발 속도가 가장 빠릅니다.
+        주간 위험점수는 1차 단순 합산으로 출시하고, 실제 퇴원 데이터가 쌓이면 가중치를 정교화하는 순차 개선을 권장합니다.
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

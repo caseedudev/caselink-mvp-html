@@ -28,6 +28,17 @@ caselink-mvp-html/
 ./stop.sh           # 서버 중지
 ```
 
+## Skills
+
+커스텀 검증 및 유지보수 스킬은 `.claude/skills/`에 정의되어 있습니다.
+
+| Skill | Purpose |
+|-------|---------|
+| `verify-implementation` | 프로젝트의 모든 verify 스킬을 순차 실행하여 통합 검증 보고서를 생성합니다 |
+| `manage-skills` | 세션 변경사항을 분석하고, 검증 스킬을 생성/업데이트하며, CLAUDE.md를 관리합니다 |
+| `markdown-to-html` | 마크다운(.md) 문서를 CaseLink 스타일 HTML 뷰어로 변환 (marked + mermaid + KaTeX + TOC) |
+| `verify-markdown-viewer` | 마크다운 뷰어 HTML 검증 — 라이브러리 로드, TOC, index.html 등록 |
+
 ## LLM 아키텍처
 
 ### 핵심 원칙

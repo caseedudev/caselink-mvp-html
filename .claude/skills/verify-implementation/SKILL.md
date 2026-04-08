@@ -30,6 +30,7 @@ argument-hint: "[선택사항: 특정 verify 스킬 이름]"
 | # | 스킬 | 설명 |
 |---|------|------|
 | 1 | `verify-url-routing` | HTML 페이지의 URL hash 라우팅 검증 — goPage hash 업데이트, 복원, hashchange, postMessage 연동 |
+| 2 | `verify-markdown-viewer` | 마크다운 뷰어 HTML 검증 — marked/mermaid/KaTeX 로드, TOC 네비게이션, index.html 등록 |
 
 ## 워크플로우
 
